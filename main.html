@@ -1,0 +1,748 @@
+<html>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+
+
+// ##################################
+// Global Variables
+// ##################################
+
+var canvas;
+var ctx;
+
+const LIGHTSPEED = 6;
+const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
+
+var mirrors = [];
+var radius = 10;
+
+
+// ##################################
+// ON LOAD
+// ##################################
+
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas');
+	ctx = canvas.getContext('2d');
+
+	var framesPerSecond = 60;
+	setInterval(function() {
+			moveEverything();
+			drawEverything();	
+		}, 1000/framesPerSecond);
+
+	canvas.addEventListener('mousedown', 
+		function(evt) {
+			var mousePos = calculateMousePos(evt);
+			handleMouseClick(mousePos);
+		});
+	
+	/*
+	canvas.addEventListener('mousemove',
+		function(evt) {
+			var mousePos = calculateMousePos(evt);
+		}); 
+	*/
+}
+
+
+// ##################################
+// USER INPUT
+// ##################################
+
+function calculateMousePos(evt) {
+	var rect = canvas.getBoundingClientRect();
+	var root = document.documentElement;
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return {
+		x:mouseX,
+		y:mouseY
+	};
+}
+
+function handleMouseClick(mousePos) {
+	// Check for click on cores
+	for (var i=0; i < cores.length; i++) {
+		core = cores[i];
+		if (core.encloses(mousePos.x, mousePos.y)){
+			core.explode();
+		}
+	}
+	
+	
+}
+
+
+// ##################################
+// Helper Functions
+// ##################################
+
+// crosses
+// surrounds
+
+//
+function distance_between_two_points(x0, y0, x1, y1) {
+    var deltaX = x1 - x0;
+    var deltaY = y1 - y0;
+    return Math.hypot(deltaX, deltaY);
+    
+}
+
+// Helper for intersect()
+function ccw(A,B,C) {  
+        return Boolean( (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0]) ); 
+}
+
+// Line intersection test
+function intersect(L1, L2) {
+    // Return true if lines L1 and L2 intersect
+    var A = [L1.startX, L1.startY];
+    var B = [L1.endX, L1.endY];    
+    
+    var C = [L2.startX, L2.startY];
+    var D = [L2.endX, L2.endY];   
+     
+    return Boolean(ccw(A,C,D) != ccw(B,C,D) && ccw(A,B,C) != ccw(A,B,D));
+}
+
+
+function reflect_off_line(line, posX, posY, velocity) {
+    // Calculate intercept
+    // Use trig to calculate new angle
+    // update velocity and position
+    return;
+    
+}
+
+// ##################################
+// Classes (Prototype Constructors)
+// ##################################
+
+// ----------------------------------
+// Lines and Polygons
+// ----------------------------------
+
+// === Line =========================
+function Line(startX, startY, endX, endY, color, lineWidth) {
+	this.color = color;
+	this.lineWidth = lineWidth;
+	this.startX = startX;
+	this.startY = startY;
+	this.endX = endX;
+	this.endY = endY;
+}
+// setStart()
+Line.prototype.setStart = function (startX, startY) {
+	this.startX = startX;
+	this.startY = startY;
+}
+// setEnd()
+Line.prototype.setEnd = function (endX, endY) {
+	this.endX = endX;
+	this.endY = endY;
+}
+// intersects()
+Line.prototype.intersects = function (line) { 
+	// receives line object and tests intersection
+	return Boolean(intersect(this, line))
+}	
+// draw()
+Line.prototype.draw = function () {
+	colorLine(this.startX, this.startY, 
+		 this.endX, this.endY, 
+		 this.color, this.lineWidth);
+}
+
+
+// === MirrorLine =========================
+function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
+	// Call parent constructor	
+	Line.call(this, startX, startY, endX, endY, color, lineWidth);
+	
+	this.centerX = (startX + endX) / 2;
+	this.centerY = (startY + endY) / 2;
+							
+} // Make it a subclass
+MirrorLine.prototype = Object.create(Line.prototype); 
+MirrorLine.prototype.constructor = MirrorLine; 
+// move()
+MirrorLine.prototype.move = function (newCenterX, newCenterY) {
+	deltaX = newCenterX - this.centerX;
+	deltaY = newCenterY - this.centerY;
+	
+	// TO DO
+}
+// reflect()
+MirrorLine.prototype.reflect = function (posX, posY, velocity) {
+	return reflect_off_line(this, posX, posY, velocity);
+}						
+
+
+// === MirrorLineGroup =========================
+function MirrorLineGroup(centerX, centerY, color, lineWidth) {
+	this.color = color;
+	this.lineWidth = lineWidth;
+	this.mirrorLines = [];
+	this.centerX = centerX;
+	this.centerY = centerY;
+}
+// setLines()
+MirrorLineGroup.prototype.setLines = function (points) {
+	// Receives a set of x,y coordinates for a series of lines
+	// relative to centerX and centerY
+	if (points.length%2 != 0 || points.length < 4) {
+		console.log("Error: 'points' has odd number of elements");
+	}
+	var startX = points[0];
+	var startY = points[1];
+	var endX;
+	var endY;
+	var mirror;
+	
+	for(i=1; i < points.length/2; i++){
+		endX = points[2*i];
+		endY = points[2*i + 1];
+		mirror = new MirrorLine(startX, startY, endX, endY, 
+				    this.color, this.lineWidth);
+		startX = endX;
+		startY = endY;
+		
+		this.mirrorLines.append(mirror);	
+	}
+}
+// draw()
+MirrorLineGroup.prototype.draw = function () {
+	for(var i=0; i < this.mirrorLines.length; i++){
+		this.mirrorLines[i].draw();
+	}
+}	
+
+
+// === Trail =========================
+function Trail(ballObj, trailLength, color, lineWidth) {
+	this.ballObj = ballObj; //Ballistic object to trail
+	this.trailLength = trailLength;
+	this.color = color;
+	this.lineWidth = lineWidth;
+
+	this.lines = [];
+}
+// updateTRAIL()
+Trail.prototype.updateTRAIL = function () {
+	var prevX = this.ballObj.getPrevX();
+	var prevY = this.ballObj.getPrevY();
+	var newX = this.ballObj.getX();
+	var newY = this.ballObj.getY();
+	var newLine = new Line(prevX, prevY, newX, newY, 
+				this.color, this.lineWidth);	
+	this.lines.push(newLine);
+	if (this.lines.length > this.trailLength){
+		var temp = this.lines.shift() //Get rid of oldest line
+		// temp is throwaway
+	}
+}
+// draw()
+Trail.prototype.draw = function () {
+	for(var i=0; i < this.trailLength; i++){
+		if (i < this.lines.length) {
+			this.lines[i].draw();
+		}
+	}
+}
+
+// ----------------------------------
+// Velocity
+// ----------------------------------
+
+// === Velocity =========================
+function Velocity(speed, direction) {
+// Speed (float) and direction in degrees (0-359)
+
+	this.speed = speed;
+	this.direction = direction % 360;
+}
+// setSpeed()
+Velocity.prototype.setSpeed = function (speed) {
+	this.speed = speed;
+}
+// getSpeed()
+Velocity.prototype.getSpeed = function () {
+	return this.speed;
+}
+// getSpeedX()
+Velocity.prototype.getSpeedX = function () {
+	var speedX = this.speed * Math.cos(this.direction * Math.PI/180);
+	return speedX;
+}
+// getSpeedY()
+Velocity.prototype.getSpeedY = function () {
+	var speedY = this.speed * Math.sin(this.direction * Math.PI/180);
+	return speedY;
+}
+// setDirection()
+Velocity.prototype.setDirection = function (direction) {
+	this.direction = direction % 360;
+}
+// getDirection()
+Velocity.prototype.getDirection = function () {
+	return this.direction;
+}
+
+
+// ----------------------------------
+// Ballistic Objects
+// ----------------------------------
+
+// === BallisticObject =========================
+function BallisticObject(posX, posY, speed, direction) {
+
+	this.posX = posX;
+	this.posY = posY;
+	this.prevX = posX;
+	this.prevY = posY;
+	this.prevDirection = direction;
+	this.velocity = new Velocity(speed, direction);
+	this.active = false; // boolean	
+}
+// updateOBJ()
+BallisticObject.prototype.updateOBJ = function () {
+	if (!this.active){
+		return;
+	}
+	this.prevX = this.posX;
+	this.prevY = this.posY;
+	this.prevDirection = this.velocity.getDirection();
+	this.posX += this.velocity.getSpeedX();
+	this.posY += this.velocity.getSpeedY();
+}
+// setSpeed()
+BallisticObject.prototype.setSpeed = function (speed) {
+	this.velocity.setSpeed(speed);
+}
+// getSpeed()
+BallisticObject.prototype.getSpeed = function () {
+	return this.velocity.getSpeed();
+}
+// setPosition()
+BallisticObject.prototype.setPosition = function (posX, posY) {
+	this.posX = posX;
+	this.posY = posY;
+}
+// getX()
+BallisticObject.prototype.getX = function () {
+	return this.posX;
+}
+// getY()
+BallisticObject.prototype.getY = function () {
+	return this.posY;
+}
+// getPrevX()
+BallisticObject.prototype.getPrevX = function () {
+	return this.prevX;
+}
+// getPrevY()
+BallisticObject.prototype.getPrevY = function () {
+	return this.prevY;
+}
+// getDirection()
+BallisticObject.prototype.getDirection = function () {
+	return this.velocity.getDirection();
+}
+// getPrevDirection()
+BallisticObject.prototype.getPrevDirection = function () {
+	return this.prevDirection;
+}
+// activate()
+BallisticObject.prototype.activate = function () {
+	this.active = true;
+}
+// isActive()
+BallisticObject.prototype.isActive = function () {
+	return this.active;
+}
+// reflect()
+BallisticObject.prototype.reflect = function () {
+	//To Do
+	return;
+}
+
+
+// === Beam =========================
+function Beam(posX, posY, speed, direction, color, lineWidth) {
+	// Call parent constructor	
+	BallisticObject.call(this, posX, posY, speed, direction);
+	this.color = color;
+	this.lineWidth = lineWidth;
+	this.lines = [];
+} // Make it a subclass
+Beam.prototype = Object.create(BallisticObject.prototype); 
+Beam.prototype.constructor = Beam; 
+// updateBEAM()
+Beam.prototype.updateBEAM = function () {
+
+	// @@@@@@@@@@@			
+	console.log(this.active);
+	// @@@@@@@@@@@	
+	if (this.active){
+		// update ballistics
+		this.updateOBJ();
+
+		// update beam path
+		if (this.getDirection() != this.getPrevDirection()) { // create new line
+			this.newLine();
+			// @@@@@@@@@@@			
+			console.log("newLine");
+			// @@@@@@@@@@@	
+		} else {   // update most recent line
+			this.lines[this.lines.length - 1].setEnd(this.getX(), 
+								 this.getY());
+			// @@@@@@@@@@@			
+			console.log("updated line");
+			// @@@@@@@@@@@	
+		}
+		// check if core collision
+		for (var i=0; i < cores.length; i++) {
+			core = cores[i];
+			if (core.encloses(this.getX(), this.getY())){
+				core.absorb(this);
+				this.fade();
+				break;
+			}
+		}
+	}
+}
+// activate()
+Beam.prototype.activate = function () {
+	this.active = true;
+	this.newLine();
+}
+// newLine()
+Beam.prototype.newLine = function () {
+	var new_line = new Line(this.getX(), this.getY(), 
+			    this.getX(), this.getY(), 
+			    this.color, this.lineWidth);
+	this.lines.push(new_line);
+}
+// fade()
+Beam.prototype.fade = function () {
+	this.lines = [];
+}
+// draw()
+Beam.prototype.draw = function () {
+	for(var i=0; i < this.lines.length; i++) {
+		this.lines[i].draw();
+	}
+}
+
+
+
+
+// === Pulse =========================
+function Pulse(posX, posY, speed, direction, trailLength, color, lineWidth) {
+	// Call parent constructor	
+	BallisticObject.call(this, posX, posY, speed, direction);
+	this.trail = new Trail(this, trailLength, color, lineWidth);
+} // Make it a subclass
+Pulse.prototype = Object.create(BallisticObject.prototype); 
+Pulse.prototype.constructor = Pulse; 
+// updatePULSE()
+Pulse.prototype.updatePULSE = function () {
+	if (this.active){
+		this.updateOBJ();
+		this.trail.updateTRAIL();
+	}
+}
+// draw()
+Pulse.prototype.draw = function () {
+	this.trail.draw();
+}
+
+
+// ----------------------------------
+// Cores and Sources
+// ----------------------------------
+
+// === Core =========================
+function Core(centerX, centerY, innerRadius, outerRadius, color, coreRings) {
+	this.centerX = centerX;
+	this.centerY = centerY;
+	this.innerRadius = innerRadius;
+	this.outerRadius = outerRadius;
+	this.color = color;
+	this.coreRings = coreRings; // an array of CoreRing objects
+}
+// updateCORE()
+Core.prototype.updateCORE = function () {
+
+	for (var i=0; i < this.coreRings.length; i++) {	
+		this.coreRings[i].updateRING();	 // update each ring
+	}	
+}
+// isFull()
+Core.prototype.isFull = function () {
+	for (var i=0; i < this.coreRings.length; i++) {
+		if (!(this.coreRings[i].isActive())) {
+			return false;
+		}
+	}
+	return true;
+}
+// explode()
+Core.prototype.explode = function () {
+	for (var i=0; i < this.coreRings.length; i++) {
+		var ring = this.coreRings[i];
+		if (ring.isActive()) {
+			ring.deactivate();
+			// fire laser beam
+			
+			// TODO
+		} else {
+			ring.activate();
+		}
+	}
+}
+// absorb()
+Core.prototype.absorb = function (beam) {
+	var absorbed = false;
+	for (var i=0; i < this.coreRings.length; i++) {
+		var ring = this.coreRings[i];
+		if (!(ring.isActive()) && beam.color == ring.color) {
+			ring.activate();
+			return;
+		}
+	}
+	if (!absorbed) {
+		// broken core
+		// TO DO
+		return;
+	}
+}
+// getX()
+Core.prototype.getX = function () {
+	return this.centerX;
+}
+// getY()
+Core.prototype.getY = function () {
+	return this.centerY;
+}
+// encloses()
+Core.prototype.encloses = function (x, y) {
+	// Call helper function
+	var dist = distance_between_two_points(this.centerX, this.centerY, x, y);
+	return Boolean(this.outerRadius - dist > 0);
+}
+// draw()
+Core.prototype.draw = function () {
+	
+	// Core circle
+	colorCircle(this.centerX, this.centerY, this.innerRadius, this.color);
+	
+	// Core levels
+	for(var i=0; i < this.coreRings.length; i++){
+		var ring = this.coreRings[i];
+		if (ring.isActive()) {
+			ring.draw(this.centerX, this.centerY);
+		}
+	}
+}
+
+
+// === CoreRing =========================
+function CoreRing(radius, frequency, amplitude, color, lineWidth) {
+	this.radius = radius;
+	this.frequency = frequency;
+	this.amplitude = amplitude;
+	this.radiusChange = 0; 
+	this.degreeOffset = 0; // 0-359 degrees
+	this.active = false;
+	
+	this.color = color;
+	this.lineWidth = lineWidth;	
+}
+// updateRING()
+CoreRing.prototype.updateRING = function () {
+	if (this.active){
+		this.degreeOffset = (this.degreeOffset + this.frequency) % 360;
+		// var radiansOffset = this.degreeOffset * Math.PI/180;
+		this.radiusChange = this.amplitude * Math.sin(this.degreeOffset);
+	}
+}
+// isActive()
+CoreRing.prototype.isActive = function () {
+	return this.active;
+}
+// activate()
+CoreRing.prototype.activate = function () {
+	this.active = true;
+}
+// deactivate()
+CoreRing.prototype.deactivate = function () {
+	this.active = false;
+}
+// getColor()
+CoreRing.prototype.getColor = function () {
+	return this.color;
+}
+// draw()
+CoreRing.prototype.draw = function (centerX, centerY) {
+	var rad = this.radius + this.radiusChange;
+	strokeCircle(centerX, centerY, rad, this.color, this.lineWidth);
+}
+
+
+
+// ------------------------------------
+
+// ##################################
+// Gameplay
+// ##################################
+
+
+
+
+dashLineWidth = 2;
+
+pos1x = 50;
+pos1y = 50;
+angle1 = 45;
+dash1 = 2;
+var CR1 = new CoreRing(20, .04, 1, 'red', 3);
+CR1.activate();
+var arr1 = [CR1];
+var pulse1 = new Pulse(pos1x,pos1y, LIGHTSPEED, angle1, dash1, 'red', dashLineWidth);
+pulse1.activate();
+var core1 = new Core(pos1x, pos1y, 7, 20, 'red', arr1);
+
+
+pos2x = 200;
+pos2y = 300;
+angle2 = 0;
+dash2 = 5;
+var CR2 = new CoreRing(25, .08, 1, 'green', 5);
+CR2.activate();
+var arr2 = [CR2];
+var pulse2 = new Pulse(pos2x,pos2y, LIGHTSPEED, angle2, dash2, 'green', dashLineWidth);
+pulse2.activate();
+var core2 = new Core(pos2x, pos2y, 10, 20, 'green', arr2);
+
+pos3x = 250;
+pos3y = 50;
+angle3 = 90;
+dash3 = 10;
+var CR3r = new CoreRing(20, .04, 1, 'red', 3);
+CR3r.activate();
+var CR3b = new CoreRing(40, .1, 1, 'blue', 5);
+CR3b.activate();
+var arr3 = [CR3b, CR3r];
+var pulse3 = new Pulse(pos3x,pos3y, LIGHTSPEED, angle3, dash3, 'purple', dashLineWidth);
+pulse3.activate();
+var core3 = new Core(pos3x, pos3y, 10, 20, 'purple', arr3);
+
+
+var beam1 = new Beam(50,300, LIGHTSPEED, 270, 'red', dashLineWidth);
+beam1.activate();
+var beam2 = new Beam(50,300, LIGHTSPEED, 0, 'green', dashLineWidth);
+beam2.activate();
+var beam3 = new Beam(50,300, LIGHTSPEED, 315, 'purple', dashLineWidth);
+beam3.activate();
+
+var cores = [core2, core1, core3];
+var beams = []; //[beam1, beam2, beam3];
+var pulses = [pulse1, pulse2, pulse3];
+
+function moveEverything() {
+	
+	// ---------------------
+	// Ballistic objects
+	// ---------------------
+	
+	
+	// Beams
+	for (var i=0; i < beams.length; i++) {
+		beams[i].updateBEAM();
+	}
+	// Pulses
+	for (var i=0; i < pulses.length; i++) {
+		pulses[i].updatePULSE();
+	}
+	
+	// ---------------------
+	// Collisions
+	// ---------------------
+	
+		
+	
+	// ---------------------
+	// CORES
+	// ---------------------
+	// update core rings
+	for (var i=0; i < cores.length; i++) {
+		cores[i].updateCORE();
+	}
+}
+
+
+// ##################################
+// DRAW
+// ##################################
+
+function drawEverything() {
+	// next line blanks out the screen with black
+	colorRect(0,0,canvas.width,canvas.height,'black');
+	
+	// Cores
+	for (var i=0; i < cores.length; i++) {
+		cores[i].draw();
+	}
+	
+	
+	// Beams
+	for (var i=0; i < beams.length; i++) {
+		beams[i].draw();
+	}
+	// Pulses
+	for (var i=0; i < pulses.length; i++) {
+		pulses[i].draw();
+	}
+}
+
+// Draws line on canvas from (x0, y0) to (x1, y1)
+function colorLine(x0, y0, x1, y1, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	
+	ctx.beginPath();
+	ctx.moveTo(x0, y0);
+	ctx.lineTo(x1, y1);
+	ctx.stroke();
+	ctx.lineCap="round";
+}
+
+
+function colorCircle(centerX, centerY, radius, drawColor) {
+	ctx.fillStyle = drawColor;
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, radius, 0, Math.PI*2,true);
+	ctx.fill();
+}
+
+function strokeCircle(centerX, centerY, radius, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, radius, 0, Math.PI*2,true);
+	ctx.stroke();
+}
+
+function colorRect(leftX, topY, width, height, drawColor) {
+	ctx.fillStyle = drawColor;
+	ctx.fillRect(leftX, topY, width, height);
+}
+
+</script>
+
+</html>
