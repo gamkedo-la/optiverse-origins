@@ -1,1 +1,1 @@
-Double click main.html
+Double click index.html

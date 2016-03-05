@@ -26,7 +26,7 @@ window.onload = function() {
 	canvas = document.getElementById('gameCanvas');
 	ctx = canvas.getContext('2d');
 
-	var framesPerSecond = 60;
+	var framesPerSecond = 30;
 	setInterval(function() {
 			moveEverything();
 			drawEverything();	
@@ -82,7 +82,31 @@ function handleMouseClick(mousePos) {
 // crosses
 // surrounds
 
-//
+// Dot product of two vectors
+function dotproduct(a,b) {
+	var n = 0, lim = Math.min(a.length,b.length);
+	for (var i = 0; i < lim; i++) n += a[i] * b[i];
+	return n;
+}
+
+ // Normalize a vector
+function normalize(vector) {
+	var n = 0, vectorLength, result = [];
+	
+	for (var i = 0; i < vector.length; i++) {
+	    n += Math.pow(vector[i],2);
+	}
+	
+	vectorLength = Math.sqrt(n);
+		
+	for (var i = 0; i < vector.length; i++) {
+	    result.push(vector[i] / vectorLength);
+	}
+	
+	return result;
+}
+ 
+
 function distance_between_two_points(x0, y0, x1, y1) {
     var deltaX = x1 - x0;
     var deltaY = y1 - y0;
@@ -111,29 +135,16 @@ function lines_intersect(L1, L2) {
 function intersection_point(line1, line2) {
     // Returns point of intersection between two Line objects
         
-    var denominator, numerator1, numerator2, a, b, c;
-    var result = {x: null, y: null};
-    
-    denominator = ((line2.endY - line2.startY) * (line1.endX - line1.startX)) - 
-		  ((line2.endX - line2.startX) * (line1.endY - line1.startY));
-    if (denominator == 0) {
-        return result;
-    }
-    a = line1.startY - line2.startY;
-    b = line1.startX - line2.startX;
-    numerator1 = ((line2.endX - line2.startX) * a) - ((line2.endY - line2.startY) * b);
-    numerator2 = ((line1.endX - line1.startX) * a) - ((line1.endY - line1.startY) * b);
-    c = numerator1 / denominator;
-    
-    result.x = line1.startX + (a * (line1.endX - line1.startX));
-    result.y = line1.startY + (a * (line1.endY - line1.startY));    
-    
-    return result;
- 
-}
-
-/* FUNCTION FROM THE INTERNET
-function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+   var line1StartX = line1.startX; 
+   var line1StartY = line1.startY; 
+   var line1EndX = line1.endX; 
+   var line1EndY = line1.endY;
+   var line2StartX = line2.startX; 
+   var line2StartY = line2.startY;
+   var line2EndX = line2.endX;
+   var line2EndY = line2.endY;
+   
+    // FROM THE INTERWEBS!!! http://jsfiddle.net/justin_c_rounds/Gd2S2/
     // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
     var denominator, a, b, numerator1, numerator2, result = {
         x: null,
@@ -141,7 +152,8 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
         onLine1: false,
         onLine2: false
     };
-    denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
+    denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - 
+		      ((line2EndX - line2StartX) * (line1EndY - line1StartY));
     if (denominator == 0) {
         return result;
     }
@@ -170,7 +182,22 @@ function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, l
     }
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
-};*/
+}
+
+
+// Vector reflection in 2D
+function reflect_vector(vector, mirror_line) {
+    // Receives two vectors represented as arrays (same origin), 
+    // and returns mirror of 'vector' around 'mirror_line'.
+    
+    var nhat, result = {x: null, y: null};
+    nhat = normalize(mirror_line); // Normalized mirror line
+    
+    result.x = 2 * dotproduct(vector, nhat) * nhat[0] - vector[0];
+    result.y = 2 * dotproduct(vector, nhat) * nhat[1] - vector[1];
+    
+    return result;    
+}
 
 
 // ##################################
@@ -253,11 +280,16 @@ MirrorLine.prototype.reflect = function (vector) {
 	result.intersectX = point.x;
 	result.intersectY = point.y;
 	
+	// Create vectors using intersect as origin, and calculate reflection
+	remainingTrajectory = [vector.endX - point.x, vector.endY - point.y];
+	mirrorLine = [this.endX - point.x, this.endY - point.y];
+	delta = reflect_vector(remainingTrajectory, mirrorLine);
+	// Add delta to origin to get result
+	result.newX = point.x + delta.x;
+	result.newY = point.y + delta.y;
+	
 	// Use trig to calculate new direction
-	
-	
-	// Move correct distance in that direction to get new position
-	
+	result.newDirection = (Math.atan(delta.y/delta.x) * (180/Math.PI)) % 360;
 	
 	return result;
 }						
@@ -292,7 +324,7 @@ MirrorLineGroup.prototype.setLines = function (points) {
 		startX = endX;
 		startY = endY;
 		
-		this.mirrorLines.append(mirror);	
+		this.mirrorLines.push(mirror);	
 	}
 }
 // draw()
@@ -383,7 +415,7 @@ Velocity.prototype.getSpeedY = function () {
 	var speedY = this.speed * Math.sin(this.direction * Math.PI/180);
 	return speedY;
 }
-// setDirection()
+// setDirection() - receives degrees
 Velocity.prototype.setDirection = function (direction) {
 	this.direction = direction % 360;
 }
@@ -441,9 +473,7 @@ BallisticObject.prototype.updateOBJ = function () {
 			this.posX = reflection.newX;
 			this.posY = reflection.newY;
 			this.velocity.setDirection(reflection.newDirection);
-			
-			//
-			
+
 			return; // Only one event can occur
 		}
 	}
@@ -743,7 +773,7 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 
 // Mirrors
 var mirrorLineWidth = 6;
-var mirror1 = new MirrorLine(0, 400, 500, 0, 'gray', mirrorLineWidth);
+var mirror1 = new MirrorLine(0, 300, 600, 0, 'gray', mirrorLineWidth);
 
 var mirrors = [mirror1];
 
@@ -866,6 +896,7 @@ function drawEverything() {
 		pulses[i].draw();
 	}
 	// Mirrors
+
 	for (var i=0; i < mirrors.length; i++) {
 		mirrors[i].draw();
 	}
