@@ -208,9 +208,6 @@ function intersection_point(line1, line2) {
         result.onLine2 = true;
     }
     
-// @@@@@@@@@@@@@@@@@@
-console.log("intersection_point()", result);
-// @@@@@@@@@@@@@@@@@@
 
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
@@ -315,10 +312,7 @@ MirrorLine.prototype.reflect = function (line_step) {
 		// Use trig to calculate new direction
 		var newAngle = Math.atan2(delta.y, delta.x) * (180/Math.PI);
 		result.newDirection = deg_to_dir(newAngle);
-		// @@@@@@@@@@@@@@@@@@
-		console.log("reflect() delta", delta);
-		console.log("reflect() if result", result);
-		// @@@@@@@@@@@@@@@@@@
+
 	} else {
 		
 		// Use full lines as vectors
@@ -333,10 +327,7 @@ MirrorLine.prototype.reflect = function (line_step) {
 		// Choose a point slightly off mirror in new direction of propagation
 		result.newX = point.x + .001 * Math.cos(result.newDirection * Math.PI/180);
 		result.newY = point.y + .001 * Math.sin(result.newDirection * Math.PI/180);
-		
-		// @@@@@@@@@@@@@@@@@@
-		console.log("reflect() else result", result);
-		// @@@@@@@@@@@@@@@@@@
+
 	}
 	
 	return result;
@@ -464,10 +455,6 @@ Beam.prototype.updateBEAM = function () {
 	
 		if(lines_intersect(mirrors[i], line_step)){
 			
-			// @@@@@@@@@@@@@@@@@@
-			console.log("REFLECTION START");
-			console.log("line_step:", line_step);
-			// @@@@@@@@@@@@@@@@@@
 			// Reflect off of mirror
 			reflection = mirrors[i].reflect(line_step);
 			
@@ -484,13 +471,7 @@ Beam.prototype.updateBEAM = function () {
 			// Save values
 			this.posX = reflection.newX;
 			this.posY = reflection.newY;
-			this.direction = deg_to_dir(reflection.newDirection);
-			
-			// @@@@@@@@@@@@@@@@@@
-			console.log("reflection", reflection);
-			console.log("saving direction: ", this.direction);
-			console.log("REFLECTION END", reflection);
-			// @@@@@@@@@@@@@@@@@@			
+			this.direction = deg_to_dir(reflection.newDirection);		
 			
 			return // Only one collision event
 		}
