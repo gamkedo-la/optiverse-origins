@@ -6,5 +6,5 @@ function toggleEditor() {
 
 function editorDraw() {
 	colorRect(0,0,canvas.width,canvas.height,'red');
-	colorText("now in editor (early placeholder, obvs)", 15, 15, 'black');
+	colorText("now in editor (placeholder), mouse at (" +mouseX+", "+mouseY+")" , 15, 15, 'black');
 }

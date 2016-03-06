@@ -1,4 +1,10 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+</head>
+<body>
 
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -12,6 +18,9 @@
 
 var canvas;
 var ctx;
+
+var mouseX = 0;
+var mouseY = 0;
 
 const LIGHTSPEED = 0;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
@@ -34,18 +43,9 @@ window.onload = function() {
 
   document.addEventListener("keydown", keyPressed);
 
-  canvas.addEventListener('mousedown', 
-		function(evt) {
-			var mousePos = calculateMousePos(evt);
-			handleMouseClick(mousePos);
-		});
+  canvas.addEventListener('mousedown', handleMouseClick);
 	
-	/*
-	canvas.addEventListener('mousemove',
-		function(evt) {
-			var mousePos = calculateMousePos(evt);
-		}); 
-	*/
+  canvas.addEventListener('mousemove', updateMousePos); 
 }
 
 
@@ -53,22 +53,18 @@ window.onload = function() {
 // USER INPUT
 // ##################################
 
-function calculateMousePos(evt) {
+function updateMousePos(evt) {
 	var rect = canvas.getBoundingClientRect();
 	var root = document.documentElement;
-	var mouseX = evt.clientX - rect.left - root.scrollLeft;
-	var mouseY = evt.clientY - rect.top - root.scrollTop;
-	return {
-		x:mouseX,
-		y:mouseY
-	};
+	mouseX = evt.clientX - rect.left - root.scrollLeft;
+	mouseY = evt.clientY - rect.top - root.scrollTop;
 }
 
-function handleMouseClick(mousePos) {
+function handleMouseClick(evt) {
 	// Check for click on cores
 	for (var i=0; i < cores.length; i++) {
 		core = cores[i];
-		if (core.encloses(mousePos.x, mousePos.y)){
+		if (core.encloses(mouseX, mouseY)){
 			core.explode();
 		}
 	}
@@ -731,4 +727,5 @@ function colorText(showWords, textX, textY, fillColor) {
 
 </script>
 
+</body>
 </html>
