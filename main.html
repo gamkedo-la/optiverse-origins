@@ -8,6 +8,7 @@
 
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
+<script src="imagecode.js"></script>
 <script src="leveleditor.js"></script>
 <script>
 
@@ -32,9 +33,16 @@ const KEYCODE_E = 69;
 // ##################################
 
 window.onload = function() {
+	loadImages();
+
 	canvas = document.getElementById('gameCanvas');
 	ctx = canvas.getContext('2d');
+	colorRect(0,0,canvas.width,canvas.height,'black');
+	colorText("Loading images...", 15, 15, 'white');
 
+}
+
+function loadingDoneSoStartGame() { // so that game and input won't start until images load
 	var framesPerSecond = 30;
 	setInterval(function() {
 			moveEverything();
@@ -61,6 +69,11 @@ function updateMousePos(evt) {
 }
 
 function handleMouseClick(evt) {
+	if(isInEditor) {
+		editorMouseClicked();
+		return; // bypass any gameplay interactions while in editor
+	}
+
 	// Check for click on cores
 	for (var i=0; i < cores.length; i++) {
 		core = cores[i];
@@ -71,10 +84,18 @@ function handleMouseClick(evt) {
 }
 
 function keyPressed(evt) {
-  if(evt.keyCode == KEYCODE_E) {
-  	toggleEditor();
+  var anyValidKeyPressed = true;
+  switch(evt.keyCode) {
+  	case KEYCODE_E:
+  		toggleEditor();
+  		break;
+  	default: // to allow any non-game key actions to affect browser
+  		anyValidKeyPressed = false;
+  		break;
   }
-  evt.preventDefault(); // without this, arrow keys scroll the browser!
+  if(anyValidKeyPressed) {
+  	evt.preventDefault(); // without this, keys affect the browser
+  }
 }
 
 
@@ -681,7 +702,7 @@ function drawEverything() {
 	}
 
 	if(isInEditor) {
-		editorDraw();
+		editorUpdate();
 	}
 }
 
@@ -717,6 +738,14 @@ function strokeCircle(centerX, centerY, radius, drawColor, lineWidth) {
 function colorRect(leftX, topY, width, height, drawColor) {
 	ctx.fillStyle = drawColor;
 	ctx.fillRect(leftX, topY, width, height);
+}
+
+function strokeRect(leftX, topY, width, height, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	ctx.beginPath();
+	ctx.rect(leftX, topY, width, height);
+	ctx.stroke();
 }
 
 function colorText(showWords, textX, textY, fillColor) {
