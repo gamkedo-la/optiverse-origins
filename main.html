@@ -2,6 +2,7 @@
 
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
+<script src="leveleditor.js"></script>
 <script>
 
 
@@ -15,6 +16,7 @@ var ctx;
 const LIGHTSPEED = 0;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
 
+const KEYCODE_E = 69;
 
 // ##################################
 // ON LOAD
@@ -30,7 +32,9 @@ window.onload = function() {
 			drawEverything();	
 		}, 1000/framesPerSecond);
 
-	canvas.addEventListener('mousedown', 
+  document.addEventListener("keydown", keyPressed);
+
+  canvas.addEventListener('mousedown', 
 		function(evt) {
 			var mousePos = calculateMousePos(evt);
 			handleMouseClick(mousePos);
@@ -68,8 +72,13 @@ function handleMouseClick(mousePos) {
 			core.explode();
 		}
 	}
-	
-	
+}
+
+function keyPressed(evt) {
+  if(evt.keyCode == KEYCODE_E) {
+  	toggleEditor();
+  }
+  evt.preventDefault(); // without this, arrow keys scroll the browser!
 }
 
 
@@ -329,7 +338,7 @@ function Trail(trailLength, color, lineWidth) {
 }
 // addNewLine()
 Trail.prototype.addLine = function (startX, startY, endX, endY) {
-	var line = new Line(startX, startY, endX, endY, color, lineWidth);
+	var line = new Line(startX, startY, endX, endY, 'green', 2);
 	this.lines.push(line);
 	while (this.lines.length > this.trailLength){
 		var temp = this.lines.shift() //Get rid of oldest line
@@ -384,7 +393,7 @@ Beam.prototype.updateBEAM = function () {
 	this.posX += this.getSpeedX();
 	this.posY += this.getSpeedY();
 	
-	this.trail.addLine(this.prevX, this.prevY, this.);
+	this.trail.addLine(this.prevX, this.prevY, this.posX,this.posY);
 	
 	// create line of most recent step
 	var line_step = {startX: this.prevX, 
@@ -674,6 +683,10 @@ function drawEverything() {
 	for (var i=0; i < mirrors.length; i++) {
 		mirrors[i].draw();
 	}
+
+	if(isInEditor) {
+		editorDraw();
+	}
 }
 
 // Draws line on canvas from (x0, y0) to (x1, y1)
@@ -710,6 +723,10 @@ function colorRect(leftX, topY, width, height, drawColor) {
 	ctx.fillRect(leftX, topY, width, height);
 }
 
+function colorText(showWords, textX, textY, fillColor) {
+  ctx.fillStyle = fillColor;
+  ctx.fillText(showWords, textX, textY);
+}
 
 
 </script>
