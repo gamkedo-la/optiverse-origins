@@ -16,19 +16,68 @@ const UI_BUTTON_PIXEL_SIZE = 40;
 var isInEditor = false;
 var editorMouseOverItem = NO_SELECTION;
 var editorSelectedBrush = NO_SELECTION;
+var editorNextClickSetsAngleOfIdx = NO_SELECTION;
+
+var levelPiecesList = [];
+function levelObjClass(atX, atY, ofKind, inRot) {
+	this.x = atX;
+	this.y = atY;
+	this.kind = ofKind;
+	this.ang = inRot;
+
+	this.draw = function() {
+		drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind],
+													this.x,this.y, this.ang);
+	}
+}
 
 function toggleEditor() {
 	isInEditor = !isInEditor;
 }
 
-function editorMouseClicked() {
-	if(editorMouseOverItem != NO_SELECTION) {
-		editorSelectedBrush = editorMouseOverItem;
+function distToMouse(fromX,fromY) {
+	var dx = fromX - mouseX;
+	var dy = fromY - mouseY;
+	return Math.sqrt( dx*dx + dy*dy );
+}
+
+function editorDeleteNearestToMouse() {
+	var closestIdx = NO_SELECTION;
+	var closestDist = 999999.0;
+
+	for(var i=levelPiecesList.length-1;i>=0;i--) {
+		var distTo = distToMouse( levelPiecesList[i].x, levelPiecesList[i].y )
+
+		if(distTo < closestDist) {
+			closestIdx = i;
+			closestDist = distTo;
+		}
+	}
+
+	if(closestIdx != NO_SELECTION) {
+		levelPiecesList.splice(closestIdx, 1);
 	}
 }
 
-function editorUpdate() { // can contain logic, too
-	// logic code for editor
+function editorMouseClicked() {
+	if(editorMouseOverItem != NO_SELECTION) {
+		editorSelectedBrush = editorMouseOverItem;
+		editorNextClickSetsAngleOfIdx = NO_SELECTION; // resets angle setting if piece changed
+	} else if(editorSelectedBrush == LEVELPART_DELETE) {
+		editorDeleteNearestToMouse();
+	} else {
+		if(editorNextClickSetsAngleOfIdx == NO_SELECTION) {
+			editorNextClickSetsAngleOfIdx = levelPiecesList.length;
+			levelPiecesList.push( new levelObjClass(mouseX, mouseY,
+				editorSelectedBrush,
+				Math.random()*Math.PI * 2.0) );
+		} else {
+			editorNextClickSetsAngleOfIdx = NO_SELECTION;
+		}
+	}
+}
+
+function editorMousePositionUpdate() {
 	if(mouseX > canvas.width-UI_BUTTON_PIXEL_SIZE) {
 		editorMouseOverItem = Math.floor( mouseY / UI_BUTTON_PIXEL_SIZE ); 
 		if(editorMouseOverItem < 0 || editorMouseOverItem > LEVELPART_DELETE) {
@@ -37,8 +86,20 @@ function editorUpdate() { // can contain logic, too
 	} else {
 		editorMouseOverItem = NO_SELECTION;
 	}
+	if(editorMouseOverItem == NO_SELECTION && editorNextClickSetsAngleOfIdx != NO_SELECTION) {
+		levelPiecesList[editorNextClickSetsAngleOfIdx].ang =
+			Math.atan2(mouseY - levelPiecesList[editorNextClickSetsAngleOfIdx].y,
+						mouseX - levelPiecesList[editorNextClickSetsAngleOfIdx].x);
+	}
+}
 
-	// draw code for editor
+function editorDrawLevelObj() {
+	for(var i=0;i<levelPiecesList.length;i++) {
+		levelPiecesList[i].draw();
+	}
+}
+
+function editorDrawInterface() {
 	var xCoord = canvas.width-UI_BUTTON_PIXEL_SIZE;
 	for(var i=0;i<LEVELPART_ENUM_KINDS;i++) {
 		var yCoord = UI_BUTTON_PIXEL_SIZE*i;
@@ -54,9 +115,29 @@ function editorUpdate() { // can contain logic, too
 			xCoord, yCoord,
 			UI_BUTTON_PIXEL_SIZE,UI_BUTTON_PIXEL_SIZE);
 	}
-	if(editorSelectedBrush != NO_SELECTION && editorMouseOverItem == NO_SELECTION) {
+	var stepText = "select object from sidebar to place";
+
+	if(editorNextClickSetsAngleOfIdx != NO_SELECTION) {
+		colorLine(levelPiecesList[editorNextClickSetsAngleOfIdx].x,
+				  levelPiecesList[editorNextClickSetsAngleOfIdx].y,
+				  mouseX, mouseY, 'yellow', 3)
+		stepText = "click to set rotation of last placed object";
+	} else if(editorSelectedBrush != NO_SELECTION && editorMouseOverItem == NO_SELECTION) {
+		stepText = "click to place object, will be able to set rotation next";
 		drawBitmapCenteredAtLocationWithRotation(levObjPics[editorSelectedBrush],
 													mouseX,mouseY, 0);
 	}
-	colorText("Editor state debug output (placeholder)", 15, 15, 'white');
+	if(editorSelectedBrush == LEVELPART_DELETE) {
+		stepText = "click to delete nearest part";
+	}
+
+	colorText(stepText, 15, 15, 'white');
+}
+
+function editorUpdate() {
+	editorMousePositionUpdate();
+
+	editorDrawLevelObj();
+
+	editorDrawInterface();
 }
