@@ -12,7 +12,7 @@
 var canvas;
 var ctx;
 
-const LIGHTSPEED = 0;
+const LIGHTSPEED = 7;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
 
 
@@ -81,7 +81,7 @@ function handleMouseClick(mousePos) {
 // surrounds
 
 // Dot product of two vectors
-function dotproduct(a,b) {
+function dot_product(a,b) {
 	// Args: a = [x1,y1], b = [x2,y2]
 	var n = 0, lim = Math.min(a.length,b.length);
 	for (var i = 0; i < lim; i++) n += a[i] * b[i];
@@ -154,6 +154,7 @@ function intersection_point(line1, line2) {
     };
     denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - 
 		      ((line2EndX - line2StartX) * (line1EndY - line1StartY));
+
     if (denominator == 0) {
         return result;
     }
@@ -180,11 +181,14 @@ function intersection_point(line1, line2) {
     if (b > 0 && b < 1) {
         result.onLine2 = true;
     }
+    
+// @@@@@@@@@@@@@@@@@@
+console.log("intersection_point()", result);
+// @@@@@@@@@@@@@@@@@@
+
     // if line1 and line2 are segments, they intersect if both of the above are true
     return result;
 }
-
-
 
 // Vector reflection in 2D
 function reflect_vector(vector, mirror_line) {
@@ -196,12 +200,25 @@ function reflect_vector(vector, mirror_line) {
     var nhat, result = {x: null, y: null};
     nhat = normalize(mirror_line); // Normalized mirror line
     
-    result.x = 2 * dotproduct(vector, nhat) * nhat[0] - vector[0];
-    result.y = 2 * dotproduct(vector, nhat) * nhat[1] - vector[1];
+    result.x = 2 * dot_product(vector, nhat) * nhat[0] - vector[0];
+    result.y = 2 * dot_product(vector, nhat) * nhat[1] - vector[1];
     
     return result;    
 }
 
+
+// Convert angle in degrees to direction (0-360)
+function deg_to_dir(angle) {
+	while (angle < 0){
+		angle += 360;
+	}
+	return angle % 360;
+}
+
+// Convert radians to degrees
+function rad_to_deg(radians) {
+	return radians * 180/Math.PI;
+}
 
 // ##################################
 // Classes (Prototype Constructors)
@@ -246,28 +263,55 @@ MirrorLine.prototype.move = function (deltaX, deltaY) {
 	// TO DO
 }
 // reflect()
-MirrorLine.prototype.reflect = function (vector) {
+MirrorLine.prototype.reflect = function (line_step) {
 	var result = {newX: null,
 		      newY: null,
 		      intersectX: null,
 		      intersectY: null,
 		      newDirection: null};
 	// Calculate intersection point
-	var point = intersection_point(this, vector);
+	var point = intersection_point(this, line_step);
 	
 	result.intersectX = point.x;
 	result.intersectY = point.y;
 	
-	// Create vectors using intersect as origin, and calculate reflection
-	remainingTrajectory = [vector.endX - point.x, vector.endY - point.y];
-	mirrorLine = [this.endX - point.x, this.endY - point.y];
-	delta = reflect_vector(remainingTrajectory, mirrorLine);
-	// Add delta to origin to get result
-	result.newX = point.x + delta.x;
-	result.newY = point.y + delta.y;
+	if (point.onLine1 && point.onLine2) {
 	
-	// Use trig to calculate new direction
-	result.newDirection = (Math.atan(delta.y/delta.x) * (180/Math.PI)) % 360;
+		// Create vectors using intersect as origin, and calculate reflection
+		var remainingTrajectory = [line_step.endX - point.x, 
+					   line_step.endY - point.y];
+		var mirrorLine = [this.endX - point.x, this.endY - point.y];
+		var delta = reflect_vector(remainingTrajectory, mirrorLine);
+		// Add delta to origin to get result
+		result.newX = point.x + delta.x;
+		result.newY = point.y + delta.y;
+		
+		// Use trig to calculate new direction
+		var newAngle = Math.atan2(delta.y, delta.x) * (180/Math.PI);
+		result.newDirection = deg_to_dir(newAngle);
+		// @@@@@@@@@@@@@@@@@@
+		console.log("reflect() delta", delta);
+		console.log("reflect() if result", result);
+		// @@@@@@@@@@@@@@@@@@
+	} else {
+		
+		// Use full lines as vectors
+		var trajectory = [line_step.endX - line_step.startX, 
+				  line_step.endY - line_step.startY];
+		var mirrorLine = [this.endX - this.startX, this.endY - this.startY];
+		var delta = reflect_vector(trajectory, mirrorLine);
+		
+		// Use trig to find new direction of propagation
+		result.newDirection = (Math.atan2(delta.y, delta.x) * (180/Math.PI)) % 360;
+		
+		// Choose a point slightly off mirror in new direction of propagation
+		result.newX = point.x + .001 * Math.cos(result.newDirection * Math.PI/180);
+		result.newY = point.y + .001 * Math.sin(result.newDirection * Math.PI/180);
+		
+		// @@@@@@@@@@@@@@@@@@
+		console.log("reflect() else result", result);
+		// @@@@@@@@@@@@@@@@@@
+	}
 	
 	return result;
 }						
@@ -327,9 +371,9 @@ function Trail(trailLength, color, lineWidth) {
 
 	this.lines = [];
 }
-// addNewLine()
+// addLine()
 Trail.prototype.addLine = function (startX, startY, endX, endY) {
-	var line = new Line(startX, startY, endX, endY, color, lineWidth);
+	var line = new Line(startX, startY, endX, endY, this.color, this.lineWidth);
 	this.lines.push(line);
 	while (this.lines.length > this.trailLength){
 		var temp = this.lines.shift() //Get rid of oldest line
@@ -352,22 +396,20 @@ Trail.prototype.draw = function () {
 // ----------------------------------
 
 // === Beam =========================
-function Beam(posX, posY, speed, direction, trailLength, color, lineWidth) {
+function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 
 	this.posX = posX;
 	this.posY = posY;
 	this.speed = speed;
-	this.direction = direction;
+	this.direction = deg_to_dir(angle);
 	this.active = true; // boolean	
 	
-	this.trail = new Trail(this, trailLength, color, lineWidth);
+	this.trail = new Trail(trailLength, color, lineWidth);
 	
 	// Previous state
 	this.prevX = posX;
 	this.prevY = posY;
-	this.prevDirection = direction;
-	this.intersectX = null;
-	this.intersectY = null;
+	this.prevDirection = this.direction;
 }
 // updateBEAM()
 Beam.prototype.updateBEAM = function () {
@@ -384,8 +426,6 @@ Beam.prototype.updateBEAM = function () {
 	this.posX += this.getSpeedX();
 	this.posY += this.getSpeedY();
 	
-	this.trail.addLine(this.prevX, this.prevY, this.);
-	
 	// create line of most recent step
 	var line_step = {startX: this.prevX, 
 		      startY: this.prevY,
@@ -397,19 +437,39 @@ Beam.prototype.updateBEAM = function () {
 	for (var i=0; i < mirrors.length; i++) {
 	
 		if(lines_intersect(mirrors[i], line_step)){
+			
+			// @@@@@@@@@@@@@@@@@@
+			console.log("REFLECTION START");
+			console.log("line_step:", line_step);
+			// @@@@@@@@@@@@@@@@@@
 			// Reflect off of mirror
 			reflection = mirrors[i].reflect(line_step);
 			
+			// Add line to intersection point
+			this.trail.addLine(this.prevX, this.prevY, 
+				reflection.intersectX, reflection.intersectY);
+			
+			// Add line from intersection to new position			
+			this.trail.addLine(reflection.intersectX, 
+					   reflection.intersectY,
+					   reflection.newX,
+					   reflection.newY);
+				
 			// Save values
-			this.intersectX = reflection.intersectX;
-			this.intersectY = reflection.intersectY;
 			this.posX = reflection.newX;
 			this.posY = reflection.newY;
-			this.direction = reflection.newDirection;
+			this.direction = deg_to_dir(reflection.newDirection);
+			
+			// @@@@@@@@@@@@@@@@@@
+			console.log("reflection", reflection);
+			console.log("saving direction: ", this.direction);
+			console.log("REFLECTION END", reflection);
+			// @@@@@@@@@@@@@@@@@@			
+			
+			return // Only one collision event
 		}
 	}
 	
-		
 	
 	// lens collisions
 	/* for (var i=0; i < lenses.length; i++) {
@@ -419,6 +479,9 @@ Beam.prototype.updateBEAM = function () {
 	}*/
 	
 	// other object collisions
+	
+	// no collisions:
+	this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
 }
 // getSpeedX()
 Beam.prototype.getSpeedX = function () {
@@ -566,13 +629,12 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 
 // Mirrors
 var mirrorLineWidth = 6;
-var mirror1 = new MirrorLine(0, 300, 600, 0, 'gray', mirrorLineWidth);
+var mirror1 = new MirrorLine(100, 100, 700, 100, 'gray', mirrorLineWidth);
+var mirror2 = new MirrorLine(100, 100, 0, 500, 'gray', mirrorLineWidth);
+var mirror3 = new MirrorLine(0, 500, 700, 500, 'gray', mirrorLineWidth);
+var mirror4 = new MirrorLine(700, 500, 700, 0, 'gray', mirrorLineWidth);
 
-var mirrors = [mirror1];
-
-// @@@@@@@@@@@@@@@@@@
-console.log(mirrors);
-// @@@@@@@@@@@@@@@@@@
+var mirrors = [mirror1,mirror2,mirror3,mirror4];
 
 
 //Cores
@@ -611,19 +673,15 @@ var core3 = new Core(pos3x, pos3y, 10, 20, 'purple', arr3);
 
 trailLength = 10;
 
-var beam1 = new Beam(50,300, LIGHTSPEED, 270, trailLength, 'red', dashLineWidth);
-var beam2 = new Beam(50,300, LIGHTSPEED, 0, trailLength, 'green', dashLineWidth);
-var beam3 = new Beam(50,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
+var beam1 = new Beam(350,300, LIGHTSPEED, 0, trailLength, 'red', dashLineWidth);
+var beam2 = new Beam(150,300, LIGHTSPEED, 0, trailLength, 'green', dashLineWidth);
+var beam3 = new Beam(150,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
 
 
 //Accumulate
 
 var cores = [core2, core1, core3];
 var beams = [beam1, beam2, beam3];
-
-// @@@@@@@@@@@@@@@@@@
-console.log(beams);
-// @@@@@@@@@@@@@@@@@@
 
 
 function moveEverything() {
