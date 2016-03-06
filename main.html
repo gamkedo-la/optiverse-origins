@@ -12,10 +12,8 @@
 var canvas;
 var ctx;
 
-const LIGHTSPEED = 6;
+const LIGHTSPEED = 0;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
-
-var radius = 10;
 
 
 // ##################################
@@ -84,6 +82,7 @@ function handleMouseClick(mousePos) {
 
 // Dot product of two vectors
 function dotproduct(a,b) {
+	// Args: a = [x1,y1], b = [x2,y2]
 	var n = 0, lim = Math.min(a.length,b.length);
 	for (var i = 0; i < lim; i++) n += a[i] * b[i];
 	return n;
@@ -91,6 +90,7 @@ function dotproduct(a,b) {
 
  // Normalize a vector
 function normalize(vector) {
+	// Args: vector = [x1,y1]
 	var n = 0, vectorLength, result = [];
 	
 	for (var i = 0; i < vector.length; i++) {
@@ -185,10 +185,13 @@ function intersection_point(line1, line2) {
 }
 
 
+
 // Vector reflection in 2D
 function reflect_vector(vector, mirror_line) {
+    // Args: vector = [x1,y1], mirror_line = [x2,y2]
+    
     // Receives two vectors represented as arrays (same origin), 
-    // and returns mirror of 'vector' around 'mirror_line'.
+    // and returns point, mirror of 'vector' around 'mirror_line'.
     
     var nhat, result = {x: null, y: null};
     nhat = normalize(mirror_line); // Normalized mirror line
@@ -205,7 +208,7 @@ function reflect_vector(vector, mirror_line) {
 // ##################################
 
 // ----------------------------------
-// Lines and Polygons
+// Lines
 // ----------------------------------
 
 // === Line =========================
@@ -217,32 +220,7 @@ function Line(startX, startY, endX, endY, color, lineWidth) {
 	this.endX = endX;
 	this.endY = endY;
 }
-// setStart()
-Line.prototype.setStart = function (startX, startY) {
-	this.startX = startX;
-	this.startY = startY;
-}
-// getStartX()
-Line.prototype.getStartX = function () {
-	return this.startX;
-}
-// getStartY()
-Line.prototype.getStartY = function () {
-	return this.startY;
-}
-// setEnd()
-Line.prototype.setEnd = function (endX, endY) {
-	this.endX = endX;
-	this.endY = endY;
-}
-// getEndX()
-Line.prototype.getEndX = function () {
-	return this.endX;
-}
-// getEndY()
-Line.prototype.getEndY = function () {
-	return this.endY;
-}
+
 // intersects()
 Line.prototype.intersects = function (line) { 
 	// receives line object and tests intersection
@@ -294,7 +272,11 @@ MirrorLine.prototype.reflect = function (vector) {
 	return result;
 }						
 
+// ----------------------------------
+// Line Groups and Polygons
+// ----------------------------------
 
+/* TO DO
 // === MirrorLineGroup =========================
 function MirrorLineGroup(centerX, centerY, color, lineWidth) {
 	this.color = color;
@@ -333,48 +315,25 @@ MirrorLineGroup.prototype.draw = function () {
 		this.mirrorLines[i].draw();
 	}
 }
+*/
+
 
 
 // === Trail =========================
-function Trail(ballObj, trailLength, color, lineWidth) {
-	this.ballObj = ballObj; //Ballistic object to trail
+function Trail(trailLength, color, lineWidth) {
 	this.trailLength = trailLength;
 	this.color = color;
 	this.lineWidth = lineWidth;
 
 	this.lines = [];
 }
-// updateTRAIL()
-Trail.prototype.updateTRAIL = function () {
-	var prevX = this.ballObj.getPrevX();
-	var prevY = this.ballObj.getPrevY();	
-	var intersectX = this.ballObj.getIntersectX();
-	var intersectY = this.ballObj.getIntersectY();
-	this.ballObj.nullIntersectX();
-	this.ballObj.nullIntersectY();
-	var newX = this.ballObj.getX();
-	var newY = this.ballObj.getY();
-	
-	if (intersectX != null && intersectY != null){
-		var newLine1 = new Line(prevX, prevY, intersectX, intersectY, 
-				this.color, this.lineWidth);
-		var newLine2 = new Line(intersectX, intersectY, newX, newY, 
-				this.color, this.lineWidth);
-		this.addNewLine(newLine1);
-		this.addNewLine(newLine2);
-	} else {
-		var newLine = new Line(prevX, prevY, newX, newY, 
-					this.color, this.lineWidth);	
-		this.addNewLine(newLine);
-	}
-	
-}
 // addNewLine()
-Trail.prototype.addNewLine = function (newLine) {
-	this.lines.push(newLine);
-	if (this.lines.length > this.trailLength){
+Trail.prototype.addLine = function (startX, startY, endX, endY) {
+	var line = new Line(startX, startY, endX, endY, color, lineWidth);
+	this.lines.push(line);
+	while (this.lines.length > this.trailLength){
 		var temp = this.lines.shift() //Get rid of oldest line
-		// temp is throwaway
+		// temp is throwaway, not used
 	}
 }
 // draw()
@@ -386,97 +345,71 @@ Trail.prototype.draw = function () {
 	}
 }
 
-// ----------------------------------
-// Velocity
-// ----------------------------------
-
-// === Velocity =========================
-function Velocity(speed, direction) {
-// Speed (float) and direction in degrees (0-359)
-
-	this.speed = speed;
-	this.direction = direction % 360;
-}
-// setSpeed()
-Velocity.prototype.setSpeed = function (speed) {
-	this.speed = speed;
-}
-// getSpeed()
-Velocity.prototype.getSpeed = function () {
-	return this.speed;
-}
-// getSpeedX()
-Velocity.prototype.getSpeedX = function () {
-	var speedX = this.speed * Math.cos(this.direction * Math.PI/180);
-	return speedX;
-}
-// getSpeedY()
-Velocity.prototype.getSpeedY = function () {
-	var speedY = this.speed * Math.sin(this.direction * Math.PI/180);
-	return speedY;
-}
-// setDirection() - receives degrees
-Velocity.prototype.setDirection = function (direction) {
-	this.direction = direction % 360;
-}
-// getDirection()
-Velocity.prototype.getDirection = function () {
-	return this.direction;
-}
 
 
 // ----------------------------------
-// Ballistic Objects
+// Laser Beams
 // ----------------------------------
 
-// === BallisticObject =========================
-function BallisticObject(posX, posY, speed, direction) {
+// === Beam =========================
+function Beam(posX, posY, speed, direction, trailLength, color, lineWidth) {
 
 	this.posX = posX;
 	this.posY = posY;
+	this.speed = speed;
+	this.direction = direction;
+	this.active = true; // boolean	
+	
+	this.trail = new Trail(this, trailLength, color, lineWidth);
+	
+	// Previous state
 	this.prevX = posX;
 	this.prevY = posY;
+	this.prevDirection = direction;
 	this.intersectX = null;
 	this.intersectY = null;
-	this.prevDirection = direction;
-	this.velocity = new Velocity(speed, direction);
-	this.active = false; // boolean	
 }
-// updateOBJ()
-BallisticObject.prototype.updateOBJ = function () {
+// updateBEAM()
+Beam.prototype.updateBEAM = function () {
 	if (!this.active){
 		return;
 	}
+	
+	// Update previous info
 	this.prevX = this.posX;
 	this.prevY = this.posY;
-	this.prevDirection = this.velocity.getDirection();
-	this.posX += this.velocity.getSpeedX();
-	this.posY += this.velocity.getSpeedY();
+	this.prevDirection = this.direction;
 	
-	// create vector of most recent step
-	var vector = {startX: this.prevX, 
+	// Calculate new position
+	this.posX += this.getSpeedX();
+	this.posY += this.getSpeedY();
+	
+	this.trail.addLine(this.prevX, this.prevY, this.);
+	
+	// create line of most recent step
+	var line_step = {startX: this.prevX, 
 		      startY: this.prevY,
 		      endX: this.posX, 
 		      endY: this.posY, 
-		      direction: this.velocity.getDirection()};
+		      direction: this.direction};
 	
-	// mirror collisions
+	// mirror collisions 
 	for (var i=0; i < mirrors.length; i++) {
 	
-		if(lines_intersect(mirrors[i], vector)){
+		if(lines_intersect(mirrors[i], line_step)){
 			// Reflect off of mirror
-			reflection = mirrors[i].reflect(vector);
+			reflection = mirrors[i].reflect(line_step);
 			
 			// Save values
 			this.intersectX = reflection.intersectX;
 			this.intersectY = reflection.intersectY;
 			this.posX = reflection.newX;
 			this.posY = reflection.newY;
-			this.velocity.setDirection(reflection.newDirection);
-
-			return; // Only one event can occur
+			this.direction = reflection.newDirection;
 		}
 	}
+	
+		
 	
 	// lens collisions
 	/* for (var i=0; i < lenses.length; i++) {
@@ -484,151 +417,22 @@ BallisticObject.prototype.updateOBJ = function () {
 			
 		}
 	}*/
+	
+	// other object collisions
 }
-// setSpeed()
-BallisticObject.prototype.setSpeed = function (speed) {
-	this.velocity.setSpeed(speed);
+// getSpeedX()
+Beam.prototype.getSpeedX = function () {
+	var speedX = this.speed * Math.cos(this.direction * Math.PI/180);
+	return speedX;
 }
-// getSpeed()
-BallisticObject.prototype.getSpeed = function () {
-	return this.velocity.getSpeed();
+// getSpeedY()
+Beam.prototype.getSpeedY = function () {
+	var speedY = this.speed * Math.sin(this.direction * Math.PI/180);
+	return speedY;
 }
-// setPosition()
-BallisticObject.prototype.setPosition = function (posX, posY) {
-	this.posX = posX;
-	this.posY = posY;
-}
-// getX()
-BallisticObject.prototype.getX = function () {
-	return this.posX;
-}
-// getY()
-BallisticObject.prototype.getY = function () {
-	return this.posY;
-}
-// getPrevX()
-BallisticObject.prototype.getPrevX = function () {
-	return this.prevX;
-}
-// getPrevY()
-BallisticObject.prototype.getPrevY = function () {
-	return this.prevY;
-}
-// getIntersectX()
-BallisticObject.prototype.getIntersectX = function () {
-	return this.intersectX;
-}
-// nullIntersectX()
-BallisticObject.prototype.nullIntersectX = function () {
-	this.intersectX = null;
-}
-// getIntersectY()
-BallisticObject.prototype.getIntersectY = function () {
-	return this.intersectY;
-}
-// nullIntersectY()
-BallisticObject.prototype.nullIntersectY = function () {
-	this.intersectY = null;
-}
-// getDirection()
-BallisticObject.prototype.getDirection = function () {
-	return this.velocity.getDirection();
-}
-// getPrevDirection()
-BallisticObject.prototype.getPrevDirection = function () {
-	return this.prevDirection;
-}
-// activate()
-BallisticObject.prototype.activate = function () {
-	this.active = true;
-}
-// isActive()
-BallisticObject.prototype.isActive = function () {
-	return this.active;
-}
-
-
-// === Beam =========================
-function Beam(posX, posY, speed, direction, color, lineWidth) {
-	// Call parent constructor	
-	BallisticObject.call(this, posX, posY, speed, direction);
-	this.color = color;
-	this.lineWidth = lineWidth;
-	this.lines = [];
-} // Make it a subclass
-Beam.prototype = Object.create(BallisticObject.prototype); 
-Beam.prototype.constructor = Beam; 
-// updateBEAM()
-Beam.prototype.updateBEAM = function () {
-
-	if (this.active){
-		// update ballistics
-		this.updateOBJ();
-		
-		// update beam path
-		if (this.getDirection() != this.getPrevDirection()) { // create new line
-			this.newLine();
-		} else {   // update most recent line
-			this.lines[this.lines.length - 1].setEnd(this.getX(), 
-								 this.getY());
-		}
-		// check if core collision
-		for (var i=0; i < cores.length; i++) {
-			core = cores[i];
-			if (core.encloses(this.getX(), this.getY())){
-				core.absorb(this);
-				this.fade();
-				break;
-			}
-		}
-	}
-}
-// activate()
-Beam.prototype.activate = function () {
-	this.active = true;
-	this.newLine();
-}
-// newLine()
-Beam.prototype.newLine = function () {
-	var new_line = new Line(this.getX(), this.getY(), 
-			    this.getX(), this.getY(), 
-			    this.color, this.lineWidth);
-	this.lines.push(new_line);
-}
-// fade()
-Beam.prototype.fade = function () {
-	this.lines = [];
-}
-// draw()
 Beam.prototype.draw = function () {
-	for(var i=0; i < this.lines.length; i++) {
-		this.lines[i].draw();
-	}
-}
-
-
-
-
-// === Pulse =========================
-function Pulse(posX, posY, speed, direction, trailLength, color, lineWidth) {
-	// Call parent constructor	
-	BallisticObject.call(this, posX, posY, speed, direction);
-	this.trail = new Trail(this, trailLength, color, lineWidth);
-} // Make it a subclass
-Pulse.prototype = Object.create(BallisticObject.prototype); 
-Pulse.prototype.constructor = Pulse; 
-// updatePULSE()
-Pulse.prototype.updatePULSE = function () {
-	if (this.active){
-		this.updateOBJ();
-		this.trail.updateTRAIL();
-	}
-}
-// draw()
-Pulse.prototype.draw = function () {
 	this.trail.draw();
 }
-
 
 // ----------------------------------
 // Cores and Sources
@@ -636,6 +440,7 @@ Pulse.prototype.draw = function () {
 
 // === Core =========================
 function Core(centerX, centerY, innerRadius, outerRadius, color, coreRings) {
+	// Args: coreRings = []
 	this.centerX = centerX;
 	this.centerY = centerY;
 	this.innerRadius = innerRadius;
@@ -688,14 +493,6 @@ Core.prototype.absorb = function (beam) {
 		// TO DO
 		return;
 	}
-}
-// getX()
-Core.prototype.getX = function () {
-	return this.centerX;
-}
-// getY()
-Core.prototype.getY = function () {
-	return this.centerY;
 }
 // encloses()
 Core.prototype.encloses = function (x, y) {
@@ -751,10 +548,6 @@ CoreRing.prototype.activate = function () {
 CoreRing.prototype.deactivate = function () {
 	this.active = false;
 }
-// getColor()
-CoreRing.prototype.getColor = function () {
-	return this.color;
-}
 // draw()
 CoreRing.prototype.draw = function (centerX, centerY) {
 	var rad = this.radius + this.radiusChange;
@@ -793,8 +586,6 @@ var dash1 = 2;
 var CR1 = new CoreRing(20, .04, 1, 'red', 3);
 CR1.activate();
 var arr1 = [CR1];
-var pulse1 = new Pulse(pos1x,pos1y, LIGHTSPEED, angle1, dash1, 'red', dashLineWidth);
-pulse1.activate();
 var core1 = new Core(pos1x, pos1y, 7, 20, 'red', arr1);
 
 
@@ -805,8 +596,6 @@ var dash2 = 5;
 var CR2 = new CoreRing(25, .08, 1, 'green', 5);
 CR2.activate();
 var arr2 = [CR2];
-var pulse2 = new Pulse(pos2x,pos2y, LIGHTSPEED, angle2, dash2, 'green', dashLineWidth);
-pulse2.activate();
 var core2 = new Core(pos2x, pos2y, 10, 20, 'green', arr2);
 
 var pos3x = 250;
@@ -818,44 +607,32 @@ CR3r.activate();
 var CR3b = new CoreRing(40, .1, 1, 'blue', 5);
 CR3b.activate();
 var arr3 = [CR3b, CR3r];
-var pulse3 = new Pulse(pos3x,pos3y, LIGHTSPEED, angle3, dash3, 'purple', dashLineWidth);
-pulse3.activate();
 var core3 = new Core(pos3x, pos3y, 10, 20, 'purple', arr3);
 
+trailLength = 10;
 
-var beam1 = new Beam(50,300, LIGHTSPEED, 270, 'red', dashLineWidth);
-beam1.activate();
-var beam2 = new Beam(50,300, LIGHTSPEED, 0, 'green', dashLineWidth);
-beam2.activate();
-var beam3 = new Beam(50,300, LIGHTSPEED, 315, 'purple', dashLineWidth);
-beam3.activate();
+var beam1 = new Beam(50,300, LIGHTSPEED, 270, trailLength, 'red', dashLineWidth);
+var beam2 = new Beam(50,300, LIGHTSPEED, 0, trailLength, 'green', dashLineWidth);
+var beam3 = new Beam(50,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
 
 
 //Accumulate
 
 var cores = [core2, core1, core3];
-var beams = []; //[beam1, beam2, beam3];
-var pulses = [pulse1, pulse2, pulse3];
+var beams = [beam1, beam2, beam3];
 
 // @@@@@@@@@@@@@@@@@@
-console.log(cores);
+console.log(beams);
 // @@@@@@@@@@@@@@@@@@
 
 
 function moveEverything() {
 	
 	// ---------------------
-	// Ballistic objects
-	// ---------------------
-	
-	
 	// Beams
+	// ---------------------
 	for (var i=0; i < beams.length; i++) {
 		beams[i].updateBEAM();
-	}
-	// Pulses
-	for (var i=0; i < pulses.length; i++) {
-		pulses[i].updatePULSE();
 	}
 	
 	// ---------------------
@@ -891,10 +668,7 @@ function drawEverything() {
 	for (var i=0; i < beams.length; i++) {
 		beams[i].draw();
 	}
-	// Pulses
-	for (var i=0; i < pulses.length; i++) {
-		pulses[i].draw();
-	}
+	
 	// Mirrors
 
 	for (var i=0; i < mirrors.length; i++) {
