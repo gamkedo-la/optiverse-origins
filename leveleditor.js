@@ -9,26 +9,25 @@ const LEVELPART_MIRROR = (levPartEnum++);
 const LEVELPART_SOURCE = (levPartEnum++);
 const LEVELPART_WALL = (levPartEnum++);
 const LEVELPART_DELETE = (levPartEnum++);
+const LEVELPART_EXPORT = (levPartEnum++);
+const LEVELPART_IMPORT = (levPartEnum++);
 const LEVELPART_ENUM_KINDS = (levPartEnum++);
 
 const UI_BUTTON_PIXEL_SIZE = 40;
 
 var isInEditor = false;
+
 var editorMouseOverItem = NO_SELECTION;
 var editorSelectedBrush = NO_SELECTION;
 var editorNextClickSetsAngleOfIdx = NO_SELECTION;
 
 var levelPiecesList = [];
+
 function levelObjClass(atX, atY, ofKind, inRot) {
 	this.x = atX;
 	this.y = atY;
 	this.kind = ofKind;
 	this.ang = inRot;
-
-	this.draw = function() {
-		drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind],
-													this.x,this.y, this.ang);
-	}
 }
 
 function toggleEditor() {
@@ -59,10 +58,31 @@ function editorDeleteNearestToMouse() {
 	}
 }
 
+function SaveToTextfield() {
+	levelText = document.getElementById('levelTextfield');
+	levelText.value = JSON.stringify(levelPiecesList);
+}
+function LoadTextfield() {
+	levelText = document.getElementById('levelTextfield');
+	try{
+        levelPiecesList = JSON.parse( levelText.value );
+    }catch(e){
+        alert("invalid level data in text box below game");
+    }
+}
+
 function editorMouseClicked() {
 	if(editorMouseOverItem != NO_SELECTION) {
-		editorSelectedBrush = editorMouseOverItem;
+
+		if(editorMouseOverItem == LEVELPART_EXPORT) {
+			SaveToTextfield();
+		} else if(editorMouseOverItem == LEVELPART_IMPORT) {
+			LoadTextfield();
+		} else {
+			editorSelectedBrush = editorMouseOverItem;
+		}
 		editorNextClickSetsAngleOfIdx = NO_SELECTION; // resets angle setting if piece changed
+
 	} else if(editorSelectedBrush == LEVELPART_DELETE) {
 		editorDeleteNearestToMouse();
 	} else {
@@ -80,7 +100,7 @@ function editorMouseClicked() {
 function editorMousePositionUpdate() {
 	if(mouseX > canvas.width-UI_BUTTON_PIXEL_SIZE) {
 		editorMouseOverItem = Math.floor( mouseY / UI_BUTTON_PIXEL_SIZE ); 
-		if(editorMouseOverItem < 0 || editorMouseOverItem > LEVELPART_DELETE) {
+		if(editorMouseOverItem < 0 || editorMouseOverItem >= LEVELPART_ENUM_KINDS) {
 			editorMouseOverItem = NO_SELECTION;
 		}
 	} else {
@@ -95,7 +115,9 @@ function editorMousePositionUpdate() {
 
 function editorDrawLevelObj() {
 	for(var i=0;i<levelPiecesList.length;i++) {
-		levelPiecesList[i].draw();
+		drawBitmapCenteredAtLocationWithRotation(levObjPics[levelPiecesList[i].kind],
+									levelPiecesList[i].x,levelPiecesList[i].y,
+									levelPiecesList[i].ang);
 	}
 }
 
@@ -127,8 +149,14 @@ function editorDrawInterface() {
 		drawBitmapCenteredAtLocationWithRotation(levObjPics[editorSelectedBrush],
 													mouseX,mouseY, 0);
 	}
-	if(editorSelectedBrush == LEVELPART_DELETE) {
+	if(editorSelectedBrush == LEVELPART_DELETE) { // selected
 		stepText = "click to delete nearest part";
+	}
+	if(editorMouseOverItem == LEVELPART_EXPORT) { // merely hovering, since action on click
+		stepText = "click to update text below game to be current layout";
+	}
+	if(editorMouseOverItem == LEVELPART_IMPORT) { // merely hovering, since action on click
+		stepText = "click to load layout from text below the game";
 	}
 
 	colorText(stepText, 15, 15, 'white');
