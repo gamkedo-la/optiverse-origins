@@ -1,7 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+</head>
+<body>
 
 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
+<script src="imagecode.js"></script>
+<script src="leveleditor.js"></script>
 <script>
 
 
@@ -12,36 +20,40 @@
 var canvas;
 var ctx;
 
+var mouseX = 0;
+var mouseY = 0;
+
 const LIGHTSPEED = 7;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
 
+const KEYCODE_E = 69;
 
 // ##################################
 // ON LOAD
 // ##################################
 
 window.onload = function() {
+	loadImages();
+
 	canvas = document.getElementById('gameCanvas');
 	ctx = canvas.getContext('2d');
+	colorRect(0,0,canvas.width,canvas.height,'black');
+	colorText("Loading images...", 15, 15, 'white');
 
+}
+
+function loadingDoneSoStartGame() { // so that game and input won't start until images load
 	var framesPerSecond = 30;
 	setInterval(function() {
 			moveEverything();
 			drawEverything();	
 		}, 1000/framesPerSecond);
 
-	canvas.addEventListener('mousedown', 
-		function(evt) {
-			var mousePos = calculateMousePos(evt);
-			handleMouseClick(mousePos);
-		});
+  document.addEventListener("keydown", keyPressed);
+
+  canvas.addEventListener('mousedown', handleMouseClick);
 	
-	/*
-	canvas.addEventListener('mousemove',
-		function(evt) {
-			var mousePos = calculateMousePos(evt);
-		}); 
-	*/
+  canvas.addEventListener('mousemove', updateMousePos); 
 }
 
 
@@ -49,27 +61,41 @@ window.onload = function() {
 // USER INPUT
 // ##################################
 
-function calculateMousePos(evt) {
+function updateMousePos(evt) {
 	var rect = canvas.getBoundingClientRect();
 	var root = document.documentElement;
-	var mouseX = evt.clientX - rect.left - root.scrollLeft;
-	var mouseY = evt.clientY - rect.top - root.scrollTop;
-	return {
-		x:mouseX,
-		y:mouseY
-	};
+	mouseX = evt.clientX - rect.left - root.scrollLeft;
+	mouseY = evt.clientY - rect.top - root.scrollTop;
 }
 
-function handleMouseClick(mousePos) {
+function handleMouseClick(evt) {
+	if(isInEditor) {
+		editorMouseClicked();
+		return; // bypass any gameplay interactions while in editor
+	}
+
 	// Check for click on cores
 	for (var i=0; i < cores.length; i++) {
 		core = cores[i];
-		if (core.encloses(mousePos.x, mousePos.y)){
+		if (core.encloses(mouseX, mouseY)){
 			core.explode();
 		}
 	}
-	
-	
+}
+
+function keyPressed(evt) {
+  var anyValidKeyPressed = true;
+  switch(evt.keyCode) {
+  	case KEYCODE_E:
+  		toggleEditor();
+  		break;
+  	default: // to allow any non-game key actions to affect browser
+  		anyValidKeyPressed = false;
+  		break;
+  }
+  if(anyValidKeyPressed) {
+  	evt.preventDefault(); // without this, keys affect the browser
+  }
 }
 
 
@@ -732,6 +758,12 @@ function drawEverything() {
 	for (var i=0; i < mirrors.length; i++) {
 		mirrors[i].draw();
 	}
+
+	if(isInEditor) {
+		editorUpdate();
+	} else {
+		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
+	}
 }
 
 // Draws line on canvas from (x0, y0) to (x1, y1)
@@ -768,8 +800,25 @@ function colorRect(leftX, topY, width, height, drawColor) {
 	ctx.fillRect(leftX, topY, width, height);
 }
 
+function strokeRect(leftX, topY, width, height, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	ctx.beginPath();
+	ctx.rect(leftX, topY, width, height);
+	ctx.stroke();
+}
+
+function colorText(showWords, textX, textY, fillColor) {
+  ctx.fillStyle = fillColor;
+  ctx.fillText(showWords, textX, textY);
+}
 
 
 </script>
 
+ <textarea rows="3" cols="102" id="levelTextfield">
+Paste level data from saved text file here to load it
+</textarea> <!-- <button type="button" onclick="LoadTextfield()">Load It</button> -->
+
+</body>
 </html>
