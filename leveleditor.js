@@ -138,6 +138,9 @@ function editorDrawInterface() {
 	var xCoord = canvas.width-UI_BUTTON_PIXEL_SIZE;
 	for(var i=0;i<LEVELPART_ENUM_KINDS;i++) {
 		var yCoord = UI_BUTTON_PIXEL_SIZE*i;
+		
+		colorRect(xCoord, yCoord, UI_BUTTON_PIXEL_SIZE,UI_BUTTON_PIXEL_SIZE, 'black');
+
 		if(editorSelectedBrush == i) {
 			colorRect(xCoord, yCoord, UI_BUTTON_PIXEL_SIZE,UI_BUTTON_PIXEL_SIZE, '#00ffff');
 		} else if(editorMouseOverItem == i) {
