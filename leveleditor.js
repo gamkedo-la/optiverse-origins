@@ -40,6 +40,13 @@ function toggleEditor() {
 		currentLevel = Level.init();
 	} else {
 		currentLevel = Level.init(levelPiecesList);
+		mirrors = [mirror1,mirror2,mirror3,mirror4];
+		for(var i=0; i < currentLevel.parts.length; i++) {
+			if(currentLevel.parts[i].constructor.name == 'Mirror') {
+				mirrors.push(currentLevel.parts[i].mirrorLine);
+			}
+		}
+		
 	}
 }
 

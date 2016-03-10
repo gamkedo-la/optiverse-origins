@@ -547,7 +547,6 @@ function Mirror()
 	//----------------
 	//
 	//
-	
 
 
 	return this;
@@ -566,11 +565,23 @@ Mirror.init = function(_x, _y, _rot)
 	var imageName = "images/mirror.png";
 	//
 	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
-
+	//
+	// Calculate how to mimic the look of the mirror PNG file
+	var mirror_hardcoded_height = 46.0;
+	var startY = _y - (mirror_hardcoded_height/2.0);
+	var endY = _y + (mirror_hardcoded_height/2.0);
+	var startPoint = rotatePointAroundPoint(_x, startY, _x, _y, _rot);
+	var endPoint = rotatePointAroundPoint(_x, endY, _x, _y, _rot);
+	instance.mirrorLine = new MirrorLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], 'gray', mirrorLineWidth);
+	//
 	return instance;
 }
 
-
+/* @OVERRIDE */
+Mirror.prototype.draw = function() 
+{ 
+	this.mirrorLine.draw();
+};
 
 
 
@@ -701,3 +712,46 @@ Wall.init = function(_x, _y, _rot)
 }
 
 
+
+
+
+
+
+
+
+
+/**
+ * Finds out where a point moves if its plane gets rotated
+ * 
+ * @param {Number} x Point x
+ * @param {Number} y Point y
+ * @param {Number} ox Origo point x
+ * @param {Number} oy Origo point y
+ * @param {Number} angle Rotation angle
+ * @return {Array} An array with X at pos 0 and Y at pos 1
+ */
+rotatePointAroundPoint = function( x, y, ox, oy, angle ) {
+		
+		var pX;
+		var pY;
+		
+		//angle = angle * Math.PI / 180.0;
+		
+		/*							 _							_		 _	   _
+		 * 							|							 |		|		|
+		 * 							|	cos angle	-sin angle	 |		|	x	|
+		 * 	Apply rotation matrix	|							 |	X	|		|
+		 * 							|	sin angle	cos angle	 |		|	y	|
+		 * 							|							 |		|		|
+		 * 							 Ð							Ð		 Ð	   Ð
+		 * 
+		 * but adjust origo so that it exists at the given rotation point, ie x-ox and y-oy.
+		 * Then, move it back, ie +ox and +oy.
+		 * 
+		 */
+		pX = Math.cos(angle) * (x-ox) - Math.sin(angle) * (y-oy) + ox;
+		pY = Math.sin(angle) * (x-ox) + Math.cos(angle) * (y-oy) + oy;
+		
+		return [pX,pY];
+		
+};
