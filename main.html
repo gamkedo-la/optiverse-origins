@@ -10,6 +10,7 @@
 
 <script src="imagecode.js"></script>
 <script src="leveleditor.js"></script>
+<script src="level.js"></script>
 <script>
 
 
@@ -690,6 +691,8 @@ var beam3 = new Beam(150,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWi
 var cores = [core2, core1, core3];
 var beams = [beam1, beam2, beam3];
 
+var currentLevel = Level.create();
+
 
 function moveEverything() {
 	
@@ -723,11 +726,16 @@ function drawEverything() {
 	// next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height,'black');
 	
+
+	// Level parts
+	for (var i=0; i < currentLevel.parts.length; i++) {
+		currentLevel.parts[i].draw();
+	}
+
 	// Cores
 	for (var i=0; i < cores.length; i++) {
 		cores[i].draw();
 	}
-	
 	
 	// Beams
 	for (var i=0; i < beams.length; i++) {
@@ -735,7 +743,6 @@ function drawEverything() {
 	}
 	
 	// Mirrors
-
 	for (var i=0; i < mirrors.length; i++) {
 		mirrors[i].draw();
 	}

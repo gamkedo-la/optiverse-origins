@@ -33,7 +33,8 @@ function loadImages() {
     {levPartType:LEVELPART_WALL, theFile:"wall.png"},
     {levPartType:LEVELPART_DELETE, theFile:"delete.png"},
     {levPartType:LEVELPART_EXPORT, theFile:"export.png"},
-    {levPartType:LEVELPART_IMPORT, theFile:"import.png"}
+    {levPartType:LEVELPART_IMPORT, theFile:"import.png"},
+    {levPartType:LEVELPART_TOGAME, theFile:"toGame.png"}
     ];
 
   picsToLoad = imageList.length;
