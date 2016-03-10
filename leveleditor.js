@@ -11,7 +11,6 @@ const LEVELPART_WALL = (levPartEnum++);
 const LEVELPART_DELETE = (levPartEnum++);
 const LEVELPART_EXPORT = (levPartEnum++);
 const LEVELPART_IMPORT = (levPartEnum++);
-const LEVELPART_TOGAME = (levPartEnum++);
 const LEVELPART_ENUM_KINDS = (levPartEnum++);
 
 const UI_BUTTON_PIXEL_SIZE = 40;
@@ -33,6 +32,15 @@ function levelObjClass(atX, atY, ofKind, inRot) {
 
 function toggleEditor() {
 	isInEditor = !isInEditor;
+	if(isInEditor) {
+		levelPiecesList = currentLevel.getJSON();
+		if(levelPiecesList.length > 0) {
+			SaveToTextfield();
+		}
+		currentLevel = Level.init();
+	} else {
+		currentLevel = Level.init(levelPiecesList);
+	}
 }
 
 function distToMouse(fromX,fromY) {
@@ -71,10 +79,7 @@ function LoadTextfield() {
         alert("invalid level data in text box below game");
     }
 }
-function SendToGame() {
-	currentLevel = Level.init(levelPiecesList);
-	toggleEditor();
-}
+
 
 function editorMouseClicked() {
 	if(editorMouseOverItem != NO_SELECTION) {
@@ -84,8 +89,6 @@ function editorMouseClicked() {
 		} else if(editorMouseOverItem == LEVELPART_IMPORT) {
 			LoadTextfield();
 			currentLevel = Level.init();
-		} else if(editorMouseOverItem == LEVELPART_TOGAME) {
-			SendToGame();
 		} else {
 			editorSelectedBrush = editorMouseOverItem;
 		}

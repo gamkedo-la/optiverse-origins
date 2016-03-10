@@ -32,6 +32,7 @@ function Level()
 	//
 	//
 	this.parts = [];
+	this.editorPartsDescr = [];
 
 	return this;
 }
@@ -53,6 +54,8 @@ Level.init = function(_partsDescr)
 		var part = Level.ClassRouter[pData["kind"]].init( pData["x"], pData["y"], pData["ang"] );
 		instance.parts.push(part);
 	}
+	//
+	instance.editorPartsDescr = _partsDescr;
 
 	return instance;
 }
@@ -69,6 +72,16 @@ Level.ClassRouter = [
 	Source,
 	Wall
 ]
+
+
+/**
+ * Get the original JSON code from the level editor
+ * 
+ */
+Level.prototype.getJSON = function() 
+{ 
+	return this.editorPartsDescr;
+};
 
 
 
@@ -126,21 +139,20 @@ function LevelPart()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-LevelPart.init = function(_imgSrc, _x, _y, _rot)
+LevelPart.init = function(_imgSrc, _x, _y, _rot, _instance)
 {
 	_x = typeof _x != 'undefined' ? _x : 0.0;
 	_y = typeof _y != 'undefined' ? _y : 0.0;
 	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	_instance = typeof _instance != 'undefined' ? _instance : new LevelPart();
 	//
-	var instance = new LevelPart();
+	_instance.x = _x;
+	_instance.y = _y;
+	_instance.rotation = _rot;
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage(_imgSrc);
+	_instance.setImage(_imgSrc);
 
-	return instance;
+	return _instance;
 }
 
 
@@ -224,17 +236,10 @@ function Asteroid()
  */
 Asteroid.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Asteroid();
+	var imageName = "images/asteroid.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/asteroid.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -297,17 +302,10 @@ function Core_()
  */
 Core_.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Core_();
+	var imageName = "images/core.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/core.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -369,17 +367,10 @@ function Lens()
  */
 Lens.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Lens();
+	var imageName = "images/lens.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/lens.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -441,17 +432,10 @@ function Lens2()
  */
 Lens2.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Lens2();
+	var imageName = "images/lens2.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/lens2.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -513,17 +497,10 @@ function Lens3()
  */
 Lens3.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Lens3();
+	var imageName = "images/lens3.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/lens3.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -585,17 +562,10 @@ function Mirror()
  */
 Mirror.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Mirror();
+	var imageName = "images/mirror.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/mirror.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -657,17 +627,10 @@ function Source()
  */
 Source.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Source();
+	var imageName = "images/source.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/source.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -729,17 +692,10 @@ function Wall()
  */
 Wall.init = function(_x, _y, _rot)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	//
 	var instance = new Wall();
+	var imageName = "images/wall.png";
 	//
-	instance.x = _x;
-	instance.y = _y;
-	instance.rotation = _rot;
-	//
-	instance.setImage("images/wall.png");
+	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
 
 	return instance;
 }
