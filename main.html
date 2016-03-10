@@ -698,6 +698,8 @@ var beam3 = new Beam(150,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWi
 var cores = [core2, core1, core3];
 var beams = [beam1, beam2, beam3];
 
+var currentLevel = Level.init([]);
+
 
 function moveEverything() {
 	
@@ -750,6 +752,11 @@ function drawEverything() {
 	openingSequenceHandler();
 	if( isOpeningBlockingGameplay() ) {
 		return; // skip other gameplay stuff for now if doing opening
+	}
+
+	// Level parts
+	for (var i=0; i < currentLevel.parts.length; i++) {
+		currentLevel.parts[i].draw();
 	}
 
 	// Cores
