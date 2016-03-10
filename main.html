@@ -10,6 +10,7 @@
 
 <script src="imagecode.js"></script>
 <script src="leveleditor.js"></script>
+<script src="openingsequence.js"></script>
 <script>
 
 
@@ -27,6 +28,7 @@ const LIGHTSPEED = 7;
 const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
 
 const KEYCODE_E = 69;
+const KEYCODE_O = 79;
 
 // ##################################
 // ON LOAD
@@ -48,6 +50,8 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 			moveEverything();
 			drawEverything();	
 		}, 1000/framesPerSecond);
+
+  setupOpeningAnimTick();
 
   document.addEventListener("keydown", keyPressed);
 
@@ -88,6 +92,9 @@ function keyPressed(evt) {
   switch(evt.keyCode) {
   	case KEYCODE_E:
   		toggleEditor();
+  		break;
+  	case KEYCODE_O:
+  		startOpening();
   		break;
   	default: // to allow any non-game key actions to affect browser
   		anyValidKeyPressed = false;
@@ -714,6 +721,22 @@ function moveEverything() {
 	}
 }
 
+function zoomInOnShip(lerpVal) {
+	var shipStartW = imgShipAnimSmall.height; // using height since square anims strip
+	var shipEndW = imgShipLarge.width;
+	var shipStartX = canvas.width/2;
+
+	var shipStartH = imgShipAnimSmall.height;
+	var shipEndH = imgShipLarge.height;
+	var shipEndX = canvas.width;
+
+	var shipDrawW = (1.0-lerpVal) * shipStartW + lerpVal * shipEndW;
+	var shipDrawH = (1.0-lerpVal) * shipStartH + lerpVal * shipEndH;
+	var shipDrawX = (1.0-lerpVal) * shipStartX + lerpVal * shipEndX;
+
+	drawBitmapFitIntoLocation(imgShipLarge, shipDrawX-shipDrawW/2, canvas.height/2-shipDrawH/2,
+		shipDrawW,shipDrawH);
+}
 
 // ##################################
 // DRAW
@@ -722,7 +745,12 @@ function moveEverything() {
 function drawEverything() {
 	// next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height,'black');
-	
+
+	openingSequenceHandler();
+	if( isOpeningBlockingGameplay() ) {
+		return; // skip other gameplay stuff for now if doing opening
+	}
+
 	// Cores
 	for (var i=0; i < cores.length; i++) {
 		cores[i].draw();
