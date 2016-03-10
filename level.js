@@ -42,13 +42,15 @@ function Level()
  * 
  * @param {array} 	_parts	Array of parts from the Level Editor
  */
-Level.create = function(_partsDescr=[])
+Level.init = function(_partsDescr)
 {
+	_partsDescr = typeof _partsDescr != 'undefined' ? _partsDescr : [];
+	//
 	var instance = new Level();
 	//
 	for(var i=0; i < _partsDescr.length; i++) {
 		var pData = _partsDescr[i];
-		var part = Level.ClassRouter[pData["kind"]].create( pData["x"], pData["y"], pData["ang"] );
+		var part = Level.ClassRouter[pData["kind"]].init( pData["x"], pData["y"], pData["ang"] );
 		instance.parts.push(part);
 	}
 
@@ -124,8 +126,12 @@ function LevelPart()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-LevelPart.create = function(_imgSrc, _x=0.0, _y=0.0, _rot=0.0)
+LevelPart.init = function(_imgSrc, _x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new LevelPart();
 	//
 	instance.x = _x;
@@ -216,8 +222,12 @@ function Asteroid()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Asteroid.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Asteroid.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Asteroid();
 	//
 	instance.x = _x;
@@ -285,8 +295,12 @@ function Core_()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Core_.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Core_.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Core_();
 	//
 	instance.x = _x;
@@ -353,8 +367,12 @@ function Lens()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Lens.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Lens.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Lens();
 	//
 	instance.x = _x;
@@ -421,8 +439,12 @@ function Lens2()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Lens2.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Lens2.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Lens2();
 	//
 	instance.x = _x;
@@ -489,8 +511,12 @@ function Lens3()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Lens3.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Lens3.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Lens3();
 	//
 	instance.x = _x;
@@ -557,8 +583,12 @@ function Mirror()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Mirror.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Mirror.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Mirror();
 	//
 	instance.x = _x;
@@ -625,8 +655,12 @@ function Source()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Source.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Source.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Source();
 	//
 	instance.x = _x;
@@ -693,8 +727,12 @@ function Wall()
  * @param {float} 	_y 		Initial y
  * @param {float} 	_rot 	Initial rotation
  */
-Wall.create = function(_x=0.0, _y=0.0, _rot=0.0)
+Wall.init = function(_x, _y, _rot)
 {
+	_x = typeof _x != 'undefined' ? _x : 0.0;
+	_y = typeof _y != 'undefined' ? _y : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
+	//
 	var instance = new Wall();
 	//
 	instance.x = _x;

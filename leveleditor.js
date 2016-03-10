@@ -72,7 +72,7 @@ function LoadTextfield() {
     }
 }
 function SendToGame() {
-	currentLevel = Level.create(levelPiecesList);
+	currentLevel = Level.init(levelPiecesList);
 	toggleEditor();
 }
 
@@ -83,6 +83,7 @@ function editorMouseClicked() {
 			SaveToTextfield();
 		} else if(editorMouseOverItem == LEVELPART_IMPORT) {
 			LoadTextfield();
+			currentLevel = Level.init();
 		} else if(editorMouseOverItem == LEVELPART_TOGAME) {
 			SendToGame();
 		} else {
@@ -92,6 +93,8 @@ function editorMouseClicked() {
 
 	} else if(editorSelectedBrush == LEVELPART_DELETE) {
 		editorDeleteNearestToMouse();
+	} else if(editorSelectedBrush == NO_SELECTION) {
+		return;
 	} else {
 		if(editorNextClickSetsAngleOfIdx == NO_SELECTION) {
 			editorNextClickSetsAngleOfIdx = levelPiecesList.length;
