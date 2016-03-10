@@ -439,7 +439,7 @@ function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 // updateBEAM()
 Beam.prototype.updateBEAM = function () {
 	if (!this.active){
-		return;
+		return false;
 	}
 	
 	// Update previous info
@@ -481,7 +481,7 @@ Beam.prototype.updateBEAM = function () {
 			this.posY = reflection.newY;
 			this.direction = deg_to_dir(reflection.newDirection);		
 			
-			return // Only one collision event
+			return false; // Only one collision event
 		}
 	}
 	
@@ -497,6 +497,15 @@ Beam.prototype.updateBEAM = function () {
 	
 	// no collisions:
 	this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
+
+	// check for screen exit
+	var lastLine = this.trail.lines[0];
+	if(lastLine.endX < 0.0 || lastLine.endY < 0.0 || lastLine.endX > canvas.width || lastLine.endY > canvas.height) {
+		this.active = false;
+		return true;
+	}
+
+	return false;
 }
 // getSpeedX()
 Beam.prototype.getSpeedX = function () {
@@ -649,7 +658,7 @@ var mirror2 = new MirrorLine(100, 100, 0, 500, 'gray', mirrorLineWidth);
 var mirror3 = new MirrorLine(0, 500, 700, 500, 'gray', mirrorLineWidth);
 var mirror4 = new MirrorLine(700, 500, 700, 0, 'gray', mirrorLineWidth);
 
-var mirrors = [mirror1,mirror2,mirror3,mirror4];
+var mirrors = [mirror2,mirror4];//[mirror1,mirror2,mirror3,mirror4];
 
 
 //Cores
@@ -704,10 +713,26 @@ var currentLevel = Level.init([]);
 function moveEverything() {
 	
 	// ---------------------
+	// Level parts
+	// ---------------------
+	for (var i=0; i < currentLevel.parts.length; i++) {
+		currentLevel.parts[i].update();
+	}
+
+	// ---------------------
 	// Beams
 	// ---------------------
+	//
+	// Update all beams and check if they have expired
+	var expBeamsIndex = [];
 	for (var i=0; i < beams.length; i++) {
-		beams[i].updateBEAM();
+		if(beams[i].updateBEAM()) {
+			expBeamsIndex.push(i); 
+		}
+	}
+	// Disregard all expired beams
+	for (var i=0; i < expBeamsIndex.length; i++) {
+		beams.splice(expBeamsIndex[i], 1);
 	}
 	
 	// ---------------------

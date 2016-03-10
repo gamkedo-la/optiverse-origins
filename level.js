@@ -167,6 +167,15 @@ LevelPart.prototype.draw = function()
 };
 
 
+/**
+ * Update frame
+ * 
+ */
+LevelPart.prototype.update = function() 
+{ 
+
+};
+
 
 /**
  * Set new Image
@@ -623,7 +632,7 @@ function Source()
 	//----------------
 	//
 	//
-	
+	this.beam = null;
 
 
 	return this;
@@ -647,6 +656,17 @@ Source.init = function(_x, _y, _rot)
 }
 
 
+/* @OVERRIDE */
+Source.prototype.update = function() 
+{ 
+	LevelPart.prototype.update.call(this);
+	//
+	// Check if a new beam is needed
+	if(this.beam == null || !this.beam.active) {
+		this.beam = new Beam(this.x, this.y, LIGHTSPEED, rad_to_deg(this.rotation), trailLength, 'red', dashLineWidth);
+		beams.push(this.beam);
+	}
+};
 
 
 

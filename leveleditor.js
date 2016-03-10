@@ -33,20 +33,22 @@ function levelObjClass(atX, atY, ofKind, inRot) {
 function toggleEditor() {
 	isInEditor = !isInEditor;
 	if(isInEditor) {
+		// If we just entered editor mode, import current level data as editor data
 		levelPiecesList = currentLevel.getJSON();
 		if(levelPiecesList.length > 0) {
 			SaveToTextfield();
 		}
 		currentLevel = Level.init();
 	} else {
+		// If we just exited editor mode, use editor data to create new level
 		currentLevel = Level.init(levelPiecesList);
-		mirrors = [mirror1,mirror2,mirror3,mirror4];
+		// Register mirrors
+		mirrors = [mirror2,mirror4]; //[mirror1,mirror2,mirror3,mirror4];
 		for(var i=0; i < currentLevel.parts.length; i++) {
 			if(currentLevel.parts[i].constructor.name == 'Mirror') {
 				mirrors.push(currentLevel.parts[i].mirrorLine);
 			}
 		}
-		
 	}
 }
 
