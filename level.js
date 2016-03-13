@@ -220,29 +220,12 @@ Asteroid.prototype.constructor = Asteroid;
  */
 function Asteroid() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Asteroid.init = function(_x, _y, _rot)
 {
 	var instance = new Asteroid();
@@ -286,29 +269,12 @@ Core_.prototype.constructor = Core_;
  */
 function Core_() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Core_.init = function(_x, _y, _rot)
 {
 	var instance = new Core_();
@@ -351,29 +317,12 @@ Lens.prototype.constructor = Lens;
  */
 function Lens() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Lens.init = function(_x, _y, _rot)
 {
 	var instance = new Lens();
@@ -416,29 +365,12 @@ Lens2.prototype.constructor = Lens2;
  */
 function Lens2() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Lens2.init = function(_x, _y, _rot)
 {
 	var instance = new Lens2();
@@ -481,29 +413,12 @@ Lens3.prototype.constructor = Lens3;
  */
 function Lens3() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Lens3.init = function(_x, _y, _rot)
 {
 	var instance = new Lens3();
@@ -546,28 +461,12 @@ Mirror.prototype.constructor = Mirror;
  */
 function Mirror() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Mirror.init = function(_x, _y, _rot)
 {
 	var instance = new Mirror();
@@ -638,13 +537,7 @@ function Source()
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Source.init = function(_x, _y, _rot)
 {
 	var instance = new Source();
@@ -698,29 +591,12 @@ Wall.prototype.constructor = Wall;
  */
 function Wall() 
 {
-
 	LevelPart.call(this);
-
-	//--------------------
-	//
-	// 		MEMBERS
-	//
-	//----------------
-	//
-	//
-	
-
 
 	return this;
 }
 
-/**
- * CONSTRUCTOR that takes arguments
- * 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
- */
+/* @OVERRIDE */
 Wall.init = function(_x, _y, _rot)
 {
 	var instance = new Wall();
@@ -730,9 +606,6 @@ Wall.init = function(_x, _y, _rot)
 
 	return instance;
 }
-
-
-
 
 
 
