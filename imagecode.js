@@ -58,7 +58,11 @@ function drawBitmapCenteredAtLocationWithRotation(graphic, atX, atY,withAngle) {
   ctx.save(); // allows us to undo translate movement and rotate spin
   ctx.translate(atX,atY); // sets the point where our graphic will go
   ctx.rotate(withAngle); // sets the rotation
-  ctx.drawImage(graphic,-graphic.width/2,-graphic.height/2); // center, draw
+  try {
+    ctx.drawImage(graphic,-graphic.width/2,-graphic.height/2); // center, draw
+  } catch(err) {
+    console.log(err);
+  }
   ctx.restore(); // undo the translation movement and rotation since save()
 }
 
@@ -84,4 +88,8 @@ function drawBitmapFitIntoLocation(graphic, atX, atY, targetWid, targetHei) {
                           atX,atY, // dest corner
                           targetWid, targetHei // dest dimensions
                           );
+}
+
+function drawSimple(source) {
+  ctx.drawImage(source.image, source['bounds'].x, source['bounds'].y);
 }

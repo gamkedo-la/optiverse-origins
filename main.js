@@ -23,6 +23,8 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 			drawEverything();	
 		}, 1000/framesPerSecond);
 
+	LevelEditor.setup();
+
   setupOpeningAnimTick();
 
   document.addEventListener("keydown", keyPressed);
@@ -103,8 +105,8 @@ function moveEverything() {
 	// ---------------------
 	// Level parts
 	// ---------------------
-	for (var i=0; i < currentLevel.parts.length; i++) {
-		currentLevel.parts[i].update();
+	for (var i=0; i < currentLevel.pieces.length; i++) {
+		currentLevel.pieces[i].update();
 	}
 
 	// ---------------------
@@ -167,9 +169,9 @@ function drawEverything() {
 		return; // skip other gameplay stuff for now if doing opening
 	}
 
-	// Level parts
-	for (var i=0; i < currentLevel.parts.length; i++) {
-		currentLevel.parts[i].draw();
+	// Level pieces
+	for (var i=0; i < currentLevel.pieces.length; i++) {
+		currentLevel.pieces[i].draw();
 	}
 
 	// Cores
@@ -189,7 +191,7 @@ function drawEverything() {
 		mirrors[i].draw();
 	}
 
-	if(isInEditor) {
+	if(LevelEditor.active) {
 		editorUpdate();
 	} else {
 		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
