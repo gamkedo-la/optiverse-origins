@@ -126,9 +126,9 @@ function LevelPiece()
  * CONSTRUCTOR that takes arguments
  * 
  * @param {Image} 	_kind	Initial Image 
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
+ * @param {Number} 	_x 		Initial x
+ * @param {Number} 	_y 		Initial y
+ * @param {Number} 	_rot 	Initial rotation
  * @return {LevelPiece}
  */
 LevelPiece.init = function(_kind, _x, _y, _rot, _instance)

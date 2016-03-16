@@ -167,17 +167,17 @@ LevelEditor.selectBrush = function(_partClass)
 }
 //
 LevelEditor.mouseClicked = function(evt) {
-	if(LevelEditor.mouseOverItem != null && !LevelEditor.settingRotation) {
-		LevelEditor.mouseOverItem.onClick();
+	if(LevelEditor.mouseOverItem != null && !LevelEditor.settingRotation) { 
+		LevelEditor.mouseOverItem.onClick(); 	// Clicked one of the buttons in the tool panel
 	} else if(LevelEditor.inPanel) {
-		LevelEditor.moveStart();
-	} else if(LevelEditor.selectedBrush != null && LevelEditor.deleting) {
+		LevelEditor.moveStart();				// Clicked somewhere on the panel background
+	} else if(LevelEditor.deleting) {
 		editorDeleteNearestToMouse();
 		if(!evt.shiftKey) {
 			LevelEditor.deleting = false;
 			LevelEditor.selectedBrush = null;
 		}
-	} else {
+	} else if(LevelEditor.selectedBrush != null){
 		if(LevelEditor.settingRotation) {
 			LevelEditor.pieces.push(LevelEditor.selectedBrush.clone());
 			if(!evt.shiftKey) {
@@ -191,16 +191,19 @@ LevelEditor.mouseClicked = function(evt) {
 LevelEditor.mousePositionUpdate = function() {
 	LevelEditor.mouseOverItem = null;
 	//
+	// Check if mouse is over the editor panel
 	var x2 = LevelEditor.bounds.x2 + LevelEditor.panelSenseZone;
 	var y2 = LevelEditor.bounds.y2 + LevelEditor.panelSenseZone;
 	var inBoundsX = mouseX > LevelEditor.bounds.x && mouseX < x2;
 	var inBoundsY = mouseY > LevelEditor.bounds.y && mouseY < y2;
 	LevelEditor.inPanel = inBoundsX && inBoundsY;
-	if(LevelEditor.inPanel) {
+	if(LevelEditor.inPanel) { 	// Check resizing handle
 		if(LevelEditor.corner.pointHit( mouseX, mouseY )) {
 			LevelEditor.mouseOverItem = LevelEditor.corner;
 			return;
 		}
+		//
+		// Check the tool buttons
 		for(var i=0; i < LevelEditor.LEButtons.length; i++) {
 			if(LevelEditor.LEButtons[i].pointHit( mouseX, mouseY )) {
 				LevelEditor.mouseOverItem = LevelEditor.LEButtons[i];
@@ -209,6 +212,7 @@ LevelEditor.mousePositionUpdate = function() {
 		}
 	}
 	//
+	// Handle brush movement/rotation
 	if(LevelEditor.selectedBrush != null) {
 		if(LevelEditor.settingRotation) {
 			LevelEditor.selectedBrush.rotation = Math.atan2(mouseY - LevelEditor.selectedBrush.y, 
@@ -219,14 +223,14 @@ LevelEditor.mousePositionUpdate = function() {
 		}
 	}
 	//
-	if(LevelEditor.cornerGrab) {
+	if(LevelEditor.cornerGrab) {			// Handle panel resize if ongoing
 		LevelEditor.bounds.x2 = mouseX;
 		LevelEditor.bounds.y2 = mouseY;
 		LevelEditor.bounds.w = LevelEditor.bounds.x2 - LevelEditor.bounds.x;
 		LevelEditor.bounds.h = LevelEditor.bounds.y2 - LevelEditor.bounds.y;
 		//
 		LevelEditor.refitUI();
-	} else if(LevelEditor.panelGrab) {
+	} else if(LevelEditor.panelGrab) {		// Handle panel repositioning if ongoing
 		LevelEditor.bounds.x += mouseX - LevelEditor.lastMouseX;
 		LevelEditor.bounds.x2 += mouseX - LevelEditor.lastMouseX;
 		LevelEditor.bounds.y += mouseY - LevelEditor.lastMouseY;
@@ -276,14 +280,19 @@ LevelEditor.resizeEnd = function()
 	canvas.removeEventListener('mouseup', LevelEditor.resizeEnd);
 }
 //
+/**
+ * Looks at the dimensions of the panel and fits in the buttons accordingly
+ *
+ */
 LevelEditor.refitUI = function()
 {
-	// Cap panel xy
+	// Cap panel xy to avoid leaving the canvas
 	LevelEditor.bounds.x = Math.min(canvas.width-LevelEditor.marginX, LevelEditor.bounds.x);
 	LevelEditor.bounds.y = Math.min(canvas.height-LevelEditor.marginY, LevelEditor.bounds.y);
 	LevelEditor.bounds.x2 = LevelEditor.bounds.x + LevelEditor.bounds.w;
 	LevelEditor.bounds.y2 = LevelEditor.bounds.y + LevelEditor.bounds.h;
 	//
+	// Figure what space we have to work with
 	var x = LevelEditor.bounds.x + LevelEditor.marginX;
 	var y = LevelEditor.bounds.y + LevelEditor.marginY;
 	var spanX = LevelEditor.bounds.w - (LevelEditor.marginX);
@@ -291,20 +300,21 @@ LevelEditor.refitUI = function()
 	var rowSpacing = BTN_SIZE + LevelEditor.paddingY;
 	var rowCtr = Math.floor((LevelEditor.bounds.h-LevelEditor.marginY) / rowSpacing);
 	var itemsPerRow = Math.floor(spanX / columnSpacing);
+	// Start fitting the buttons
 	for(var i=0; i < LevelEditor.LEButtons.length;) { 
 		LevelEditor.LEButtons[i].updatePos(x,y);
 		LevelEditor.LEButtons[i].active = rowCtr > 0;
 		i++;
-		if(i % itemsPerRow == 0) {
+		if(i % itemsPerRow == 0) { 	// Skip to next row
 			rowCtr--;
 			x = LevelEditor.bounds.x + LevelEditor.marginX;
 			y += rowSpacing;
-		} else {
-			x += columnSpacing;
+		} else { 					// Skip to next column
+			x += columnSpacing; 
 		}
 	}
 	LevelEditor.overflow = rowCtr <= 0;
-	//
+	// Snap resize handle to bottom right of panel
 	LevelEditor.corner.updatePos(
 		LevelEditor.bounds.x2-(LevelEditor.cornerSize/2), LevelEditor.bounds.y2-(LevelEditor.cornerSize/2));
 }
@@ -334,9 +344,9 @@ LevelEditor.drawInterface = function() {
 	for(var i=0; i < LevelEditor.LEButtons.length; i++) {
 		LevelEditor.LEButtons[i].redraw();
 	}
-	// Resizing
+	// Resizing handle
 	drawSimple(LevelEditor.corner);
-	if(LevelEditor.overflow) {
+	if(LevelEditor.overflow) { 	// Indicate overflow visually by adding "..." next to the handle
 		var w = 5;
 		var x = LevelEditor.corner.bounds.x - (w*6);
 		for(var i=0; i < 3; i++) {
@@ -417,7 +427,6 @@ function LoadTextfield() {
 	levelText = document.getElementById('levelTextfield');
 	try{
         var pData = JSON.parse(levelText.value);
-        //LevelEditor.pieces = [];
         for(var i in pData) {
         	var className = Level.ClassRouter[pData[i].kind];
         	LevelEditor.pieces.push(new className.init( pData[i].x, pData[i].y, pData[i].rotation ));
@@ -571,8 +580,10 @@ function LEButton(_x, _y, _w, _h, _img, _onclick, _tooltip) {
 	return this;
 }
 /**
- * Update position
+ * Update bounds to reflext new xy position
  * 
+ * @param {Number} 	_x 		New x
+ * @param {Number} 	_y 		New y
  */
 LEButton.prototype.updatePos = function(_x, _y) 
 { 
@@ -581,6 +592,13 @@ LEButton.prototype.updatePos = function(_x, _y)
 	this.bounds.x2 = (_x + this.bounds.w);
 	this.bounds.y2 = (_y + this.bounds.h);
 };
+/**
+ * Check if xy exists within bounds
+ * 
+ * @param {Number} 	_x 		
+ * @param {Number} 	_y 		
+ * @return {bool} 	TRUE if xy exists in bounds
+ */
 LEButton.prototype.pointHit = function(_x, _y) 
 {
 	if(!this.active) {
