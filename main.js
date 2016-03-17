@@ -3,6 +3,13 @@ var canvas;
 var ctx;
 
 // ##################################
+// Global Variables
+// ##################################
+
+const LENS_COLOR = 'white';
+const MIRROR_COLOR = 'gray';
+
+// ##################################
 // ON LOAD
 // ##################################
 
@@ -17,7 +24,7 @@ window.onload = function() {
 }
 
 function loadingDoneSoStartGame() { // so that game and input won't start until images load
-	var framesPerSecond = 30;
+	var framesPerSecond = 5;
 	setInterval(function() {
 			moveEverything();
 			drawEverything();	
@@ -41,13 +48,23 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 
 // Mirrors
 var mirrorLineWidth = 6;
-var mirror1 = new MirrorLine(100, 100, 700, 100, 'gray', mirrorLineWidth);
-var mirror2 = new MirrorLine(100, 100, 0, 500, 'gray', mirrorLineWidth);
-var mirror3 = new MirrorLine(0, 500, 700, 500, 'gray', mirrorLineWidth);
-var mirror4 = new MirrorLine(700, 500, 700, 0, 'gray', mirrorLineWidth);
+var mirror1 = new MirrorLine(100, 100, 700, 100, MIRROR_COLOR, mirrorLineWidth);
+var mirror2 = new MirrorLine(100, 100, 0, 500, MIRROR_COLOR, mirrorLineWidth);
+var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
+var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
 
 var mirrors = [mirror1,mirror2,mirror3,mirror4];
 
+
+// Lenses
+var p1 = new Point(0, 250);
+var p2 = new Point(800, 250);
+var p3 = new Point(800, 300);
+var p4 = new Point(0, 300);
+points = [p1, p2, p3, p4];
+var lens1 = new Lens(points, 1.5, LENS_COLOR);
+
+var lenses = [lens1];
 
 //Cores
 
@@ -87,13 +104,13 @@ trailLength = 10;
 
 var beam1 = new Beam(350,300, LIGHTSPEED, 0, trailLength, 'red', dashLineWidth);
 var beam2 = new Beam(150,300, LIGHTSPEED, 90, trailLength, 'green', dashLineWidth);
-var beam3 = new Beam(150,300, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
+var beam3 = new Beam(151,305, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
 
 
 //Accumulate
 
 var cores = [core2, core1, core3];
-var beams = [beam1, beam2, beam3];
+var beams = [beam3];
 
 var currentLevel = Level.init([]);
 
@@ -166,12 +183,17 @@ function drawEverything() {
 	if( isOpeningBlockingGameplay() ) {
 		return; // skip other gameplay stuff for now if doing opening
 	}
-
+	
 	// Level parts
 	for (var i=0; i < currentLevel.parts.length; i++) {
 		currentLevel.parts[i].draw();
 	}
-
+	
+	// Lenses	
+	for (var i=0; i < lenses.length; i++) {
+		lenses[i].draw();
+	}	
+	
 	// Cores
 	for (var i=0; i < cores.length; i++) {
 		cores[i].draw();
@@ -206,6 +228,19 @@ function colorLine(x0, y0, x1, y1, drawColor, lineWidth) {
 	ctx.lineTo(x1, y1);
 	ctx.stroke();
 	ctx.lineCap="round";
+}
+
+// Draws polygon on canvas
+function colorPolygon(points, drawColor) {
+	ctx.fillStyle = drawColor;
+	ctx.beginPath();
+	
+	ctx.moveTo(points[0].x, points[0].y);
+	for(var i=1; i < points.length; i++){
+		ctx.lineTo(points[i].x, points[i].y);
+	}
+	ctx.closePath();
+	ctx.fill();
 }
 
 

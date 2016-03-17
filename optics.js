@@ -3,8 +3,8 @@
 // Global Variables
 // ##################################
 
-const LIGHTSPEED = 7;
-const DASHED_LINE_LENGTH = 10; // must be >1, not sure if decimals do anything
+const LIGHTSPEED = 2;
+const DASHED_LINE_LENGTH = 20; // must be >1, not sure if decimals do anything
 
 
 
@@ -23,16 +23,43 @@ function dot_product(a,b) {
 	return n;
 }
 
- // Normalize a vector
-function normalize(vector) {
+// Cross product of two vectors
+function cross_product(a,b) {
+	// Args: a = [x1,y1], b = [x2,y2]
+	// Note: order matters, returns a x b
+	var result = a[0] * b[1] - a[1] * b[0];
+	return result;
+}
+
+// Angle between two vectors
+function angle_between_vectors(a,b) {
+	// Args: a = [x1,y1], b = [x2,y2]
+	var result; 
+	result = dot_product(a,b) / (vector_length(a) * vector_length(b));
+	result = Math.acos(result);
+	return result;
+}
+
+// Vector Length
+function vector_length(vector) {
 	// Args: vector = [x1,y1]
-	var n = 0, vectorLength, result = [];
+	var n = 0, result;
 	
 	for (var i = 0; i < vector.length; i++) {
 	    n += Math.pow(vector[i],2);
 	}
 	
-	vectorLength = Math.sqrt(n);
+	result = Math.sqrt(n);
+		
+	return result;
+}
+
+// Normalize a vector
+function normalize(vector) {
+	// Args: vector = [x1,y1]
+	var vectorLength, result = [];
+	
+	vectorLength = vector_length(vector);
 		
 	for (var i = 0; i < vector.length; i++) {
 	    result.push(vector[i] / vectorLength);
@@ -40,8 +67,8 @@ function normalize(vector) {
 	
 	return result;
 }
- 
 
+// Distance between two points
 function distance_between_two_points(x0, y0, x1, y1) {
     var deltaX = x1 - x0;
     var deltaY = y1 - y0;
@@ -126,8 +153,8 @@ function intersection_point(line1, line2) {
 function reflect_vector(vector, mirror_line) {
     // Args: vector = [x1,y1], mirror_line = [x2,y2]
     
-    // Receives two vectors represented as arrays (same origin), 
-    // and returns point, mirror of 'vector' around 'mirror_line'.
+    // Receives: two vectors represented as arrays (same origin), 
+    // Returns: point, mirror of 'vector' around 'mirror_line'.
     
     var nhat, result = {x: null, y: null};
     nhat = normalize(mirror_line); // Normalized mirror line
@@ -138,6 +165,69 @@ function reflect_vector(vector, mirror_line) {
     return result;    
 }
 
+// Vector refraction in 2D
+function refract_vector(vector, refract_Line, refractiveIndex) {
+    // Args: vector = [x1,y1], refract_Line = [x2,y2]
+    
+    // Receives: two vectors represented as arrays (same origin), 
+    // and returns new position and change in direction of refracted beam
+    // Note: lens is on the right of refract_Line vector.
+    
+    var angleBetweenVectors, angle1, angle2, n1, n2, sign, sintheta;
+    var result = {change_in_direction: null, total_internal_reflection: false};
+    
+    // Strategy: Use cosine formula to find angle between vectors,
+    // and then Snell's law to find new direction.
+    
+    // Step 1: Use cross product to determine direction of beam
+    var cross = cross_product(refract_Line, vector);
+    if (cross > 0) {
+	// Going from lens to space
+	n1 = refractiveIndex;
+	n2 = 1;
+	sign = 1;
+    } else if (cross < 0) {
+	// Going from space to lens
+	n1 = 1;
+	n2 = refractiveIndex;
+	sign = -1;
+    } else {
+	console.log("Error: vector and refraction lines are parallel");
+	return;
+    }
+    
+    // Step 2: Calculate angle between vectors using cosine law
+    angleBetweenVectors = angle_between_vectors(refract_Line, vector);
+    
+    // Step3: Calculate angle1 for Snell's law
+    angle1 = Math.PI/2 - angleBetweenVectors;
+    
+    // Step4: Calculate angle2 using Snell's law
+    angle2 = Math.asin((n1/n2) * Math.sin(angle1));
+    
+    // Step5: Check for total internal reflection
+    sintheta = sign * (angle2 - angle1) * 180/Math.PI;
+    if (Math.abs(sintheta) > 1) {
+	// Not allowed, total internal reflection
+	result.total_internal_reflection = true;
+	return result;
+    }
+    
+    // Step6: Calculate change in angle (radians)
+    change_in_direction = (sintheta);
+    
+    console.log("refract_vector!");
+    console.log("n1", n1);
+    console.log("n2", n2);
+    console.log("cross", cross);
+    console.log("angleBetweenVectors", angleBetweenVectors);
+    console.log("angle1", angle1);
+    console.log("inside", (n1/n2) * Math.sin(angle1));
+    console.log("angle2", angle2);
+    console.log("change_in_direction", change_in_direction);
+    
+    return result;    
+}
 
 // Convert angle in degrees to direction (0-360)
 function deg_to_dir(angle) {
@@ -156,6 +246,17 @@ function rad_to_deg(radians) {
 // ##################################
 // Classes (Prototype Constructors)
 // ##################################
+
+
+// ----------------------------------
+// Points
+// ----------------------------------
+
+function Point(x, y) {
+	this.x = x;
+	this.y = y;
+}
+
 
 // ----------------------------------
 // Lines
@@ -182,7 +283,6 @@ Line.prototype.draw = function () {
 		 this.endX, this.endY, 
 		 this.color, this.lineWidth);
 }
-
 
 // === MirrorLine =========================
 function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
@@ -243,9 +343,6 @@ MirrorLine.prototype.reflect = function (line_step) {
 	return result;
 }						
 
-// ----------------------------------
-// Line Groups and Polygons
-// ----------------------------------
 
 /* TO DO
 // === MirrorLineGroup =========================
@@ -290,6 +387,115 @@ MirrorLineGroup.prototype.draw = function () {
 
 
 
+// ----------------------------------
+// Lenses
+// ----------------------------------
+
+
+// === LensLine =========================
+function LensLine(startX, startY, endX, endY, refractiveIndex) {
+	// Lens lines go clockwise around lens, lens is on the right of vector.
+	this.startX = startX;
+	this.startY = startY;
+	this.endX = endX;
+	this.endY = endY;
+	this.refractiveIndex = refractiveIndex;
+}
+// intersects()
+LensLine.prototype.intersects = function (line) { 
+	// receives line object and tests intersection
+	return Boolean(intersect(this, line))
+}
+// refract()
+LensLine.prototype.refract = function (line_step) {
+
+	console.log("line_step: ", line_step );	
+
+	// Note: lens is on the right of LensLine vector.
+	var result = {newX: null,
+		      newY: null,
+		      intersectX: null,
+		      intersectY: null,
+		      newDirection: null};
+	// Calculate intersection point
+	var point = intersection_point(this, line_step);
+	
+	result.intersectX = point.x;
+	result.intersectY = point.y;
+	var remainingTrajectory = [line_step.endX - point.x, 
+				   line_step.endY - point.y];
+	
+	// Calculate new direction
+	var trajectory = [line_step.endX - line_step.startX, 
+			  line_step.endY - line_step.startY];
+	var refractLine = [this.endX - this.startX, this.endY - this.startY];
+	var refraction = refract_vector(trajectory, refractLine, 
+				   this.refractiveIndex);
+				   
+	if (refraction.total_internal_reflection) {
+		// reflect beam like a mirror
+	} else {
+		// refract beam like a lens
+		result.newDirection = line_step.direction + refraction.change_in_direction;
+	}
+	
+	
+	if (remainingTrajectory > 0) {
+		result.newX = point.x + (remainingTrajectory * 
+					Math.cos(result.newDirection * Math.PI/180));
+		result.newY = point.y + (remainingTrajectory * 
+					Math.sin(result.newDirection * Math.PI/180));
+
+	} else {
+		
+		// Choose a point in new direction of propagation
+		result.newX = point.x + .001 * Math.cos(result.newDirection * Math.PI/180);
+		result.newY = point.y + .001 * Math.sin(result.newDirection * Math.PI/180);
+
+	}
+	
+	console.log("Lens result: ", result );	
+	
+	return result;
+}	
+
+
+// === Lens =========================
+function Lens(points, refractiveIndex, color) {
+	// points: array of ordered points that make up the lens
+	// refractiveIndex: index of refraction
+	
+	this.refractiveIndex = refractiveIndex;	
+	this.lensLines = [];
+	this.color = color;
+	
+	// Convert ponts to LensLines
+	for (var i=0; i < points.length; i++) {	
+		var startX = points[i].x;
+		var startY = points[i].y;
+		var endX = points[(i+1) % points.length].x;
+		var endY = points[(i+1) % points.length].y;
+		
+		var lensLine = new LensLine(startX, startY, endX, endY, this.refractiveIndex);
+		this.lensLines.push(lensLine);
+	}
+	
+} 
+// draw()
+Lens.prototype.draw = function () {
+	var points = [];
+	for(var i=0; i < this.lensLines.length; i++){
+		var point = new Point(this.lensLines[i].startX, this.lensLines[i].startY);
+		points.push(point);
+	}
+	colorPolygon(points, this.color);
+}
+
+
+// ----------------------------------
+// Trails
+// ----------------------------------
+
 // === Trail =========================
 function Trail(trailLength, color, lineWidth) {
 	this.trailLength = trailLength;
@@ -315,7 +521,6 @@ Trail.prototype.draw = function () {
 		}
 	}
 }
-
 
 
 // ----------------------------------
@@ -389,11 +594,33 @@ Beam.prototype.updateBEAM = function () {
 	
 	
 	// lens collisions
-	/* for (var i=0; i < lenses.length; i++) {
-		if(lines_intersect(lenses[i], ){
-			
+	for (var i=0; i < lenses.length; i++) {
+		var lensLines = lenses[i].lensLines;
+		for (var j=0; j < lensLines.length; j++)  {
+			if(lines_intersect(lensLines[j], line_step)){
+				// Refract off of lens
+				refraction = lensLines[j].refract(line_step);
+				
+				// Add line to intersection point
+				this.trail.addLine(this.prevX, this.prevY, 
+					refraction.intersectX, refraction.intersectY);
+				
+				// Add line from intersection to new position			
+				this.trail.addLine(refraction.intersectX, 
+						   refraction.intersectY,
+						   refraction.newX,
+						   refraction.newY);
+					
+				// Save values
+				this.posX = refraction.newX;
+				this.posY = refraction.newY;
+				this.direction = deg_to_dir(refraction.newDirection);		
+				
+				return false; // Only one collision event
+				
+			}
 		}
-	}*/
+	}
 	
 	// other object collisions
 	
@@ -422,6 +649,9 @@ Beam.prototype.getSpeedY = function () {
 Beam.prototype.draw = function () {
 	this.trail.draw();
 }
+
+
+
 
 // ----------------------------------
 // Cores and Sources
@@ -542,5 +772,8 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 	var rad = this.radius + this.radiusChange;
 	strokeCircle(centerX, centerY, rad, this.color, this.lineWidth);
 }
+
+
+
 
 
