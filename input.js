@@ -14,8 +14,8 @@ function updateMousePos(evt) {
 }
 
 function handleMouseClick(evt) {
-	if(isInEditor) {
-		editorMouseClicked();
+	if(LevelEditor.active) {
+		LevelEditor.mouseClicked(evt);
 		return; // bypass any gameplay interactions while in editor
 	}
 
@@ -32,7 +32,7 @@ function keyPressed(evt) {
   var anyValidKeyPressed = true;
   switch(evt.keyCode) {
   	case KEYCODE_E:
-  		toggleEditor();
+  		LevelEditor.toggle();
   		break;
   	case KEYCODE_O:
   		startOpening();

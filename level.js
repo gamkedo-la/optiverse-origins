@@ -8,9 +8,9 @@
  * 	Description: Describes a level object
  * 	
 																																										
-METHODS:
+	METHODS:
 
-create
+	create
 
 																			
 */
@@ -31,8 +31,8 @@ function Level()
 	//----------------
 	//
 	//
-	this.parts = [];
-	this.editorPartsDescr = [];
+	this.pieces = [];
+	this.editorPiecesDescr = [];
 
 	return this;
 }
@@ -41,22 +41,22 @@ function Level()
 /**
  * CONSTRUCTOR that takes arguments
  * 
- * @param {array} 	_parts	Array of parts from the Level Editor
+ * @param {array} 	_pieces		Array of parts from the Level Editor
  */
-Level.init = function(_partsDescr)
+Level.init = function(_pieces)
 {
-	_partsDescr = typeof _partsDescr != 'undefined' ? _partsDescr : [];
+	_pieces = typeof _pieces != 'undefined' ? _pieces : [];
 	//
 	var instance = new Level();
 	//
-	for(var i=0; i < _partsDescr.length; i++) {
-		var pData = _partsDescr[i];
+	/*
+	for(var i=0; i < _pieces.length; i++) {
+		var pData = _pieces[i];
 		var part = Level.ClassRouter[pData["kind"]].init( pData["x"], pData["y"], pData["ang"] );
 		instance.parts.push(part);
 	}
-	//
-	instance.editorPartsDescr = _partsDescr;
-
+	*/
+	instance.pieces = _pieces;
 	return instance;
 }
 
@@ -74,34 +74,25 @@ Level.ClassRouter = [
 ]
 
 
-/**
- * Get the original JSON code from the level editor
- * 
- */
-Level.prototype.getJSON = function() 
-{ 
-	return this.editorPartsDescr;
-};
-
 
 
 
 //-----------------------------------------------------------------------------//
 /*
- *	Name: 		LevelPart
+ *	Name: 		LevelPiece
  * 	Abstract: 	YES
  * 	Superclass: n/a
  * 	Subclasses:	Asteroid, Core, Lens, Lens2, Lens3, Mirror, Source, Wall
  * 	
- * 	Description: Describes a level part
+ * 	Description: Describes a level piece
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-create
-draw
-setImage
+	init 		draw 		update
+	clone 		updatePos	stop
+		 		
 																			
 */
 
@@ -109,9 +100,9 @@ setImage
 /**
  * CONSTRUCTOR
  *
- * @return {LevelPart}
+ * @return {LevelPiece}
  */
-function LevelPart() 
+function LevelPiece() 
 {
 
 	//--------------------
@@ -125,7 +116,7 @@ function LevelPart()
 	this.y = 0.0;
 	this.rotation = 0.0;
 	//
-	this.image = new Image();
+	this.kind = -1;
 
 
 	return this;
@@ -134,58 +125,81 @@ function LevelPart()
 /**
  * CONSTRUCTOR that takes arguments
  * 
- * @param {string} 	_imgSrc	Path to image file
- * @param {float} 	_x 		Initial x
- * @param {float} 	_y 		Initial y
- * @param {float} 	_rot 	Initial rotation
+ * @param {Image} 	_kind	Initial Image 
+ * @param {Number} 	_x 		Initial x
+ * @param {Number} 	_y 		Initial y
+ * @param {Number} 	_rot 	Initial rotation
+ * @return {LevelPiece}
  */
-LevelPart.init = function(_imgSrc, _x, _y, _rot, _instance)
+LevelPiece.init = function(_kind, _x, _y, _rot, _instance)
 {
 	_x = typeof _x != 'undefined' ? _x : 0.0;
 	_y = typeof _y != 'undefined' ? _y : 0.0;
 	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
-	_instance = typeof _instance != 'undefined' ? _instance : new LevelPart();
+	_instance = typeof _instance != 'undefined' ? _instance : new LevelPiece();
 	//
 	_instance.x = _x;
 	_instance.y = _y;
 	_instance.rotation = _rot;
 	//
-	_instance.setImage(_imgSrc);
+	_instance.kind = _kind;
 
 	return _instance;
 }
 
+/**
+ * Creates and returns a clone
+ * 
+ * @return {LevelPiece}
+ */
+LevelPiece.prototype.clone = function()
+{
+	var instance = this.constructor.init(this.x, this.y, this.rotation);
+	return instance;
+}
 
 
 /**
  * Draw to global Canvas
  * 
  */
-LevelPart.prototype.draw = function() 
+LevelPiece.prototype.draw = function() 
 { 
-	drawBitmapCenteredAtLocationWithRotation(this.image, this.x, this.y, this.rotation);
+	drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind], this.x, this.y, this.rotation);
 };
+
+
+
+/**
+ * Update position
+ * 
+ */
+LevelPiece.prototype.updatePos = function(_x, _y) 
+{ 
+	this.x = _x;
+	this.y = _y;
+};
+
 
 
 /**
  * Update frame
  * 
  */
-LevelPart.prototype.update = function() 
+LevelPiece.prototype.update = function() 
 { 
 
 };
 
 
+
 /**
- * Set new Image
+ * Stop all activity
  * 
- * @param {string} _imgSrc The source of the new Image
  */
-LevelPart.prototype.setImage = function( _imgSrc ) 
+LevelPiece.prototype.stop = function() 
 { 
-	this.image = new Image();
-	this.image.src = _imgSrc;
+
 };
 
 
@@ -196,20 +210,20 @@ LevelPart.prototype.setImage = function( _imgSrc )
 /*
  *	Name: 		Asteroid
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Asteroid type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Asteroid.prototype = Object.create( LevelPart.prototype );		
+Asteroid.prototype = Object.create( LevelPiece.prototype );		
 Asteroid.prototype.constructor = Asteroid;						
 
 
@@ -220,7 +234,7 @@ Asteroid.prototype.constructor = Asteroid;
  */
 function Asteroid() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -229,9 +243,8 @@ function Asteroid()
 Asteroid.init = function(_x, _y, _rot)
 {
 	var instance = new Asteroid();
-	var imageName = "images/asteroid.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_ASTEROID, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -245,20 +258,20 @@ Asteroid.init = function(_x, _y, _rot)
 /*
  *	Name: 		Core_
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Core_ type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Core_.prototype = Object.create( LevelPart.prototype );		
+Core_.prototype = Object.create( LevelPiece.prototype );		
 Core_.prototype.constructor = Core_;						
 
 
@@ -269,7 +282,7 @@ Core_.prototype.constructor = Core_;
  */
 function Core_() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -278,9 +291,8 @@ function Core_()
 Core_.init = function(_x, _y, _rot)
 {
 	var instance = new Core_();
-	var imageName = "images/core.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_CORE, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -293,20 +305,20 @@ Core_.init = function(_x, _y, _rot)
 /*
  *	Name: 		Lens
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Lens type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Lens.prototype = Object.create( LevelPart.prototype );		
+Lens.prototype = Object.create( LevelPiece.prototype );		
 Lens.prototype.constructor = Lens;						
 
 
@@ -317,7 +329,7 @@ Lens.prototype.constructor = Lens;
  */
 function Lens() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -326,9 +338,8 @@ function Lens()
 Lens.init = function(_x, _y, _rot)
 {
 	var instance = new Lens();
-	var imageName = "images/lens.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_LENS, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -341,20 +352,20 @@ Lens.init = function(_x, _y, _rot)
 /*
  *	Name: 		Lens2
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Lens2 type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Lens2.prototype = Object.create( LevelPart.prototype );		
+Lens2.prototype = Object.create( LevelPiece.prototype );		
 Lens2.prototype.constructor = Lens2;						
 
 
@@ -365,7 +376,7 @@ Lens2.prototype.constructor = Lens2;
  */
 function Lens2() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -374,9 +385,8 @@ function Lens2()
 Lens2.init = function(_x, _y, _rot)
 {
 	var instance = new Lens2();
-	var imageName = "images/lens2.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_LENS2, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -389,20 +399,20 @@ Lens2.init = function(_x, _y, _rot)
 /*
  *	Name: 		Lens3
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Lens3 type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Lens3.prototype = Object.create( LevelPart.prototype );		
+Lens3.prototype = Object.create( LevelPiece.prototype );		
 Lens3.prototype.constructor = Lens3;						
 
 
@@ -413,7 +423,7 @@ Lens3.prototype.constructor = Lens3;
  */
 function Lens3() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -422,9 +432,8 @@ function Lens3()
 Lens3.init = function(_x, _y, _rot)
 {
 	var instance = new Lens3();
-	var imageName = "images/lens3.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_LENS3, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -437,20 +446,20 @@ Lens3.init = function(_x, _y, _rot)
 /*
  *	Name: 		Mirror
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Mirror type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Mirror.prototype = Object.create( LevelPart.prototype );		
+Mirror.prototype = Object.create( LevelPiece.prototype );		
 Mirror.prototype.constructor = Mirror;						
 
 
@@ -461,7 +470,7 @@ Mirror.prototype.constructor = Mirror;
  */
 function Mirror() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -470,9 +479,8 @@ function Mirror()
 Mirror.init = function(_x, _y, _rot)
 {
 	var instance = new Mirror();
-	var imageName = "images/mirror.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_MIRROR, _x, _y, _rot, instance);
 	//
 	// Calculate how to mimic the look of the mirror PNG file
 	var mirror_hardcoded_height = 46.0;
@@ -497,20 +505,20 @@ Mirror.prototype.draw = function()
 /*
  *	Name: 		Source
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Source type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Source.prototype = Object.create( LevelPart.prototype );		
+Source.prototype = Object.create( LevelPiece.prototype );		
 Source.prototype.constructor = Source;						
 
 
@@ -522,7 +530,7 @@ Source.prototype.constructor = Source;
 function Source() 
 {
 
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	//--------------------
 	//
@@ -541,9 +549,8 @@ function Source()
 Source.init = function(_x, _y, _rot)
 {
 	var instance = new Source();
-	var imageName = "images/source.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_SOURCE, _x, _y, _rot, instance);
 
 	return instance;
 }
@@ -552,7 +559,7 @@ Source.init = function(_x, _y, _rot)
 /* @OVERRIDE */
 Source.prototype.update = function() 
 { 
-	LevelPart.prototype.update.call(this);
+	LevelPiece.prototype.update.call(this);
 	//
 	// Check if a new beam is needed
 	if(this.beam == null || !this.beam.active) {
@@ -562,25 +569,34 @@ Source.prototype.update = function()
 };
 
 
+/* @OVERRIDE */
+Source.prototype.stop = function()
+{
+	LevelPiece.prototype.stop.call(this);
+	//
+	this.beam = null;
+}
+
+
 
 //-----------------------------------------------------------------------------//
 /*
  *	Name: 		Wall
  * 	Abstract: 	NO
- * 	Superclass: LevelPart
+ * 	Superclass: LevelPiece
  * 	Subclasses:	n/a
  * 	
  * 	Description: Wall type
  * 	
 
 																																										
-METHODS:
+	METHODS:
 
-																			
+																				
 */
 
 
-Wall.prototype = Object.create( LevelPart.prototype );		
+Wall.prototype = Object.create( LevelPiece.prototype );		
 Wall.prototype.constructor = Wall;						
 
 
@@ -591,7 +607,7 @@ Wall.prototype.constructor = Wall;
  */
 function Wall() 
 {
-	LevelPart.call(this);
+	LevelPiece.call(this);
 
 	return this;
 }
@@ -600,9 +616,8 @@ function Wall()
 Wall.init = function(_x, _y, _rot)
 {
 	var instance = new Wall();
-	var imageName = "images/wall.png";
 	//
-	LevelPart.init.call(this, imageName, _x, _y, _rot, instance);
+	LevelPiece.init.call(this, LEVELPART_WALL, _x, _y, _rot, instance);
 
 	return instance;
 }
