@@ -3,7 +3,7 @@
 // Global Variables
 // ##################################
 
-const LIGHTSPEED = 2;
+const LIGHTSPEED = 3;
 const DASHED_LINE_LENGTH = 20; // must be >1, not sure if decimals do anything
 
 
@@ -165,68 +165,184 @@ function reflect_vector(vector, mirror_line) {
     return result;    
 }
 
+// Reflect trajectory line off of a mirror line
+function reflect_mirror(line_step, mirror_line) {
+    var result = {newX: null,
+		  newY: null,
+		  intersectX: null,
+		  intersectY: null,
+		  newDirection: null};
+		  
+    // Calculate intersection point
+    var point = intersection_point(line_step, mirror_line);
+    result.intersectX = point.x;
+    result.intersectY = point.y;
+    
+    // Create vectors using intersect as origin
+    var remaining_trajectory = [line_step.endX - point.x, 
+				line_step.endY - point.y];
+    if (remaining_trajectory[0] == 0 && remaining_trajectory[1] == 0){
+        // End point is on the mirror line, move it forward
+	remaining_trajectory[0] = 0.1 * (line_step.endX - line_step.startX);
+	remaining_trajectory[1] = 0.1 * (line_step.endY - line_step.startY);
+    }
+    var mirror_vector = [mirror_line.endX - mirror_line.startX, 
+			 mirror_line.endY - mirror_line.startY];
+    
+    // Calculate reflection off of mirror
+    var delta = reflect_vector(remaining_trajectory, mirror_vector);
+    
+    // Add delta to intersection point to get result
+    result.newX = point.x + delta.x;
+    result.newY = point.y + delta.y;
+
+    // Use trig to calculate new direction
+    var newAngle = Math.atan2(delta.y, delta.x) * (180/Math.PI);
+    result.newDirection = deg_to_dir(newAngle);
+    
+    return result;
+}
+
 // Vector refraction in 2D
-function refract_vector(vector, refract_Line, refractiveIndex) {
-    // Args: vector = [x1,y1], refract_Line = [x2,y2]
+function refract_vector(vector, refract_line, refractive_index) {
+    // Args: vector = [x1,y1], refract_line = [x2,y2]
     
     // Receives: two vectors represented as arrays (same origin), 
-    // and returns new position and change in direction of refracted beam
-    // Note: lens is on the right of refract_Line vector.
+    // and returns new direction and change in position of refracted beam
+    // Note: lens is on the right of refract_line vector.
     
-    var angleBetweenVectors, angle1, angle2, n1, n2, sign, sintheta;
-    var result = {change_in_direction: null, total_internal_reflection: false};
+    // Snell's law: n1 sin(angle1) = n2 sin(angle2)
+    //              angle2 = asin(n1/n2 * sin(angle1))
     
     // Strategy: Use cosine formula to find angle between vectors,
     // and then Snell's law to find new direction.
     
+    console.log("refract_vector start");
+    
+    var angle1, angle2, n1, n2, sign, insideFormula;
+    var angleBetweenVectors, currentAngle, changeInAngle;
+    var result = {x: null, y: null, newDirection: null,
+		  total_internal_reflection: false};
+    
     // Step 1: Use cross product to determine direction of beam
-    var cross = cross_product(refract_Line, vector);
+    var cross = cross_product(refract_line, vector);
     if (cross > 0) {
-	// Going from lens to space
-	n1 = refractiveIndex;
-	n2 = 1;
-	sign = 1;
-    } else if (cross < 0) {
 	// Going from space to lens
 	n1 = 1;
-	n2 = refractiveIndex;
+	n2 = refractive_index;
 	sign = -1;
+    } else if (cross < 0) {
+	// Going from space to lens
+	n1 = refractive_index;
+	n2 = 1;
+	sign = 1;
     } else {
 	console.log("Error: vector and refraction lines are parallel");
 	return;
     }
     
-    // Step 2: Calculate angle between vectors using cosine law
-    angleBetweenVectors = angle_between_vectors(refract_Line, vector);
+    console.log("cross", cross);
+    console.log("n1", n1);
+    console.log("n2", n2);
     
-    // Step3: Calculate angle1 for Snell's law
+    // Step 2: Calculate angle between vectors using cosine law
+    angleBetweenVectors = angle_between_vectors(refract_line, vector);
+    
+    console.log("angleBetweenVectors", angleBetweenVectors  * 180/Math.PI);
+    
+    // Step3: Calculate angle1 for Snell's law (could be negative)
     angle1 = Math.PI/2 - angleBetweenVectors;
     
-    // Step4: Calculate angle2 using Snell's law
-    angle2 = Math.asin((n1/n2) * Math.sin(angle1));
+    console.log("angle1", angle1 * 180/Math.PI);
     
-    // Step5: Check for total internal reflection
-    sintheta = sign * (angle2 - angle1) * 180/Math.PI;
-    if (Math.abs(sintheta) > 1) {
+    // Step4: Check for total internal reflection
+    insideFormula = (n1/n2) * Math.sin(angle1)
+    
+    console.log("insideFormula", insideFormula);    
+    
+    if (Math.abs(insideFormula) > 1) {
 	// Not allowed, total internal reflection
+	// Reflect like mirror
 	result.total_internal_reflection = true;
 	return result;
     }
     
-    // Step6: Calculate change in angle (radians)
-    change_in_direction = (sintheta);
+    // Step5: Calculate angle2 using Snell's law
+    angle2 = Math.asin(insideFormula);
     
-    console.log("refract_vector!");
-    console.log("n1", n1);
-    console.log("n2", n2);
-    console.log("cross", cross);
-    console.log("angleBetweenVectors", angleBetweenVectors);
-    console.log("angle1", angle1);
-    console.log("inside", (n1/n2) * Math.sin(angle1));
-    console.log("angle2", angle2);
-    console.log("change_in_direction", change_in_direction);
+    console.log("angle2", angle2 * 180/Math.PI);
+    
+    // Step6: Calculate new direction
+    changeInAngle = rad_to_deg((angle2 - angle1) * sign);
+    currentAngle = rad_to_deg( Math.atan2(vector[1], vector[0]) );
+    result.newDirection = deg_to_dir(currentAngle + changeInAngle);
+    
+    // Step7: Calculate change in position
+    var vectorLength = vector_length(vector)
+    result.x = vectorLength * Math.cos(deg_to_rad(result.newDirection));
+    result.y = vectorLength * Math.sin(deg_to_rad(result.newDirection));
+    
+    
+    
+    console.log("changeInAngle", changeInAngle);
+    console.log("currentAngle", currentAngle);
+    console.log("refract_vector end");
     
     return result;    
+}
+
+
+function refract_through_line(line_step, lens_line, refractive_index) {
+    // Note: lens is on the right of LensLine vector.
+    var result = {newX: null,
+		  newY: null,
+		  intersectX: null,
+		  intersectY: null,
+		  newDirection: null};
+		      
+    // Calculate intersection point
+    var point = intersection_point(line_step, lens_line);
+    result.intersectX = point.x;
+    result.intersectY = point.y;
+    
+    console.log("point (refract_through_line): ", point );
+    
+    // Create vectors using intersect as origin
+    var remaining_trajectory = [line_step.endX - point.x, 
+			       line_step.endY - point.y];
+    if (remaining_trajectory[0] == 0 && remaining_trajectory[1] == 0){
+        // End point is on the mirror line, move it forward
+	remaining_trajectory[0] = 0.1 * (line_step.endX - line_step.startX);
+	remaining_trajectory[1] = 0.1 * (line_step.endY - line_step.startY);
+    }
+    var lens_vector = [lens_line.endX - lens_line.startX, 
+		       lens_line.endY - lens_line.startY];
+		       
+
+    console.log("remaining_trajectory (refract_through_line): ", remaining_trajectory );
+    console.log("lens_vector (refract_through_line): ", lens_vector );
+    
+    // Calculate refraction off of lens line
+    var delta = refract_vector(remaining_trajectory, lens_vector, refractive_index);
+    
+    console.log("delta (refract_through_line): ", delta );
+    
+    if (delta.total_internal_reflection) {
+        result = reflect_mirror(line_step, lens_line);
+	console.log("result (refract_through_line): ", result );
+	return result;
+    }
+    
+    // Add delta to intersection point to get result, save new direction
+    result.newX = point.x + delta.x;
+    result.newY = point.y + delta.y;
+    result.newDirection = delta.newDirection;
+    
+    
+    console.log("result (refract_through_line): ", result );
+    
+    return result;	
+		
 }
 
 // Convert angle in degrees to direction (0-360)
@@ -240,6 +356,11 @@ function deg_to_dir(angle) {
 // Convert radians to degrees
 function rad_to_deg(radians) {
 	return radians * 180/Math.PI;
+}
+
+// Convert degrees to radians
+function deg_to_rad(degrees) {
+	return degrees * Math.PI/180;
 }
 
 
@@ -297,49 +418,8 @@ MirrorLine.prototype.move = function (deltaX, deltaY) {
 }
 // reflect()
 MirrorLine.prototype.reflect = function (line_step) {
-	var result = {newX: null,
-		      newY: null,
-		      intersectX: null,
-		      intersectY: null,
-		      newDirection: null};
-	// Calculate intersection point
-	var point = intersection_point(this, line_step);
 	
-	result.intersectX = point.x;
-	result.intersectY = point.y;
-	
-	if (point.onLine1 && point.onLine2) {
-	
-		// Create vectors using intersect as origin, and calculate reflection
-		var remainingTrajectory = [line_step.endX - point.x, 
-					   line_step.endY - point.y];
-		var mirrorLine = [this.endX - point.x, this.endY - point.y];
-		var delta = reflect_vector(remainingTrajectory, mirrorLine);
-		// Add delta to origin to get result
-		result.newX = point.x + delta.x;
-		result.newY = point.y + delta.y;
-		
-		// Use trig to calculate new direction
-		var newAngle = Math.atan2(delta.y, delta.x) * (180/Math.PI);
-		result.newDirection = deg_to_dir(newAngle);
-
-	} else {
-		
-		// Use full lines as vectors
-		var trajectory = [line_step.endX - line_step.startX, 
-				  line_step.endY - line_step.startY];
-		var mirrorLine = [this.endX - this.startX, this.endY - this.startY];
-		var delta = reflect_vector(trajectory, mirrorLine);
-		
-		// Use trig to find new direction of propagation
-		result.newDirection = (Math.atan2(delta.y, delta.x) * (180/Math.PI)) % 360;
-		
-		// Choose a point slightly off mirror in new direction of propagation
-		result.newX = point.x + .001 * Math.cos(result.newDirection * Math.PI/180);
-		result.newY = point.y + .001 * Math.sin(result.newDirection * Math.PI/180);
-
-	}
-	
+	var result = reflect_mirror(line_step, this)
 	return result;
 }						
 
@@ -409,52 +489,17 @@ LensLine.prototype.intersects = function (line) {
 // refract()
 LensLine.prototype.refract = function (line_step) {
 
-	console.log("line_step: ", line_step );	
-
 	// Note: lens is on the right of LensLine vector.
-	var result = {newX: null,
-		      newY: null,
-		      intersectX: null,
-		      intersectY: null,
-		      newDirection: null};
-	// Calculate intersection point
-	var point = intersection_point(this, line_step);
 	
-	result.intersectX = point.x;
-	result.intersectY = point.y;
-	var remainingTrajectory = [line_step.endX - point.x, 
-				   line_step.endY - point.y];
+	console.log(""  );
+	console.log(""  );
+	console.log("START REFRACTION"  );
 	
-	// Calculate new direction
-	var trajectory = [line_step.endX - line_step.startX, 
-			  line_step.endY - line_step.startY];
-	var refractLine = [this.endX - this.startX, this.endY - this.startY];
-	var refraction = refract_vector(trajectory, refractLine, 
-				   this.refractiveIndex);
-				   
-	if (refraction.total_internal_reflection) {
-		// reflect beam like a mirror
-	} else {
-		// refract beam like a lens
-		result.newDirection = line_step.direction + refraction.change_in_direction;
-	}
+	var result = refract_through_line(line_step, this, this.refractiveIndex);
 	
-	
-	if (remainingTrajectory > 0) {
-		result.newX = point.x + (remainingTrajectory * 
-					Math.cos(result.newDirection * Math.PI/180));
-		result.newY = point.y + (remainingTrajectory * 
-					Math.sin(result.newDirection * Math.PI/180));
-
-	} else {
-		
-		// Choose a point in new direction of propagation
-		result.newX = point.x + .001 * Math.cos(result.newDirection * Math.PI/180);
-		result.newY = point.y + .001 * Math.sin(result.newDirection * Math.PI/180);
-
-	}
-	
-	console.log("Lens result: ", result );	
+	console.log("END REFRACTION"  );	
+	console.log(""  );
+	console.log(""  );
 	
 	return result;
 }	

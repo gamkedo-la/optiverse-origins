@@ -24,7 +24,7 @@ window.onload = function() {
 }
 
 function loadingDoneSoStartGame() { // so that game and input won't start until images load
-	var framesPerSecond = 5;
+	var framesPerSecond = 30;
 	setInterval(function() {
 			moveEverything();
 			drawEverything();	
@@ -50,8 +50,8 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 
 // Mirrors
 var mirrorLineWidth = 6;
-var mirror1 = new MirrorLine(100, 100, 700, 100, MIRROR_COLOR, mirrorLineWidth);
-var mirror2 = new MirrorLine(100, 100, 0, 500, MIRROR_COLOR, mirrorLineWidth);
+var mirror1 = new MirrorLine(100, 50, 700, 50, MIRROR_COLOR, mirrorLineWidth);
+var mirror2 = new MirrorLine(100, 50, 0, 500, MIRROR_COLOR, mirrorLineWidth);
 var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
 var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
 
@@ -59,14 +59,37 @@ var mirrors = [mirror1,mirror2,mirror3,mirror4];
 
 
 // Lenses
-var p1 = new Point(0, 250);
-var p2 = new Point(800, 250);
-var p3 = new Point(800, 300);
-var p4 = new Point(0, 300);
-points = [p1, p2, p3, p4];
-var lens1 = new Lens(points, 1.5, LENS_COLOR);
 
-var lenses = [lens1];
+// Square
+var pa1 = new Point(100, 190);
+var pa2 = new Point(400, 190);
+var pa3 = new Point(400, 210);
+var pa4 = new Point(100, 210);
+points = [pa1, pa2, pa3, pa4];
+var lens1 = new Lens(points, 1.3, LENS_COLOR);
+
+// Prism
+var pb1 = new Point(400, 250);
+var pb2 = new Point(500, 110);
+var pb3 = new Point(600, 250);
+points = [pb1, pb2, pb3];
+var lens2 = new Lens(points, 1.3, LENS_COLOR);
+
+// Lens
+var pc1 = new Point(525, 300);
+var pc2 = new Point(550, 300);
+var pc3 = new Point(565, 350);
+var pc4 = new Point(575, 400);
+var pc5 = new Point(565, 450);
+var pc6 = new Point(550, 500);
+var pc7 = new Point(525, 500);
+var pc8 = new Point(510, 450);
+var pc9 = new Point(500, 400);
+var pc10 = new Point(510, 350);
+points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
+var lens3 = new Lens(points, 1.3, LENS_COLOR);
+
+var lenses = [lens1, lens2, lens3];
 
 //Cores
 
@@ -104,15 +127,22 @@ var core3 = new Core(pos3x, pos3y, 10, 20, 'purple', arr3);
 
 trailLength = 10;
 
-var beam1 = new Beam(350,300, LIGHTSPEED, 0, trailLength, 'red', dashLineWidth);
-var beam2 = new Beam(150,300, LIGHTSPEED, 90, trailLength, 'green', dashLineWidth);
-var beam3 = new Beam(151,305, LIGHTSPEED, 315, trailLength, 'purple', dashLineWidth);
 
+var beam1 = new Beam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam2 = new Beam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam3 = new Beam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam4 = new Beam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+
+
+var beam5 = new Beam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
+var beam6 = new Beam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
+var beam7 = new Beam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
+var beam8 = new Beam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
 
 //Accumulate
 
 var cores = [core2, core1, core3];
-var beams = [beam3];
+var beams = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
 
 var currentLevel = Level.init([]);
 
