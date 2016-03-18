@@ -6,8 +6,9 @@ var ctx;
 // Global Variables
 // ##################################
 
-const LENS_COLOR = 'white';
+const LENS_COLOR = '#EAEAFB';
 const MIRROR_COLOR = 'gray';
+const BACKGROUND_COLOR = "#191616"
 
 // ##################################
 // ON LOAD
@@ -18,7 +19,7 @@ window.onload = function() {
 
 	canvas = document.getElementById('gameCanvas');
 	ctx = canvas.getContext('2d');
-	colorRect(0,0,canvas.width,canvas.height,'black');
+	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	colorText("Loading images...", 15, 15, 'white');
 
 }
@@ -209,7 +210,7 @@ function zoomInOnShip(lerpVal) {
 
 function drawEverything() {
 	// next line blanks out the screen with black
-	colorRect(0,0,canvas.width,canvas.height,'black');
+	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 
 	openingSequenceHandler();
 	if( isOpeningBlockingGameplay() ) {

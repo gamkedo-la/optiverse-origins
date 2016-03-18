@@ -1,0 +1,17 @@
+body {
+	width: 800px;
+	margin: 0 auto;
+    background-color: darkgray;
+    margin-top: 80px;
+}
+
+textarea {
+	width:800px;
+	padding:0;
+}
+
+.placeholderstuff{
+    background-color: #191616;
+    color: #EAEAFB;
+    height: 300px;
+}
