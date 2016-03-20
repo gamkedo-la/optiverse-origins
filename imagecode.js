@@ -2,6 +2,9 @@ var levObjPics = [];
 
 var imgShipLarge = document.createElement("img");
 var imgShipAnimSmall = document.createElement("img");
+var LevelEditorRotSymbol = document.createElement("img");
+var LevelEditorPlusSign = document.createElement("img");
+var LevelEditorMinusSign = document.createElement("img");
 
 var picsToLoad = 0;
 
@@ -27,6 +30,9 @@ function loadImages() {
   var imageList = [
     {varName:imgShipLarge, theFile:"spaceshiphd.png"}, // for loading non-level parts
     {varName:imgShipAnimSmall, theFile:"spaceshipspritesheet.png"}, // for loading non-level parts
+    {varName:LevelEditorRotSymbol, theFile:"symbolRot.png"},
+    {varName:LevelEditorPlusSign, theFile:"btn_plussign.png"},
+    {varName:LevelEditorMinusSign, theFile:"btn_minussign.png"},
 
     // this format loads level parts (and editor UI buttons)
     {levPartType:LEVELPART_ASTEROID, theFile:"asteroid.png"},

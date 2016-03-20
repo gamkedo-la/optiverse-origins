@@ -130,18 +130,12 @@ LevelEditor.setup = function() {
 	LevelEditor.corner = new Button(LevelEditor.resizePanelStart, tmpCanvas, "resize panel");
 	//
 	// Misc UI
-	var rotSymbol_image = new Image();
-	rotSymbol_image.src = "images/symbolRot.png";
-	LevelEditor.rotSymbol = new Graphic(rotSymbol_image);
+	LevelEditor.rotSymbol = new Graphic(LevelEditorRotSymbol);
 	LevelEditor.rotSymbol.active = false;
 	//
-	var plusSign_image = new Image();
-	plusSign_image.src = "images/btn_plussign.png";
-	var minusSign_image = new Image();
-	minusSign_image.src = "images/btn_minussign.png";
-	LevelEditor.plusSign = new Button(function() {LevelEditor.selectedPiece.changeRotation(0.1);}, plusSign_image, "rotate CW");
+	LevelEditor.plusSign = new Button(function() {LevelEditor.selectedPiece.changeRotation(0.1);}, LevelEditorPlusSign, "rotate CW");
 	LevelEditor.plusSign.active = false;
-	LevelEditor.minusSign = new Button(function() {LevelEditor.selectedPiece.changeRotation(-0.1);}, minusSign_image, "rotate CCW");
+	LevelEditor.minusSign = new Button(function() {LevelEditor.selectedPiece.changeRotation(-0.1);}, LevelEditorMinusSign, "rotate CCW");
 	LevelEditor.minusSign.active = false;
 	LevelEditor.miscButtons.push(LevelEditor.plusSign);
 	LevelEditor.miscButtons.push(LevelEditor.minusSign);
@@ -523,11 +517,13 @@ function SaveToTextfield() {
 //
 function LoadTextfield() {
 	levelText = document.getElementById('levelTextfield');
+	LevelEditor.pieces = [];
+	LevelEditor.selectedPiece = null;
 	try{
         var pData = JSON.parse(levelText.value);
         for(var i in pData) {
         	var className = Level.ClassRouter[pData[i].kind];
-        	LevelEditor.pieces.push(new className.init( pData[i].x, pData[i].y, pData[i].rotation ));
+        	LevelEditor.pieces.push(new className.init( pData[i].bounds.x, pData[i].bounds.y, pData[i].rotation ));
         }
     }catch(e){
         alert("invalid level data in text box below game");
