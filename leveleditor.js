@@ -75,7 +75,8 @@ LevelEditor.cornerSize = 10;
 // Buttons/Interactables
 LevelEditor.LEButtons = [];
 LevelEditor.corner = null;
-LevelEditor.mouseOverItem = null;
+LevelEditor.mouseOverButton = null;
+LevelEditor.mouseOverPiece = null;
 LevelEditor.selectedBrush = null;
 // 
 // States
@@ -108,8 +109,8 @@ LevelEditor.setup = function() {
 	// Pieces
 	for(var key in LevelEditor.buttonScripts) {
 		var btn = LevelEditor.buttonScripts[key];
-		LevelEditor.LEButtons.push(new LEButton(0.0, 0.0, BTN_SIZE, BTN_SIZE, 
-			levObjPics[btn.imagecode], btn.command, btn.tooltip));
+		LevelEditor.LEButtons.push(new Button(btn.command, levObjPics[btn.imagecode], btn.tooltip, 
+												0.0, 0.0, BTN_SIZE, BTN_SIZE));
 	}
 	// Resizing-handle
 	var tmpCanvas = document.createElement('canvas');
@@ -120,8 +121,7 @@ LevelEditor.setup = function() {
 	tmpCtx.fillRect(0,0,LevelEditor.cornerSize,LevelEditor.cornerSize);
 	tmpCtx.strokeStyle = 'white';
 	tmpCtx.strokeRect(0,0,LevelEditor.cornerSize,LevelEditor.cornerSize);
-	LevelEditor.corner = new LEButton(0.0, 0.0, LevelEditor.cornerSize,LevelEditor.cornerSize, 
-		tmpCanvas, LevelEditor.resizeStart, "resize panel");
+	LevelEditor.corner = new Button(LevelEditor.resizeStart, tmpCanvas, "resize panel");
 	//
 	LevelEditor.refitUI();	
 }
@@ -143,7 +143,7 @@ LevelEditor.toggle = function() {
 		currentLevel = Level.init(LevelEditor.pieces);
 		LevelEditor.pieces = [];
 		// Register mirrors
-		mirrors = [mirror2,mirror4]; //[mirror1,mirror2,mirror3,mirror4];
+		mirrors = [mirror1,mirror2,mirror3,mirror4];
 		for(var i=0; i < currentLevel.pieces.length; i++) {
 			if(currentLevel.pieces[i].constructor.name == 'Mirror') {
 				mirrors.push(currentLevel.pieces[i].mirrorLine);
@@ -166,30 +166,33 @@ LevelEditor.selectBrush = function(_partClass)
 	LevelEditor.selectedBrush = new _partClass.init(mouseX, mouseY, 0.0);
 }
 //
-LevelEditor.mouseClicked = function(evt) {
-	if(LevelEditor.mouseOverItem != null && !LevelEditor.settingRotation) { 
-		LevelEditor.mouseOverItem.onClick(); 	// Clicked one of the buttons in the tool panel
+LevelEditor.mouseClicked = function(_evt) {
+	if(LevelEditor.mouseOverButton != null && !LevelEditor.settingRotation) { 
+		LevelEditor.mouseOverButton.onClick(_evt); 	// Clicked one of the buttons in the tool panel
 	} else if(LevelEditor.inPanel) {
-		LevelEditor.moveStart();				// Clicked somewhere on the panel background
+		LevelEditor.moveStart();					// Clicked somewhere on the panel background
 	} else if(LevelEditor.deleting) {
 		editorDeleteNearestToMouse();
-		if(!evt.shiftKey) {
+		if(!_evt.shiftKey) {
 			LevelEditor.deleting = false;
 			LevelEditor.selectedBrush = null;
 		}
 	} else if(LevelEditor.selectedBrush != null){
 		if(LevelEditor.settingRotation) {
 			LevelEditor.pieces.push(LevelEditor.selectedBrush.clone());
-			if(!evt.shiftKey) {
+			if(!_evt.shiftKey) {
 				LevelEditor.selectedBrush = null;
 			}
 		}
 		LevelEditor.settingRotation = !LevelEditor.settingRotation;
+	} else if(LevelEditor.mouseOverPiece != null) {
+		LevelEditor.mouseOverPiece.onClick(_evt);
 	}
 }
 //
 LevelEditor.mousePositionUpdate = function() {
-	LevelEditor.mouseOverItem = null;
+	LevelEditor.mouseOverButton = null;
+	LevelEditor.mouseOverPiece = null;
 	//
 	// Check if mouse is over the editor panel
 	var x2 = LevelEditor.bounds.x2 + LevelEditor.panelSenseZone;
@@ -199,15 +202,22 @@ LevelEditor.mousePositionUpdate = function() {
 	LevelEditor.inPanel = inBoundsX && inBoundsY;
 	if(LevelEditor.inPanel) { 	// Check resizing handle
 		if(LevelEditor.corner.pointHit( mouseX, mouseY )) {
-			LevelEditor.mouseOverItem = LevelEditor.corner;
+			LevelEditor.mouseOverButton = LevelEditor.corner;
 			return;
 		}
 		//
 		// Check the tool buttons
 		for(var i=0; i < LevelEditor.LEButtons.length; i++) {
 			if(LevelEditor.LEButtons[i].pointHit( mouseX, mouseY )) {
-				LevelEditor.mouseOverItem = LevelEditor.LEButtons[i];
+				LevelEditor.mouseOverButton = LevelEditor.LEButtons[i];
 				return;
+			}
+		}
+	} else {
+		for(var i=0; i < LevelEditor.pieces.length; i++) {
+			if(LevelEditor.pieces[i].pointHit( mouseX, mouseY )) {
+				LevelEditor.mouseOverPiece = LevelEditor.pieces[i];
+				break;
 			}
 		}
 	}
@@ -215,11 +225,10 @@ LevelEditor.mousePositionUpdate = function() {
 	// Handle brush movement/rotation
 	if(LevelEditor.selectedBrush != null) {
 		if(LevelEditor.settingRotation) {
-			LevelEditor.selectedBrush.rotation = Math.atan2(mouseY - LevelEditor.selectedBrush.y, 
-															mouseX - LevelEditor.selectedBrush.x);
+			LevelEditor.selectedBrush.rotation = Math.atan2(mouseY - LevelEditor.selectedBrush.bounds.y, 
+															mouseX - LevelEditor.selectedBrush.bounds.x);
 		} else {
-			LevelEditor.selectedBrush.x = mouseX;
-			LevelEditor.selectedBrush.y = mouseY;
+			LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
 		}
 	}
 	//
@@ -331,7 +340,7 @@ LevelEditor.refitUI = function()
 LevelEditor.drawLevelPieces = function() {
 	for(var p in LevelEditor.pieces) {
 		var piece = LevelEditor.pieces[p];
-		drawBitmapCenteredAtLocationWithRotation(levObjPics[piece.kind], piece.x, piece.y, piece.rotation);
+		drawBitmapCenteredAtLocationWithRotation(levObjPics[piece.kind], piece.bounds.x, piece.bounds.y, piece.rotation);
 	}
 }
 //
@@ -342,7 +351,7 @@ LevelEditor.drawInterface = function() {
 	strokeRect(LevelEditor.bounds.x, LevelEditor.bounds.y, LevelEditor.bounds.w,LevelEditor.bounds.h, panelStrokeColor, 2);
 	// Level Editing Buttons
 	for(var i=0; i < LevelEditor.LEButtons.length; i++) {
-		LevelEditor.LEButtons[i].redraw();
+		LevelEditor.LEButtons[i].draw();
 	}
 	// Resizing handle
 	drawSimple(LevelEditor.corner);
@@ -355,7 +364,7 @@ LevelEditor.drawInterface = function() {
 		}
 	}
 	// 
-	LevelEditor.mouseOverItem && LevelEditor.mouseOverItem.stroke('red', 2);
+	LevelEditor.mouseOverButton && LevelEditor.mouseOverButton.stroke('red', 2);
 	LevelEditor.drawBrush();
 	LevelEditor.refreshTooltip();
 }
@@ -363,17 +372,17 @@ LevelEditor.drawInterface = function() {
 LevelEditor.drawBrush = function()
 {
 	if(LevelEditor.selectedBrush != null) { 
-		drawBitmapCenteredAtLocationWithRotation(levObjPics[LevelEditor.selectedBrush.kind],
-			LevelEditor.selectedBrush.x, LevelEditor.selectedBrush.y, LevelEditor.selectedBrush.rotation);
+		drawBitmapCenteredAtLocationWithRotation(LevelEditor.selectedBrush.image,
+			LevelEditor.selectedBrush.bounds.x, LevelEditor.selectedBrush.bounds.y, LevelEditor.selectedBrush.rotation);
 		//
-		LevelEditor.settingRotation && colorLine(LevelEditor.selectedBrush.x, LevelEditor.selectedBrush.y, mouseX, mouseY, 'yellow', 3)
+		LevelEditor.settingRotation && colorLine(LevelEditor.selectedBrush.bounds.x, LevelEditor.selectedBrush.bounds.y, mouseX, mouseY, 'yellow', 3)
 	}
 }
 //
 LevelEditor.refreshTooltip = function()
 {
-	if(LevelEditor.mouseOverItem != null) {
-		LevelEditor.tooltipText = LevelEditor.mouseOverItem.tooltip;	
+	if(LevelEditor.mouseOverButton != null) {
+		LevelEditor.tooltipText = LevelEditor.mouseOverButton.tooltip;	
 	} else if(LevelEditor.selectedBrush == null) {
 		LevelEditor.tooltipText = "select object from panel to place";	
 	} else if(!LevelEditor.settingRotation) {
@@ -405,7 +414,7 @@ function editorDeleteNearestToMouse() {
 	var closestDist = 999999.0;
 
 	for(var i=LevelEditor.pieces.length-1;i>=0;i--) {
-		var distTo = distToMouse( LevelEditor.pieces[i].x, LevelEditor.pieces[i].y )
+		var distTo = distToMouse( LevelEditor.pieces[i].bounds.x, LevelEditor.pieces[i].bounds.y )
 
 		if(distTo < closestDist) {
 			closestIdx = i;
@@ -518,7 +527,7 @@ LevelEditor.buttonScripts = {
 		"imagecode": LEVELPART_DELETE,
 		"command": function() {
 			LevelEditor.deleting = true;
-			LevelEditor.selectedBrush = {"x":0.0, "y":0.0, "rotation":0.0, "kind":LEVELPART_DELETE};
+			LevelEditor.selectedBrush = new Graphic(levObjPics[LEVELPART_DELETE]);
 		}
 	},
 	"export": {
@@ -537,91 +546,3 @@ LevelEditor.buttonScripts = {
 
 
 
-
-
-
-//-----------------------------------------------------------------------------//
-/*
- *	Name: 		LEButton
- * 	Abstract: 	NO
- * 	Superclass: n/a
- * 	Subclasses:	n/a
- * 	
- * 	Description: A button on the level editor panel
- * 	
-																																										
-	METHODS:
-
-	pointHit	stroke
-				redraw
-
-*/
-
-
-
-/**
- * CONSTRUCTOR
- *
- * @return {LEButton}
- */
-function LEButton(_x, _y, _w, _h, _img, _onclick, _tooltip) {
-	this.bounds = {
-		'x': _x,
-		'y': _y,
-		'x2': (_x + _w),
-		'y2': (_y + _h),
-		'w': _w,
-		'h': _h,
-	};
-	this.image = _img;
-	this.onClick = _onclick;
-	this.tooltip = _tooltip;
-	this.active = true;
-	return this;
-}
-/**
- * Update bounds to reflext new xy position
- * 
- * @param {Number} 	_x 		New x
- * @param {Number} 	_y 		New y
- */
-LEButton.prototype.updatePos = function(_x, _y) 
-{ 
-	this.bounds.x = _x;
-	this.bounds.y = _y;
-	this.bounds.x2 = (_x + this.bounds.w);
-	this.bounds.y2 = (_y + this.bounds.h);
-};
-/**
- * Check if xy exists within bounds
- * 
- * @param {Number} 	_x 		
- * @param {Number} 	_y 		
- * @return {bool} 	TRUE if xy exists in bounds
- */
-LEButton.prototype.pointHit = function(_x, _y) 
-{
-	if(!this.active) {
-		return false;
-	} 
-	return (_x > this.bounds.x && _x < this.bounds.x2 && _y > this.bounds.y && _y < this.bounds.y2);
-}
-LEButton.prototype.stroke = function(_col, _thick) 
-{
-	if(!this.active) {
-		return;
-	} 
-	strokeRect(this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h, _col, _thick);
-}
-LEButton.prototype.redraw = function() 
-{
-	if(!this.active) {
-		return;
-	} 
-	drawBitmapFitIntoLocation(this.image, this.bounds.x, this.bounds.y, BTN_SIZE,BTN_SIZE);
-	if(LevelEditor.selectedBrush != null && levObjPics[LevelEditor.selectedBrush.kind] == this.image) {
-		this.stroke('#00FFFF', 3);
-	} else {
-		this.stroke('white', 1);
-	}
-}

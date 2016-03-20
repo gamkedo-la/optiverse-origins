@@ -90,11 +90,18 @@ Level.ClassRouter = [
 																																										
 	METHODS:
 
-	init 		draw 		update
+	init 		draw 		update 		pointHit
 	clone 		updatePos	stop
 		 		
 																			
 */
+
+
+
+
+LevelPiece.prototype = Object.create( Graphic.prototype );		
+LevelPiece.prototype.constructor = LevelPiece;	
+
 
 
 /**
@@ -112,11 +119,10 @@ function LevelPiece()
 	//----------------
 	//
 	//
-	this.x = 0.0;
-	this.y = 0.0;
 	this.rotation = 0.0;
 	//
 	this.kind = -1;
+	this.selected = false;
 
 
 	return this;
@@ -133,13 +139,12 @@ function LevelPiece()
  */
 LevelPiece.init = function(_kind, _x, _y, _rot, _instance)
 {
-	_x = typeof _x != 'undefined' ? _x : 0.0;
-	_y = typeof _y != 'undefined' ? _y : 0.0;
 	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
 	_instance = typeof _instance != 'undefined' ? _instance : new LevelPiece();
 	//
-	_instance.x = _x;
-	_instance.y = _y;
+	var img = levObjPics[_kind];
+	Graphic.call(_instance, img, "", _x, _y);
+	//
 	_instance.rotation = _rot;
 	//
 	_instance.kind = _kind;
@@ -154,7 +159,7 @@ LevelPiece.init = function(_kind, _x, _y, _rot, _instance)
  */
 LevelPiece.prototype.clone = function()
 {
-	var instance = this.constructor.init(this.x, this.y, this.rotation);
+	var instance = this.constructor.init(this.bounds.x, this.bounds.y, this.rotation);
 	return instance;
 }
 
@@ -165,20 +170,12 @@ LevelPiece.prototype.clone = function()
  */
 LevelPiece.prototype.draw = function() 
 { 
-	drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind], this.x, this.y, this.rotation);
+	drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind], this.bounds.x, this.bounds.y, this.rotation);
+	if(this.selected) {
+
+	}
 };
 
-
-
-/**
- * Update position
- * 
- */
-LevelPiece.prototype.updatePos = function(_x, _y) 
-{ 
-	this.x = _x;
-	this.y = _y;
-};
 
 
 
@@ -201,6 +198,21 @@ LevelPiece.prototype.stop = function()
 { 
 
 };
+
+
+/**
+ * 
+ * 
+ * @param 
+ * @param 
+ * @return
+ */
+LevelPiece.prototype.onClick = function(_evt) 
+{
+	console.log("LevelPiece onClick");
+}
+
+
 
 
 
@@ -558,12 +570,13 @@ Source.init = function(_x, _y, _rot)
 
 /* @OVERRIDE */
 Source.prototype.update = function() 
-{ 
+{
 	LevelPiece.prototype.update.call(this);
 	//
 	// Check if a new beam is needed
 	if(this.beam == null || !this.beam.active) {
-		this.beam = new Beam(this.x, this.y, LIGHTSPEED, rad_to_deg(this.rotation), trailLength, 'red', dashLineWidth);
+		this.beam = new Beam(this.bounds.x, this.bounds.y, 
+			LIGHTSPEED, rad_to_deg(this.rotation), trailLength, 'red', dashLineWidth);
 		beams.push(this.beam);
 	}
 };

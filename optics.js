@@ -217,7 +217,7 @@ function refract_vector(vector, refract_line, refractive_index) {
     // Strategy: Use cosine formula to find angle between vectors,
     // and then Snell's law to find new direction.
     
-    console.log("refract_vector start");
+    //console.log("refract_vector start");
     
     var angle1, angle2, n1, n2, sign, insideFormula;
     var angleBetweenVectors, currentAngle, changeInAngle;
@@ -237,28 +237,28 @@ function refract_vector(vector, refract_line, refractive_index) {
 	n2 = 1;
 	sign = 1;
     } else {
-	console.log("Error: vector and refraction lines are parallel");
+	//console.log("Error: vector and refraction lines are parallel");
 	return;
     }
     
-    console.log("cross", cross);
-    console.log("n1", n1);
-    console.log("n2", n2);
+    //console.log("cross", cross);
+    //console.log("n1", n1);
+    //console.log("n2", n2);
     
     // Step 2: Calculate angle between vectors using cosine law
     angleBetweenVectors = angle_between_vectors(refract_line, vector);
     
-    console.log("angleBetweenVectors", angleBetweenVectors  * 180/Math.PI);
+    //console.log("angleBetweenVectors", angleBetweenVectors  * 180/Math.PI);
     
     // Step3: Calculate angle1 for Snell's law (could be negative)
     angle1 = Math.PI/2 - angleBetweenVectors;
     
-    console.log("angle1", angle1 * 180/Math.PI);
+    //console.log("angle1", angle1 * 180/Math.PI);
     
     // Step4: Check for total internal reflection
     insideFormula = (n1/n2) * Math.sin(angle1)
     
-    console.log("insideFormula", insideFormula);    
+    //console.log("insideFormula", insideFormula);    
     
     if (Math.abs(insideFormula) > 1) {
 	// Not allowed, total internal reflection
@@ -270,7 +270,7 @@ function refract_vector(vector, refract_line, refractive_index) {
     // Step5: Calculate angle2 using Snell's law
     angle2 = Math.asin(insideFormula);
     
-    console.log("angle2", angle2 * 180/Math.PI);
+    //console.log("angle2", angle2 * 180/Math.PI);
     
     // Step6: Calculate new direction
     changeInAngle = rad_to_deg((angle2 - angle1) * sign);
@@ -284,9 +284,9 @@ function refract_vector(vector, refract_line, refractive_index) {
     
     
     
-    console.log("changeInAngle", changeInAngle);
-    console.log("currentAngle", currentAngle);
-    console.log("refract_vector end");
+    //console.log("changeInAngle", changeInAngle);
+    //console.log("currentAngle", currentAngle);
+    //console.log("refract_vector end");
     
     return result;    
 }
@@ -305,7 +305,7 @@ function refract_through_line(line_step, lens_line, refractive_index) {
     result.intersectX = point.x;
     result.intersectY = point.y;
     
-    console.log("point (refract_through_line): ", point );
+    //console.log("point (refract_through_line): ", point );
     
     // Create vectors using intersect as origin
     var remaining_trajectory = [line_step.endX - point.x, 
@@ -319,17 +319,17 @@ function refract_through_line(line_step, lens_line, refractive_index) {
 		       lens_line.endY - lens_line.startY];
 		       
 
-    console.log("remaining_trajectory (refract_through_line): ", remaining_trajectory );
-    console.log("lens_vector (refract_through_line): ", lens_vector );
+    //console.log("remaining_trajectory (refract_through_line): ", remaining_trajectory );
+    //console.log("lens_vector (refract_through_line): ", lens_vector );
     
     // Calculate refraction off of lens line
     var delta = refract_vector(remaining_trajectory, lens_vector, refractive_index);
     
-    console.log("delta (refract_through_line): ", delta );
+    //console.log("delta (refract_through_line): ", delta );
     
     if (delta.total_internal_reflection) {
         result = reflect_mirror(line_step, lens_line);
-	console.log("result (refract_through_line): ", result );
+	//console.log("result (refract_through_line): ", result );
 	return result;
     }
     
@@ -339,7 +339,7 @@ function refract_through_line(line_step, lens_line, refractive_index) {
     result.newDirection = delta.newDirection;
     
     
-    console.log("result (refract_through_line): ", result );
+    //console.log("result (refract_through_line): ", result );
     
     return result;	
 		
@@ -438,7 +438,7 @@ MirrorLineGroup.prototype.setLines = function (points) {
 	// Receives a set of x,y coordinates for a series of lines
 	// relative to centerX and centerY
 	if (points.length%2 != 0 || points.length < 4) {
-		console.log("Error: 'points' has odd number of elements");
+		//console.log("Error: 'points' has odd number of elements");
 	}
 	var startX = points[0];
 	var startY = points[1];
@@ -491,15 +491,15 @@ LensLine.prototype.refract = function (line_step) {
 
 	// Note: lens is on the right of LensLine vector.
 	
-	console.log(""  );
-	console.log(""  );
-	console.log("START REFRACTION"  );
+	//console.log(""  );
+	//console.log(""  );
+	//console.log("START REFRACTION"  );
 	
 	var result = refract_through_line(line_step, this, this.refractiveIndex);
 	
-	console.log("END REFRACTION"  );	
-	console.log(""  );
-	console.log(""  );
+	//console.log("END REFRACTION"  );	
+	//console.log(""  );
+	//console.log(""  );
 	
 	return result;
 }	
