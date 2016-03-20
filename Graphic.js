@@ -34,9 +34,12 @@ function Graphic(_img, _tooltip, _x, _y, _w, _h)
 		'y': _y,
 		'x2': (_x + _w),
 		'y2': (_y + _h),
+		'centerX': (_x + (_w/2.0)),
+		'centerY': (_y + (_h/2.0)),
 		'w': _w,
 		'h': _h,
 	};
+	this.centered = true;
 	this.image = _img;
 	this.tooltip = _tooltip;
 	this.active = true;
@@ -46,17 +49,37 @@ function Graphic(_img, _tooltip, _x, _y, _w, _h)
 
 
 /**
- * Update bounds to reflext new xy position
+ * Update bounds to reflect new xy position
  * 
  * @param {Number} 	_x 		New x
  * @param {Number} 	_y 		New y
  */
 Graphic.prototype.updatePos = function(_x, _y) 
 { 
+	if(this.centered) {
+		_x -= this.bounds.w/2.0;
+		_y -= this.bounds.h/2.0;
+	}
 	this.bounds.x = _x;
 	this.bounds.y = _y;
 	this.bounds.x2 = (_x + this.bounds.w);
 	this.bounds.y2 = (_y + this.bounds.h);
+	this.bounds.centerX = (_x + (this.bounds.w/2.0));
+	this.bounds.centerY = (_y + (this.bounds.h/2.0));
+};
+
+
+/**
+ * Change xy a certain amount
+ * 
+ * @param {Number} 	_x 		Change in x
+ * @param {Number} 	_y 		Change in y
+ */
+Graphic.prototype.changePos = function(_x, _y) 
+{ 
+	var x = this.centered ? this.bounds.centerX : this.bounds.x;
+	var y = this.centered ? this.bounds.centerY : this.bounds.y;
+	this.updatePos(x + _x, y + _y);
 };
 
 
@@ -82,6 +105,9 @@ Graphic.prototype.pointHit = function(_x, _y)
  */
 Graphic.prototype.draw = function() 
 { 
+	if(!this.active) {
+		return;
+	} 
 	drawBitmapFitIntoLocation(this.image, this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
 }
 
@@ -136,6 +162,7 @@ Button.prototype.constructor = Button;
 function Button(_onclick, _img, _tooltip, _x, _y, _w, _h) {
 	Graphic.call(this, _img, _tooltip, _x, _y, _w, _h);
 	//
+	this.centered = false;
 	this.onClick = _onclick;
 	//
 	return this;

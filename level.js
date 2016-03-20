@@ -146,7 +146,6 @@ LevelPiece.init = function(_kind, _x, _y, _rot, _instance)
 	Graphic.call(_instance, img, "", _x, _y);
 	//
 	_instance.rotation = _rot;
-	//
 	_instance.kind = _kind;
 
 	return _instance;
@@ -165,18 +164,37 @@ LevelPiece.prototype.clone = function()
 
 
 /**
+ * Replaces rotation
+ * 
+ * @param 	{Number} 	_angle 	
+ */
+LevelPiece.prototype.updateRotation = function(_angle)
+{
+	this.rotation = _angle;
+}
+
+
+/**
+ * Modifies rotation by an amount
+ * 
+ * @param 	{Number} 	_angle 	
+ */
+LevelPiece.prototype.changeRotation = function(_angle)
+{
+	this.updateRotation(this.rotation + _angle);
+}
+
+
+
+
+/**
  * Draw to global Canvas
  * 
  */
 LevelPiece.prototype.draw = function() 
 { 
-	drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind], this.bounds.x, this.bounds.y, this.rotation);
-	if(this.selected) {
-
-	}
+	drawBitmapCenteredAtLocationWithRotation(levObjPics[this.kind], this.bounds.centerX, this.bounds.centerY, this.rotation);
 };
-
-
 
 
 /**
@@ -209,7 +227,7 @@ LevelPiece.prototype.stop = function()
  */
 LevelPiece.prototype.onClick = function(_evt) 
 {
-	console.log("LevelPiece onClick");
+	
 }
 
 
@@ -494,22 +512,41 @@ Mirror.init = function(_x, _y, _rot)
 	//
 	LevelPiece.init.call(this, LEVELPART_MIRROR, _x, _y, _rot, instance);
 	//
-	// Calculate how to mimic the look of the mirror PNG file
-	var mirror_hardcoded_height = 46.0;
-	var startY = _y - (mirror_hardcoded_height/2.0);
-	var endY = _y + (mirror_hardcoded_height/2.0);
-	var startPoint = rotatePointAroundPoint(_x, startY, _x, _y, _rot);
-	var endPoint = rotatePointAroundPoint(_x, endY, _x, _y, _rot);
-	instance.mirrorLine = new MirrorLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], 'gray', mirrorLineWidth);
+	instance.calculateLine();
 	//
 	return instance;
 }
+
+
+/** @OVERRIDE **/
+Mirror.prototype.changeRotation = function(_angle)
+{
+	LevelPiece.prototype.changeRotation.call(this, _angle);
+	//
+	this.calculateLine();	
+}
+
+
+Mirror.prototype.calculateLine = function()
+{
+	// Calculate how to mimic the look of the mirror PNG file
+	var mirror_hardcoded_height = 46.0;
+	var x = this.bounds.centerX;
+	var y = this.bounds.centerY;
+	var startY = y - (mirror_hardcoded_height/2.0);
+	var endY = y + (mirror_hardcoded_height/2.0);
+	var startPoint = rotatePointAroundPoint(x, startY, x, y, this.rotation);
+	var endPoint = rotatePointAroundPoint(x, endY, x, y, this.rotation);
+	this.mirrorLine = new MirrorLine(startPoint[0], startPoint[1], endPoint[0], endPoint[1], 'gray', mirrorLineWidth);
+}
+
 
 /* @OVERRIDE */
 Mirror.prototype.draw = function() 
 { 
 	this.mirrorLine.draw();
 };
+
 
 
 
@@ -575,7 +612,7 @@ Source.prototype.update = function()
 	//
 	// Check if a new beam is needed
 	if(this.beam == null || !this.beam.active) {
-		this.beam = new Beam(this.bounds.x, this.bounds.y, 
+		this.beam = new Beam(this.bounds.centerX, this.bounds.centerY, 
 			LIGHTSPEED, rad_to_deg(this.rotation), trailLength, 'red', dashLineWidth);
 		beams.push(this.beam);
 	}
