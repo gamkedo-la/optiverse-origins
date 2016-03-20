@@ -65,7 +65,7 @@ Level.init = function(_pieces)
 Level.ClassRouter = [
 	Asteroid,
 	Core_,
-	Lens,
+	Lens_,
 	Lens2,
 	Lens3,
 	Mirror,
@@ -330,16 +330,16 @@ Core_.init = function(_x, _y, _rot)
 */
 
 
-Lens.prototype = Object.create( LevelPiece.prototype );		
-Lens.prototype.constructor = Lens;						
+Lens_.prototype = Object.create( LevelPiece.prototype );		
+Lens_.prototype.constructor = Lens_;						
 
 
 /**
  * CONSTRUCTOR
  *
- * @return {Lens}
+ * @return {Lens_}
  */
-function Lens() 
+function Lens_() 
 {
 	LevelPiece.call(this);
 
@@ -347,9 +347,9 @@ function Lens()
 }
 
 /* @OVERRIDE */
-Lens.init = function(_x, _y, _rot)
+Lens_.init = function(_x, _y, _rot)
 {
-	var instance = new Lens();
+	var instance = new Lens_();
 	//
 	LevelPiece.init.call(this, LEVELPART_LENS, _x, _y, _rot, instance);
 

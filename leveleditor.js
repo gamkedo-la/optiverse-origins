@@ -478,7 +478,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			LevelEditor.selectBrush(Lens);
+			LevelEditor.selectBrush(Lens_);
 		}
 	},
 	"lens2": {
