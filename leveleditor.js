@@ -18,6 +18,55 @@ const BTN_SIZE = 40;
 
 
 
+// Transformation scripts
+LevelEditor.trScripts = {
+
+	"none": function(_dx, _dy) {},
+	"cornerGrab": function(_dx, _dy) {
+		LevelEditor.bounds.x2 = mouseX;
+		LevelEditor.bounds.y2 = mouseY;
+		LevelEditor.bounds.w = LevelEditor.bounds.x2 - LevelEditor.bounds.x;
+		LevelEditor.bounds.h = LevelEditor.bounds.y2 - LevelEditor.bounds.y;
+		LevelEditor.refitUI();
+	},
+	"panelGrab": function(_dx, _dy) {
+		LevelEditor.bounds.x += _dx
+		LevelEditor.bounds.x2 += _dx
+		LevelEditor.bounds.y += _dy;
+		LevelEditor.bounds.y2 += _dy;
+		LevelEditor.refitUI();
+	},
+	"possiblePieceGrab": function(_dx, _dy) {
+		if(_dx != 0 || _dy != 0) {
+			LevelEditor.trScript = LevelEditor.trScripts.pieceGrab;
+			LevelEditor.trScript(_dx, _dy);
+		}
+	},
+	"pieceGrab": function(_dx, _dy) {
+		LevelEditor.selectedPiece.changePos(_dx, _dy);
+	}, 
+	"possiblePieceRotate": function(_dx, _dy) {
+		if(_dx != 0 || _dy != 0) {
+			LevelEditor.trScript = LevelEditor.trScripts.pieceRotate;
+			LevelEditor.trScript(_dx, _dy);
+		}
+	},
+	"pieceRotate": function(_dx, _dy) {
+
+		var angle1 = Math.atan2( mouseY - LevelEditor.selectedPiece.bounds.centerY, 
+								mouseX - LevelEditor.selectedPiece.bounds.centerX);
+		var angle2 = Math.atan2( LevelEditor.lastMouseY - LevelEditor.selectedPiece.bounds.centerY, 
+								 LevelEditor.lastMouseX - LevelEditor.selectedPiece.bounds.centerX);
+
+		LevelEditor.selectedPiece.changeRotation(angle1-angle2);
+	}
+
+};
+
+
+
+
+
 function editorUpdate() 
 {
 	LevelEditor.mousePositionUpdate();
@@ -83,12 +132,9 @@ LevelEditor.mouseOverButton = null;
 LevelEditor.mouseOverPiece = null;
 LevelEditor.selectedBrush = null;
 LevelEditor.selectedPiece = null;
-LevelEditor.grabbedPiece = null;
 // 
 // States
 LevelEditor.inPanel = false;
-LevelEditor.panelGrab = false;
-LevelEditor.cornerGrab = false;
 LevelEditor.overflow = false;
 LevelEditor.settingRotation = false;
 LevelEditor.deleting = false;
@@ -97,6 +143,7 @@ LevelEditor.lastMouseX = 0.0;
 LevelEditor.lastMouseY = 0.0;
 
 LevelEditor.tooltipText = "";
+LevelEditor.trScript = LevelEditor.trScripts.none;
 
 
 			
@@ -127,7 +174,9 @@ LevelEditor.setup = function() {
 	tmpCtx.fillRect(0,0,LevelEditor.cornerSize,LevelEditor.cornerSize);
 	tmpCtx.strokeStyle = 'white';
 	tmpCtx.strokeRect(0,0,LevelEditor.cornerSize,LevelEditor.cornerSize);
-	LevelEditor.corner = new Button(LevelEditor.resizePanelStart, tmpCanvas, "resize panel");
+	LevelEditor.corner = new Button(function() {
+		LevelEditor.trScript = LevelEditor.trScripts.cornerGrab;
+	}, tmpCanvas, "resize panel");
 	//
 	// Misc UI
 	LevelEditor.rotSymbol = new Graphic(LevelEditorRotSymbol);
@@ -145,6 +194,7 @@ LevelEditor.setup = function() {
 //
 LevelEditor.toggle = function() {
 	LevelEditor.active = !LevelEditor.active;
+	LevelEditor.selectedPiece = null;
 	if(LevelEditor.active) {
 		// If we just entered editor mode, import current level data as editor data
 		LevelEditor.pieces = currentLevel.pieces;
@@ -185,10 +235,12 @@ LevelEditor.selectBrush = function(_partClass)
 }
 //
 LevelEditor.mouseClicked = function(_evt) {
+	LevelEditor.mouseDragStart();
+	//
 	if(LevelEditor.mouseOverButton != null && !LevelEditor.settingRotation) { 
-		LevelEditor.mouseOverButton.onClick(_evt); 		// Clicked one of the buttons in the tool panel
+		LevelEditor.mouseOverButton.onClick(_evt); 											// Clicked one of the buttons in the tool panel
 	} else if(LevelEditor.inPanel) {
-		LevelEditor.movePanelStart();					// Clicked somewhere on the panel background
+		LevelEditor.trScript = LevelEditor.trScripts.panelGrab;		// Clicked somewhere on the panel background
 	} else if(LevelEditor.deleting) {
 		editorDeleteNearestToMouse();
 		if(!_evt.shiftKey) {
@@ -210,13 +262,10 @@ LevelEditor.mouseClicked = function(_evt) {
 			LevelEditor.plusSign.active = true;
 			LevelEditor.rotSymbol.active = true;
 		} else {
-			LevelEditor.movePieceStart(LevelEditor.selectedPiece);
+			LevelEditor.trScript = LevelEditor.trScripts.possiblePieceGrab;
 		}
-	} else {
-		LevelEditor.selectedPiece = null;
-		LevelEditor.minusSign.active = false;
-		LevelEditor.plusSign.active = false;
-		LevelEditor.rotSymbol.active = false;
+	} else if(LevelEditor.selectedPiece != null) {
+		LevelEditor.trScript = LevelEditor.trScripts.possiblePieceRotate;
 	}
 }
 //
@@ -277,30 +326,12 @@ LevelEditor.mousePositionUpdate = function() {
 		}
 	}
 	//
-	//
+	// Call the transformationscript
 	var deltaMouseX = mouseX - LevelEditor.lastMouseX;
 	var deltaMouseY = mouseY - LevelEditor.lastMouseY;
-	if(LevelEditor.grabbedPiece != null) {
-		LevelEditor.grabbedPiece.changePos(deltaMouseX, deltaMouseY);
-	}
+	LevelEditor.trScript(deltaMouseX, deltaMouseY);
 	//
-	if(LevelEditor.cornerGrab) {			// Handle panel resize if ongoing
-		LevelEditor.bounds.x2 = mouseX;
-		LevelEditor.bounds.y2 = mouseY;
-		LevelEditor.bounds.w = LevelEditor.bounds.x2 - LevelEditor.bounds.x;
-		LevelEditor.bounds.h = LevelEditor.bounds.y2 - LevelEditor.bounds.y;
-		//
-		LevelEditor.refitUI();
-	} else if(LevelEditor.panelGrab) {		// Handle panel repositioning if ongoing
-		LevelEditor.bounds.x += deltaMouseX
-		LevelEditor.bounds.x2 += deltaMouseX
-		LevelEditor.bounds.y += deltaMouseY;
-		LevelEditor.bounds.y2 += deltaMouseY;
-		//
-		LevelEditor.refitUI();
-	}
-	//
-	//
+	// Remember mouse movement
 	LevelEditor.lastMouseX = mouseX;
 	LevelEditor.lastMouseY = mouseY;
 }
@@ -314,46 +345,18 @@ LevelEditor.mousePositionUpdate = function() {
 //---------------------
 //
 //
-LevelEditor.movePanelStart = function() 
+LevelEditor.mouseDragStart = function() 
 {
-	LevelEditor.lastMouseX = mouseX;
-	LevelEditor.lastMouseY = mouseY;
-	//
-	LevelEditor.panelGrab = true;
-	canvas.addEventListener('mouseup', LevelEditor.movePanelEnd);
+	canvas.addEventListener('mouseup', LevelEditor.mouseDragEnd);
 }
 //
-LevelEditor.movePanelEnd = function() 
+LevelEditor.mouseDragEnd = function() 
 {
-	LevelEditor.panelGrab = false;
-	canvas.removeEventListener('mouseup', LevelEditor.movePanelEnd);
-}
-//
-LevelEditor.resizePanelStart = function() 
-{
-	LevelEditor.cornerGrab = true;
-	canvas.addEventListener('mouseup', LevelEditor.resizePanelEnd);
-}
-//
-LevelEditor.resizePanelEnd = function() 
-{
-	LevelEditor.cornerGrab = false;
-	canvas.removeEventListener('mouseup', LevelEditor.resizePanelEnd);
-}
-//
-LevelEditor.movePieceStart = function(_piece) 
-{
-	LevelEditor.lastMouseX = mouseX;
-	LevelEditor.lastMouseY = mouseY;
-	//
-	LevelEditor.grabbedPiece = _piece;
-	canvas.addEventListener('mouseup', LevelEditor.movePieceEnd);
-}
-//
-LevelEditor.movePieceEnd = function() 
-{
-	LevelEditor.grabbedPiece = null;
-	canvas.removeEventListener('mouseup', LevelEditor.movePieceEnd);
+	if(LevelEditor.trScript == LevelEditor.trScripts.possiblePieceGrab || LevelEditor.trScript == LevelEditor.trScripts.possiblePieceRotate) {
+		LevelEditor.selectedPiece = null;
+	}
+	LevelEditor.trScript = LevelEditor.trScripts.none;
+	canvas.removeEventListener('mouseup', LevelEditor.mouseDragEnd);
 }
 //
 /**
@@ -414,7 +417,7 @@ LevelEditor.drawLevelPieces = function() {
 LevelEditor.drawInterface = function() {
 	// Background
 	colorRect(LevelEditor.bounds.x, LevelEditor.bounds.y, LevelEditor.bounds.w,LevelEditor.bounds.h, 'grey');
-	var panelStrokeColor = LevelEditor.cornerGrab ? "#00FFFF" : 'white';
+	var panelStrokeColor = LevelEditor.trScript == LevelEditor.trScripts.cornerGrab ? "#00FFFF" : 'white';
 	strokeRect(LevelEditor.bounds.x, LevelEditor.bounds.y, LevelEditor.bounds.w,LevelEditor.bounds.h, panelStrokeColor, 2);
 	// Level Editing Buttons
 	for(var i=0; i < LevelEditor.LEButtons.length; i++) {
@@ -532,11 +535,6 @@ function LoadTextfield() {
 
 
 
-
-
-
-
-
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
@@ -612,6 +610,7 @@ LevelEditor.buttonScripts = {
 		"imagecode": LEVELPART_DELETE,
 		"command": function() {
 			LevelEditor.deleting = true;
+			LevelEditor.selectedPiece = null;
 			LevelEditor.selectedBrush = new Graphic(levObjPics[LEVELPART_DELETE]);
 		}
 	},
