@@ -149,6 +149,37 @@ function intersection_point(line1, line2) {
     return result;
 }
 
+// Check to see if polygon encloses point
+function encloses(polygon_points, point) {
+    // Return true if point is inside polygon
+    var n = polygon_points.length;
+    var inside = false;
+    var p1x = polygon_points[0].x;
+    var p1y = polygon_points[0].y;
+    var p2x, p2y, xints;
+    
+    for (var i=0; i < n+1; i++) {
+        p2x = polygon_points[i % n].x;
+        p2y = polygon_points[i % n].y;
+        if (point.y > Math.min(p1y, p2y)) {
+            if (point.y < Math.max(p1y,p2y)) { 
+                if (point.x < Math.max(p1x,p2x)) {
+                    if (p1y != p2y) {
+                        xints = (point.y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x;
+		    }
+                    if (p1x == p2x || point.x < xints) {
+                        inside = !inside;
+		    }
+		}
+	    }
+	}
+        p1x = p2x;
+	p1y = p2y;
+    }
+    return inside
+}
+
+
 // Vector reflection in 2D
 function reflect_vector(vector, mirror_line) {
     // Args: vector = [x1,y1], mirror_line = [x2,y2]
@@ -364,6 +395,9 @@ function deg_to_rad(degrees) {
 }
 
 
+
+
+
 // ##################################
 // Classes (Prototype Constructors)
 // ##################################
@@ -392,18 +426,17 @@ function Line(startX, startY, endX, endY, color, lineWidth) {
 	this.endX = endX;
 	this.endY = endY;
 }
-
-// intersects()
-Line.prototype.intersects = function (line) { 
-	// receives line object and tests intersection
-	return Boolean(intersect(this, line))
-}	
 // draw()
 Line.prototype.draw = function () {
 	colorLine(this.startX, this.startY, 
 		 this.endX, this.endY, 
 		 this.color, this.lineWidth);
 }
+
+
+// ----------------------------------
+// Mirrors
+// ----------------------------------
 
 // === MirrorLine =========================
 function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
@@ -481,26 +514,11 @@ function LensLine(startX, startY, endX, endY, refractiveIndex) {
 	this.endY = endY;
 	this.refractiveIndex = refractiveIndex;
 }
-// intersects()
-LensLine.prototype.intersects = function (line) { 
-	// receives line object and tests intersection
-	return Boolean(intersect(this, line))
-}
 // refract()
 LensLine.prototype.refract = function (line_step) {
 
 	// Note: lens is on the right of LensLine vector.
-	
-	//console.log(""  );
-	//console.log(""  );
-	//console.log("START REFRACTION"  );
-	
 	var result = refract_through_line(line_step, this, this.refractiveIndex);
-	
-	//console.log("END REFRACTION"  );	
-	//console.log(""  );
-	//console.log(""  );
-	
 	return result;
 }	
 
@@ -538,35 +556,22 @@ Lens.prototype.draw = function () {
 
 
 // ----------------------------------
-// Trails
+// Blocks (Asteroids, walls, etc.)
 // ----------------------------------
 
-// === Trail =========================
-function Trail(trailLength, color, lineWidth) {
-	this.trailLength = trailLength;
+// === Block =========================
+function Block(points, color) {
+	// points: array of ordered points that make up the lens
+	// refractiveIndex: index of refraction
+
+	this.points = points;
 	this.color = color;
-	this.lineWidth = lineWidth;
-
-	this.lines = [];
-}
-// addLine()
-Trail.prototype.addLine = function (startX, startY, endX, endY) {
-	var line = new Line(startX, startY, endX, endY, this.color, this.lineWidth);
-	this.lines.push(line);
-	while (this.lines.length > this.trailLength){
-		var temp = this.lines.shift() //Get rid of oldest line
-		// temp is throwaway, not used
-	}
-}
+	
+} 
 // draw()
-Trail.prototype.draw = function () {
-	for(var i=0; i < this.trailLength; i++){
-		if (i < this.lines.length) {
-			this.lines[i].draw();
-		}
-	}
+Block.prototype.draw = function () {
+	colorPolygon(this.points, this.color);
 }
-
 
 // ----------------------------------
 // Laser Beams
@@ -591,7 +596,11 @@ function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 // updateBEAM()
 Beam.prototype.updateBEAM = function () {
 	if (!this.active){
-		return false;
+		this.trail.removeLine();
+		if (this.trail.lines.length == 0) {
+			return true; // Delete beam
+		}
+		return false; // Don't delete beam
 	}
 	
 	// Update previous info
@@ -609,6 +618,9 @@ Beam.prototype.updateBEAM = function () {
 		      endX: this.posX, 
 		      endY: this.posY, 
 		      direction: this.direction};
+		      
+	// create point of most recent step
+	var point_step = new Point(this.posX, this.posY)
 	
 	// mirror collisions 
 	for (var i=0; i < mirrors.length; i++) {
@@ -667,7 +679,14 @@ Beam.prototype.updateBEAM = function () {
 		}
 	}
 	
-	// other object collisions
+	// block collisions
+	for (var i=0; i < blocks.length; i++) {
+		if (encloses(blocks[i].points, point_step)) {
+			this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
+			this.active = false;
+			return false
+		}
+	}
 	
 	// no collisions:
 	this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
@@ -676,7 +695,7 @@ Beam.prototype.updateBEAM = function () {
 	var lastLine = this.trail.lines[0];
 	if(lastLine.endX < 0.0 || lastLine.endY < 0.0 || lastLine.endX > canvas.width || lastLine.endY > canvas.height) {
 		this.active = false;
-		return true;
+		return true; // Delete beam
 	}
 
 	return false;
@@ -696,6 +715,39 @@ Beam.prototype.draw = function () {
 }
 
 
+// ----------------------------------
+// Trails
+// ----------------------------------
+
+// === Trail =========================
+function Trail(trailLength, color, lineWidth) {
+	this.trailLength = trailLength;
+	this.color = color;
+	this.lineWidth = lineWidth;
+
+	this.lines = [];
+}
+// addLine()
+Trail.prototype.addLine = function (startX, startY, endX, endY) {
+	var line = new Line(startX, startY, endX, endY, this.color, this.lineWidth);
+	this.lines.push(line);
+	while (this.lines.length > this.trailLength){
+		this.removeLine();
+	}
+}
+// removeLine()
+Trail.prototype.removeLine = function () {
+	var temp = this.lines.shift() //Get rid of oldest line
+	// temp is throwaway, not used
+}
+// draw()
+Trail.prototype.draw = function () {
+	for(var i=0; i < this.trailLength; i++){
+		if (i < this.lines.length) {
+			this.lines[i].draw();
+		}
+	}
+}
 
 
 // ----------------------------------

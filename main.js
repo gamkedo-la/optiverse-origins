@@ -9,6 +9,7 @@ var ctx;
 const LENS_COLOR = '#EAEAFB';
 const MIRROR_COLOR = 'gray';
 const BACKGROUND_COLOR = "#191616"
+const BLOCK_COLOR = '#303030';
 
 // ##################################
 // ON LOAD
@@ -47,6 +48,7 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 // Gameplay
 // ##################################
 
+var mirrors = [], blocks = [], lenses = [], cores = [], beams = [], points = [];
 
 
 // Mirrors
@@ -56,7 +58,19 @@ var mirror2 = new MirrorLine(100, 50, 0, 500, MIRROR_COLOR, mirrorLineWidth);
 var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
 var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
 
-var mirrors = [mirror1,mirror2,mirror3,mirror4];
+mirrors = [mirror1,mirror2,mirror3,mirror4];
+
+
+// Blocks
+var p1 = new Point(100, 390);
+var p2 = new Point(300, 390);
+var p3 = new Point(300, 410);
+var p4 = new Point(100, 410);
+points = [p1, p2, p3, p4];
+var block1 = new Block(points, BLOCK_COLOR);
+
+//Accumulate
+blocks = [block1];
 
 
 // Lenses
@@ -90,7 +104,8 @@ var pc10 = new Point(510, 350);
 points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
 var lens3 = new Lens(points, 1.3, LENS_COLOR);
 
-var lenses = [lens1, lens2, lens3];
+//Accumulate
+lenses = [lens1, lens2, lens3];
 
 //Cores
 
@@ -141,9 +156,8 @@ var beam7 = new Beam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth
 var beam8 = new Beam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
 
 //Accumulate
-
-var cores = [core2, core1, core3];
-var beams = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
+cores = [core2, core1, core3];
+beams = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
 
 var currentLevel = Level.init([]);
 
@@ -169,7 +183,7 @@ function moveEverything() {
 		}
 	}
 	// Disregard all expired beams
-	for (var i=0; i < expBeamsIndex.length; i++) {
+	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
 		beams.splice(expBeamsIndex[i], 1);
 	}
 	
@@ -221,6 +235,11 @@ function drawEverything() {
 	for (var i=0; i < currentLevel.pieces.length; i++) {
 		currentLevel.pieces[i].draw();
 	}
+	
+	// Blocks	
+	for (var i=0; i < blocks.length; i++) {
+		blocks[i].draw();
+	}	
 	
 	// Lenses	
 	for (var i=0; i < lenses.length; i++) {
