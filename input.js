@@ -23,7 +23,7 @@ function handleMouseClick(evt) {
 	for (var i=0; i < cores.length; i++) {
 		core = cores[i];
 		if (core.encloses(mouseX, mouseY)){
-			core.explode();
+			core.emitBeams();
 		}
 	}
 }

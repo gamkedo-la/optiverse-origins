@@ -516,7 +516,6 @@ function LensLine(startX, startY, endX, endY, refractiveIndex) {
 }
 // refract()
 LensLine.prototype.refract = function (line_step) {
-
 	// Note: lens is on the right of LensLine vector.
 	var result = refract_through_line(line_step, this, this.refractiveIndex);
 	return result;
@@ -573,6 +572,127 @@ Block.prototype.draw = function () {
 	colorPolygon(this.points, this.color);
 }
 
+
+
+// ----------------------------------
+// Cores and Sources
+// ----------------------------------
+
+// === Core =========================
+function Core(centerX, centerY, radius, color, coreRings) {
+	// Args: coreRings = []
+	this.centerX = centerX;
+	this.centerY = centerY;
+	this.radius = radius;
+	this.color = color;
+	this.coreRings = coreRings; // an array of CoreRing objects
+}
+// updateCORE()
+Core.prototype.updateCORE = function () {
+
+	for (var i=0; i < this.coreRings.length; i++) {	
+		this.coreRings[i].updateRING();	 // update each ring
+	}	
+}
+// isFull()
+Core.prototype.isFull = function () {
+	for (var i=0; i < this.coreRings.length; i++) {
+		if (!(this.coreRings[i].isActive())) {
+			return false;
+		}
+	}
+	return true;
+}
+// emitBeams()
+Core.prototype.emitBeams = function () {
+	for (var i=0; i < this.coreRings.length; i++) {
+		var ring = this.coreRings[i];
+		if (ring.active ) {
+			ring.active = false;
+			for (var j=0; j < ring.beamSlots.length; j++) {
+				ring.beamSlots[j].filled = false;
+			}
+			// fire laser beam
+			
+			// TODO
+		}
+	}
+}
+// encloses()
+Core.prototype.encloses = function (x, y) {
+	var dist = distance_between_two_points(this.centerX, this.centerY, 
+						x, y);
+	for (var i=0; i < this.coreRings.length; i++) {
+		var ring = this.coreRings[i];
+		if(dist <= ring.radius){
+			return true;
+		}
+	}
+	return false;
+}
+// draw()
+Core.prototype.draw = function () {
+	
+	// Core circle
+	colorCircle(this.centerX, this.centerY, this.radius, this.color);
+	
+	// Core levels
+	for(var i=0; i < this.coreRings.length; i++){
+		this.coreRings[i].draw(this.centerX, this.centerY);
+	}
+}
+
+
+// === CoreRing =========================
+function CoreRing(radius, angles, color, lineWidth) {
+	this.radius = radius;
+	
+	// Keep track of filled/empty beams in Core Ring
+	this.beamSlots = [];
+	for (var i=0; i < angles.length; i++) {
+		var slot = {direction: deg_to_dir(angles[i]),
+			    filled: false}
+		this.beamSlots.push(slot);
+	}
+	
+	this.active = false;
+	
+	this.color = color;
+	this.lineWidth = lineWidth;	
+}
+// updateRING()
+CoreRing.prototype.updateRING = function () {
+	/* if (this.active){
+		this.degreeOffset = (this.degreeOffset + this.frequency) % 360;
+		// var radiansOffset = this.degreeOffset * Math.PI/180;
+		this.radiusChange = this.amplitude * Math.sin(this.degreeOffset);
+	} */
+}
+// draw()
+CoreRing.prototype.draw = function (centerX, centerY) {
+	
+	// Draw Ring
+	if (this.active) {
+		strokeCircle(centerX, centerY, this.radius, this.color, this.lineWidth);
+	} else {
+		strokeCircleDashed(centerX, centerY, this.radius, this.color, 1);
+	}
+	// Draw arrows
+	for (var i=0; i < this.beamSlots.length; i++) {
+		var slot = this.beamSlots[i];
+		if (slot[1]) { // beam slot is filled
+			// Draw filled arrow in that direction
+			return;
+		} else {
+			// Draw empty arrow in that direction
+			return;
+		}
+	}
+	
+}
+
+
+
 // ----------------------------------
 // Laser Beams
 // ----------------------------------
@@ -586,6 +706,7 @@ function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 	this.direction = deg_to_dir(angle);
 	this.active = true; // boolean	
 	
+	this.color = color;
 	this.trail = new Trail(trailLength, color, lineWidth);
 	
 	// Previous state
@@ -679,12 +800,14 @@ Beam.prototype.updateBEAM = function () {
 		}
 	}
 	
+	
+	
 	// block collisions
 	for (var i=0; i < blocks.length; i++) {
 		if (encloses(blocks[i].points, point_step)) {
 			this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
 			this.active = false;
-			return false
+			return false;
 		}
 	}
 	
@@ -714,6 +837,47 @@ Beam.prototype.draw = function () {
 	this.trail.draw();
 }
 
+
+// === LaserBeam =========================
+function LaserBeam(posX, posY, speed, angle, trailLength, color, lineWidth) {
+	// Call parent constructor	
+	Beam.call(this, posX, posY, speed, angle, trailLength, color, lineWidth);		
+} // Make it a subclass
+LaserBeam.prototype = Object.create(Beam.prototype); 
+LaserBeam.prototype.constructor = LaserBeam; 
+// updateLASER()
+LaserBeam.prototype.updateLASER = function () {
+	// Call superclass update
+	var bool = this.updateBEAM();
+	
+	// core collisions
+	for (var i=0; i < cores.length; i++) {
+		for (var j=0; j < cores[i].coreRings.length; j++)  {
+			
+			var ring = cores[i].coreRings[j];
+			var dist = distance_between_two_points(this.posX, this.posY, 
+						cores[i].centerX, cores[i].centerY);
+			if(dist > ring.radius || this.color != ring.color){
+				continue;
+			}
+			
+			// Loop through ring's beam slots
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				if (!slot.filled) {
+					// Beam is absorbed
+					slot.filled = true; // fill beam slot
+					ring.active = true; // activate ring
+					this.active = false; // deactivate laser
+					
+					return false;
+				}
+			}
+		}
+	}
+	
+	return bool;
+}
 
 // ----------------------------------
 // Trails
@@ -749,126 +913,6 @@ Trail.prototype.draw = function () {
 	}
 }
 
-
-// ----------------------------------
-// Cores and Sources
-// ----------------------------------
-
-// === Core =========================
-function Core(centerX, centerY, innerRadius, outerRadius, color, coreRings) {
-	// Args: coreRings = []
-	this.centerX = centerX;
-	this.centerY = centerY;
-	this.innerRadius = innerRadius;
-	this.outerRadius = outerRadius;
-	this.color = color;
-	this.coreRings = coreRings; // an array of CoreRing objects
-}
-// updateCORE()
-Core.prototype.updateCORE = function () {
-
-	for (var i=0; i < this.coreRings.length; i++) {	
-		this.coreRings[i].updateRING();	 // update each ring
-	}	
-}
-// isFull()
-Core.prototype.isFull = function () {
-	for (var i=0; i < this.coreRings.length; i++) {
-		if (!(this.coreRings[i].isActive())) {
-			return false;
-		}
-	}
-	return true;
-}
-// explode()
-Core.prototype.explode = function () {
-	for (var i=0; i < this.coreRings.length; i++) {
-		var ring = this.coreRings[i];
-		if (ring.isActive()) {
-			ring.deactivate();
-			// fire laser beam
-			
-			// TODO
-		} else {
-			ring.activate();
-		}
-	}
-}
-// absorb()
-Core.prototype.absorb = function (beam) {
-	var absorbed = false;
-	for (var i=0; i < this.coreRings.length; i++) {
-		var ring = this.coreRings[i];
-		if (!(ring.isActive()) && beam.color == ring.color) {
-			ring.activate();
-			return;
-		}
-	}
-	if (!absorbed) {
-		// broken core
-		// TO DO
-		return;
-	}
-}
-// encloses()
-Core.prototype.encloses = function (x, y) {
-	// Call helper function
-	var dist = distance_between_two_points(this.centerX, this.centerY, x, y);
-	return Boolean(this.outerRadius - dist > 0);
-}
-// draw()
-Core.prototype.draw = function () {
-	
-	// Core circle
-	colorCircle(this.centerX, this.centerY, this.innerRadius, this.color);
-	
-	// Core levels
-	for(var i=0; i < this.coreRings.length; i++){
-		var ring = this.coreRings[i];
-		if (ring.isActive()) {
-			ring.draw(this.centerX, this.centerY);
-		}
-	}
-}
-
-
-// === CoreRing =========================
-function CoreRing(radius, frequency, amplitude, color, lineWidth) {
-	this.radius = radius;
-	this.frequency = frequency;
-	this.amplitude = amplitude;
-	this.radiusChange = 0; 
-	this.degreeOffset = 0; // 0-359 degrees
-	this.active = false;
-	
-	this.color = color;
-	this.lineWidth = lineWidth;	
-}
-// updateRING()
-CoreRing.prototype.updateRING = function () {
-	if (this.active){
-		this.degreeOffset = (this.degreeOffset + this.frequency) % 360;
-		// var radiansOffset = this.degreeOffset * Math.PI/180;
-		this.radiusChange = this.amplitude * Math.sin(this.degreeOffset);
-	}
-}
-// isActive()
-CoreRing.prototype.isActive = function () {
-	return this.active;
-}
-// activate()
-CoreRing.prototype.activate = function () {
-	this.active = true;
-}
-// deactivate()
-CoreRing.prototype.deactivate = function () {
-	this.active = false;
-}
-// draw()
-CoreRing.prototype.draw = function (centerX, centerY) {
-	var rad = this.radius + this.radiusChange;
-	strokeCircle(centerX, centerY, rad, this.color, this.lineWidth);
-}
 
 
 

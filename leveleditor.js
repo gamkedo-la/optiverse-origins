@@ -210,7 +210,7 @@ LevelEditor.toggle = function() {
 		currentLevel = Level.init(LevelEditor.pieces);
 		LevelEditor.pieces = [];
 		// Register mirrors
-		mirrors = [mirror1,mirror2,mirror3,mirror4];
+		// mirrors = [mirror1,mirror2,mirror3,mirror4];
 		for(var i=0; i < currentLevel.pieces.length; i++) {
 			if(currentLevel.pieces[i].constructor.name == 'Mirror') {
 				mirrors.push(currentLevel.pieces[i].mirrorLine);

@@ -11,6 +11,9 @@ const MIRROR_COLOR = 'gray';
 const BACKGROUND_COLOR = "#191616"
 const BLOCK_COLOR = '#303030';
 
+const DASHED_CIRCLE_ARC_NUMBER = 40;
+const DASHED_CIRCLE_ARC_LENGTH = 5;
+
 // ##################################
 // ON LOAD
 // ##################################
@@ -45,10 +48,11 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 
 
 // ##################################
-// Gameplay
+// Game elements
 // ##################################
 
-var mirrors = [], blocks = [], lenses = [], cores = [], beams = [], points = [];
+var mirrors = [], blocks = [], lenses = [], cores = [], beams = [], lasers = [], 
+	      points = [];
 
 
 // Mirrors
@@ -62,15 +66,15 @@ mirrors = [mirror1,mirror2,mirror3,mirror4];
 
 
 // Blocks
-var p1 = new Point(100, 390);
-var p2 = new Point(300, 390);
-var p3 = new Point(300, 410);
-var p4 = new Point(100, 410);
+var p1 = new Point(50, 450);
+var p2 = new Point(100, 450);
+var p3 = new Point(100, 500);
+var p4 = new Point(50, 500);
 points = [p1, p2, p3, p4];
 var block1 = new Block(points, BLOCK_COLOR);
 
 //Accumulate
-blocks = [block1];
+blocks = [block1];  
 
 
 // Lenses
@@ -109,55 +113,53 @@ lenses = [lens1, lens2, lens3];
 
 //Cores
 
-var dashLineWidth = 2;
 
-var pos1x = 50;
-var pos1y = 50;
-var angle1 = 45;
 var dash1 = 2;
-var CR1 = new CoreRing(20, .04, 1, 'red', 3);
-CR1.activate();
+var CR1 = new CoreRing(20, [0], 'red', 3);
 var arr1 = [CR1];
-var core1 = new Core(pos1x, pos1y, 7, 20, 'red', arr1);
+var core1 = new Core(200, 400, 7, 'red', arr1);
 
-
-var pos2x = 200;
-var pos2y = 300;
-var angle2 = 0;
 var dash2 = 5;
-var CR2 = new CoreRing(25, .08, 1, 'green', 5);
-CR2.activate();
+var CR2 = new CoreRing(25, [90], 'green', 5);
 var arr2 = [CR2];
-var core2 = new Core(pos2x, pos2y, 10, 20, 'green', arr2);
+var core2 = new Core(150, 300, 10, 'green', arr2);
 
-var pos3x = 250;
-var pos3y = 50;
-var angle3 = 90;
 var dash3 = 10;
-var CR3r = new CoreRing(20, .04, 1, 'red', 3);
-CR3r.activate();
-var CR3b = new CoreRing(40, .1, 1, 'blue', 5);
-CR3b.activate();
+var CR3r = new CoreRing(45, [45], 'purple', 3);
+var CR3b = new CoreRing(40, [210], 'blue', 5);
 var arr3 = [CR3b, CR3r];
-var core3 = new Core(pos3x, pos3y, 10, 20, 'purple', arr3);
+var core3 = new Core(600, 300, 10, 'purple', arr3);
 
-trailLength = 10;
-
-
-var beam1 = new Beam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam2 = new Beam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam3 = new Beam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam4 = new Beam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-
-
-var beam5 = new Beam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
-var beam6 = new Beam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
-var beam7 = new Beam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
-var beam8 = new Beam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
+//CR1.active = true;
+//CR2.active = true;
+//CR3r.active = true;
+//CR3b.active = true;
 
 //Accumulate
 cores = [core2, core1, core3];
-beams = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
+
+
+var trailLength = 10;
+var dashLineWidth = 2;
+
+var beam1 = new LaserBeam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam2 = new LaserBeam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam3 = new LaserBeam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+var beam4 = new LaserBeam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+
+
+var beam5 = new LaserBeam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
+var beam6 = new LaserBeam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
+var beam7 = new LaserBeam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
+var beam8 = new LaserBeam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
+
+
+lasers = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
+
+
+// ##################################
+// Gameplay
+// ##################################
 
 var currentLevel = Level.init([]);
 
@@ -176,6 +178,8 @@ function moveEverything() {
 	// ---------------------
 	//
 	// Update all beams and check if they have expired
+	
+	// Beams
 	var expBeamsIndex = [];
 	for (var i=0; i < beams.length; i++) {
 		if(beams[i].updateBEAM()) {
@@ -185,6 +189,18 @@ function moveEverything() {
 	// Disregard all expired beams
 	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
 		beams.splice(expBeamsIndex[i], 1);
+	}
+	
+	// LaserBeams
+	var expBeamsIndex = [];
+	for (var i=0; i < lasers.length; i++) {
+		if(lasers[i].updateLASER()) {
+			expBeamsIndex.push(i); 
+		}
+	}
+	// Disregard all expired beams
+	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
+		lasers.splice(expBeamsIndex[i], 1);
 	}
 	
 	// ---------------------
@@ -257,6 +273,11 @@ function drawEverything() {
 		beams[i].draw();
 	}
 	
+	// LaserBeams
+	for (var i=0; i < lasers.length; i++) {
+		lasers[i].draw();
+	}
+	
 	// Mirrors
 
 	for (var i=0; i < mirrors.length; i++) {
@@ -268,6 +289,7 @@ function drawEverything() {
 	} else {
 		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
 	}
+	
 }
 
 // Draws line on canvas from (x0, y0) to (x1, y1)
@@ -310,6 +332,19 @@ function strokeCircle(centerX, centerY, radius, drawColor, lineWidth) {
 	ctx.beginPath();
 	ctx.arc(centerX, centerY, radius, 0, Math.PI*2,true);
 	ctx.stroke();
+}
+
+function strokeCircleDashed(centerX, centerY, radius, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	
+	var step = 2 * Math.PI / DASHED_CIRCLE_ARC_NUMBER
+	
+	for (i = 0; i < DASHED_CIRCLE_ARC_NUMBER; i++) { 
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, radius, i*step, i*step + step/DASHED_CIRCLE_ARC_LENGTH);
+		ctx.stroke();
+	}
 }
 
 function colorRect(leftX, topY, width, height, drawColor) {
