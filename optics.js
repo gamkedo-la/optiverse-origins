@@ -4,8 +4,9 @@
 // ##################################
 
 const LIGHTSPEED = 3;
-const DASHED_LINE_LENGTH = 20; // must be >1, not sure if decimals do anything
-
+const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
+const LASER_TRAIL_LENGTH = 10; 
+const LASER_LINE_WIDTH = 3; 
 
 
 // ##################################
@@ -603,18 +604,12 @@ Core.prototype.isFull = function () {
 	}
 	return true;
 }
-// emitBeams()
-Core.prototype.emitBeams = function () {
+// emitLasers()
+Core.prototype.emitLasers = function () {
 	for (var i=0; i < this.coreRings.length; i++) {
 		var ring = this.coreRings[i];
 		if (ring.active ) {
-			ring.active = false;
-			for (var j=0; j < ring.beamSlots.length; j++) {
-				ring.beamSlots[j].filled = false;
-			}
-			// fire laser beam
-			
-			// TODO
+			ring.emitLasers(this.centerX, this.centerY);
 		}
 	}
 }
@@ -644,18 +639,17 @@ Core.prototype.draw = function () {
 
 
 // === CoreRing =========================
-function CoreRing(radius, angles, color, lineWidth) {
+function CoreRing(radius, angles, active, color, lineWidth) {
 	this.radius = radius;
 	
 	// Keep track of filled/empty beams in Core Ring
+	this.active = active;
 	this.beamSlots = [];
 	for (var i=0; i < angles.length; i++) {
 		var slot = {direction: deg_to_dir(angles[i]),
-			    filled: false}
+			    filled: active}
 		this.beamSlots.push(slot);
 	}
-	
-	this.active = false;
 	
 	this.color = color;
 	this.lineWidth = lineWidth;	
@@ -667,6 +661,21 @@ CoreRing.prototype.updateRING = function () {
 		// var radiansOffset = this.degreeOffset * Math.PI/180;
 		this.radiusChange = this.amplitude * Math.sin(this.degreeOffset);
 	} */
+}
+CoreRing.prototype.emitLasers = function (centerX, centerY) {
+	this.active = false;
+	for (var i=0; i < this.beamSlots.length; i++) {
+		// fire laser beam
+		var slot = this.beamSlots[i];
+		var distance = this.radius + RING_ARROW_HEAD_LENGTH;
+		var spawnX = centerX + distance * Math.cos(deg_to_rad(slot.direction));
+		var spawnY = centerY + distance * Math.sin(deg_to_rad(slot.direction));
+		var laser = new LaserBeam(spawnX, spawnY, LIGHTSPEED, slot.direction, 
+					LASER_TRAIL_LENGTH, this.color, LASER_LINE_WIDTH)
+		
+		lasers.push(laser); // Emit laserbeam
+		slot.filled = false;
+	}
 }
 // draw()
 CoreRing.prototype.draw = function (centerX, centerY) {
@@ -680,15 +689,18 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 	// Draw arrows
 	for (var i=0; i < this.beamSlots.length; i++) {
 		var slot = this.beamSlots[i];
-		if (slot[1]) { // beam slot is filled
+		
+		var arrowX = centerX + this.radius * Math.cos(deg_to_rad(slot.direction));
+		var arrowY = centerY + this.radius * Math.sin(deg_to_rad(slot.direction));
+		
+		if (slot.filled) { // beam slot is filled
 			// Draw filled arrow in that direction
-			return;
+			colorArrowHead(arrowX, arrowY, slot.direction, this.color)
 		} else {
 			// Draw empty arrow in that direction
-			return;
+			strokeArrowHead(arrowX, arrowY, slot.direction, this.color)
 		}
 	}
-	
 }
 
 

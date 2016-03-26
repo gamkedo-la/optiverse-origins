@@ -13,6 +13,9 @@ const BLOCK_COLOR = '#303030';
 
 const DASHED_CIRCLE_ARC_NUMBER = 40;
 const DASHED_CIRCLE_ARC_LENGTH = 5;
+const RING_ARROW_HEAD_LENGTH = 10;
+const RING_ARROW_HEAD_WIDTH = 5;
+const RING_ARROW_HEAD_LINE_WIDTH = 1;
 
 // ##################################
 // ON LOAD
@@ -115,19 +118,19 @@ lenses = [lens1, lens2, lens3];
 
 
 var dash1 = 2;
-var CR1 = new CoreRing(20, [0], 'red', 3);
+var CR1 = new CoreRing(20, [0], false, 'red', 3);
 var arr1 = [CR1];
 var core1 = new Core(200, 400, 7, 'red', arr1);
 
 var dash2 = 5;
-var CR2 = new CoreRing(25, [90], 'green', 5);
+var CR2 = new CoreRing(25, [90], true, 'green', 5);
 var arr2 = [CR2];
 var core2 = new Core(150, 300, 10, 'green', arr2);
 
 var dash3 = 10;
-var CR3r = new CoreRing(45, [45], 'purple', 3);
-var CR3b = new CoreRing(40, [210], 'blue', 5);
-var arr3 = [CR3b, CR3r];
+var CR3p = new CoreRing(45, [45], false, 'purple', 3);
+var CR3b = new CoreRing(40, [210], false, 'blue', 5);
+var arr3 = [CR3p, CR3b];
 var core3 = new Core(600, 300, 10, 'purple', arr3);
 
 //CR1.active = true;
@@ -290,6 +293,8 @@ function drawEverything() {
 		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
 	}
 	
+	
+	
 }
 
 // Draws line on canvas from (x0, y0) to (x1, y1)
@@ -361,6 +366,55 @@ function strokeRect(leftX, topY, width, height, drawColor, lineWidth) {
 }
 
 function colorText(showWords, textX, textY, fillColor) {
-  ctx.fillStyle = fillColor;
-  ctx.fillText(showWords, textX, textY);
+	ctx.fillStyle = fillColor;
+	ctx.fillText(showWords, textX, textY);
+}
+
+function calculateArrowHead(centerX, centerY, direction) {
+	var result = {leftX: null, leftY: null, 
+		      rightX: null, rightY: null, 
+		      forwardX: null, forwardY: null};
+	var length = RING_ARROW_HEAD_LENGTH, width = RING_ARROW_HEAD_WIDTH;
+	var angle = deg_to_rad(direction);
+	
+	result.forwardX = centerX + length * Math.cos(angle);
+	result.forwardY = centerY + length * Math.sin(angle);
+	result.leftX = centerX + width * Math.cos(angle - Math.PI/2);
+	result.leftY = centerY + width * Math.sin(angle - Math.PI/2);
+	result.rightX = centerX + width * Math.cos(angle + Math.PI/2);
+	result.rightY = centerY + width * Math.sin(angle + Math.PI/2);
+	
+	return result;
+}
+
+function colorArrowHead(centerX, centerY, direction, fillColor) {
+	// Calculate arrow dimensions
+	var arrow = calculateArrowHead(centerX, centerY, direction);	
+	
+	// Draw arrow
+	ctx.fillStyle = fillColor;
+	
+	ctx.beginPath();
+	ctx.moveTo(arrow.leftX, arrow.leftY);
+	ctx.lineTo(arrow.forwardX, arrow.forwardY);
+	ctx.lineTo(arrow.rightX, arrow.rightY);
+	ctx.closePath();
+	
+	ctx.fill();
+}
+
+function strokeArrowHead(centerX, centerY, direction, drawColor) {
+	// Calculate arrow dimensions
+	var arrow = calculateArrowHead(centerX, centerY, direction);
+	
+	// Draw arrow
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = RING_ARROW_HEAD_LINE_WIDTH;
+	
+	ctx.beginPath();
+	ctx.moveTo(arrow.leftX, arrow.leftY);
+	ctx.lineTo(arrow.forwardX, arrow.forwardY);
+	ctx.lineTo(arrow.rightX, arrow.rightY);
+	
+	ctx.stroke();
 }
