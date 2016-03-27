@@ -54,6 +54,11 @@ OptiLevel.tick = function()
 	// (Take this from main.js)
 }
 
+OptiLevel.addOpticsPiece = function(piece)
+{
+	if()
+}
+
 
 OptiLevel.draw = function()
 {
