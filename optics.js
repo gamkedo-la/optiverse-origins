@@ -13,9 +13,6 @@ const LASER_LINE_WIDTH = 3;
 // Helper Functions
 // ##################################
 
-// crosses
-// surrounds
-
 // Dot product of two vectors
 function dot_product(a,b) {
 	// Args: a = [x1,y1], b = [x2,y2]
@@ -404,6 +401,33 @@ function deg_to_rad(degrees) {
 // ##################################
 
 
+//-----------------------------------------------------------------------------//
+/*
+ *	Name: 		OpticsPiece
+ * 	Abstract: 	YES
+ * 	Superclass:     n/a
+ * 	Subclasses:	Point, Line, MirrorLine, 
+ * 	
+ * 	Description: Describes a level object
+ * 
+//-----------------------------------------------------------------------------*/	
+
+OpticsPiece.prototype = Object.create( Graphic.prototype );		
+OpticsPiece.prototype.constructor = OpticsPiece;	
+
+function OpticsPiece(type) {
+	this.type = type;
+}
+// updatePiece()
+OpticsPiece.prototype.updatePiece = function () {
+}
+OpticsPiece.prototype.movePiece = function () {
+}
+OpticsPiece.prototype.rotatePiece = function () {
+}
+
+
+
 // ----------------------------------
 // Points
 // ----------------------------------
@@ -656,11 +680,8 @@ function CoreRing(radius, angles, active, color, lineWidth) {
 }
 // updateRING()
 CoreRing.prototype.updateRING = function () {
-	/* if (this.active){
-		this.degreeOffset = (this.degreeOffset + this.frequency) % 360;
-		// var radiansOffset = this.degreeOffset * Math.PI/180;
-		this.radiusChange = this.amplitude * Math.sin(this.degreeOffset);
-	} */
+	// Send out dashed lines
+	
 }
 CoreRing.prototype.emitLasers = function (centerX, centerY) {
 	this.active = false;
