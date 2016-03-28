@@ -22,12 +22,13 @@ function OptiLevel()
 	// MEMBERS
 	//--------------------
 
-	this.mirrors = []; 
-	this.blocks = []; 
-	this.lenses = [];
-	this.cores = []; 
-	this.beams = []; 
-	this.lasers = []; 
+	this.beams = [];   //1
+	this.lasers = [];  //2
+	this.blocks = [];  //3
+	this.mirrors = []; //4
+	this.lenses = [];  //5
+	this.cores = [];   //6
+	
 
 	return this;
 }
@@ -48,15 +49,71 @@ OptiLevel.init = function(_pieces)
 	return instance;
 }
 
-OptiLevel.tick = function()
-{
-	// Loop through all level pieces and call their update function
-	// (Take this from main.js)
-}
-
 OptiLevel.addOpticsPiece = function(piece)
 {
-	if()
+	if(piece.type == "beam") {
+	} else if (piece.type == "laser") {
+	} else if (piece.type == "block") {
+	} else if (piece.type == "mirror") {
+	} else if (piece.type == "lens") {
+	} else if (piece.type == "core") {
+	} else if (piece.type == "other") {
+	} else {
+		console.log("Unrecognized OpticsPiece type: ", piece);
+	}
+}
+
+OptiLevel.tick = function()
+{
+	// ---------------------
+	// Level parts
+	// ---------------------
+	for (var i=0; i < currentLevel.pieces.length; i++) {
+		currentLevel.pieces[i].update();
+	}
+
+	// ---------------------
+	// Beams
+	// ---------------------
+	//
+	// Update all beams and check if they have expired
+	
+	// Beams
+	var expBeamsIndex = [];
+	for (var i=0; i < beams.length; i++) {
+		if(beams[i].updateBEAM()) {
+			expBeamsIndex.push(i); 
+		}
+	}
+	// Disregard all expired beams
+	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
+		beams.splice(expBeamsIndex[i], 1);
+	}
+	
+	// LaserBeams
+	var expBeamsIndex = [];
+	for (var i=0; i < lasers.length; i++) {
+		if(lasers[i].updateLASER()) {
+			expBeamsIndex.push(i); 
+		}
+	}
+	// Disregard all expired beams
+	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
+		lasers.splice(expBeamsIndex[i], 1);
+	}
+	
+	// ---------------------
+	// Mouse tractor beam 
+	// ---------------------
+	
+	
+	// ---------------------
+	// CORES
+	// ---------------------
+	// update core rings
+	for (var i=0; i < cores.length; i++) {
+		cores[i].updateCORE();
+	}
 }
 
 

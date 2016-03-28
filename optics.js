@@ -18,7 +18,7 @@ const LASER_LINE_WIDTH = 3;
  *	Name: 		OpticsPiece
  * 	Abstract: 	YES
  * 	Superclass:     n/a
- * 	Subclasses:	Point, Line, MirrorLine, etc.
+ * 	Subclasses:	Line, Beam, LaserBeam, etc.
  * 	
  * 	Description:	Describes a level object
  * 
@@ -32,9 +32,36 @@ function OpticsPiece(kind) {
 }
 OpticsPiece.prototype.updatePiece = function () {
 }
-OpticsPiece.prototype.movePiece = function () {
+
+
+//-----------------------------------------------------------------------------//
+/*
+ *	Name: 		MoveablePiece
+ * 	Abstract: 	YES
+ * 	Superclass:     OpticsPiece
+ * 	Subclasses:	MirrorLine, Lens, etc.
+ * 	
+ * 	Description:	Describes a level object
+ * 
+//-----------------------------------------------------------------------------*/	
+
+MoveablePiece.prototype = Object.create( OpticsPiece.prototype );		
+MoveablePiece.prototype.constructor = MoveablePiece;	
+
+function MoveablePiece(kind, outlinePoints, centerX, centerY) {
+	this.kind = kind; // string
+	this.outlinePoints = outlinePoints;
+	this.centerX = centerX;
+	this.centerY = centerY;
 }
-OpticsPiece.prototype.rotatePiece = function () {
+MoveablePiece.prototype.encloses = function (x, y) {
+	var point = new Point(x, y);
+	return encloses(this.outlinePoints, point);
+}
+MoveablePiece.prototype.moveTo = function (newCenterX, newCenterY) {
+	// default
+	this.centerX = newCenterX;
+	this.centerY = newCenterY;
 }
 
 
@@ -54,9 +81,6 @@ function Point(x, y) {
 // ----------------------------------
 
 // === Line =========================
-Line.prototype = Object.create( OpticsPiece.prototype );		
-Line.prototype.constructor = Line;
-// constructor
 function Line(startX, startY, endX, endY, color, lineWidth) {
 	this.color = color;
 	this.lineWidth = lineWidth;
@@ -78,23 +102,67 @@ Line.prototype.draw = function () {
 // ----------------------------------
 
 // === MirrorLine =========================
-MirrorLine.prototype = Object.create(Line.prototype); 
-MirrorLine.prototype.constructor = MirrorLine; 
+MirrorLine.prototype = Object.create( MoveablePiece.prototype );		
+MirrorLine.prototype.constructor = MirrorLine;
 // constructor
 function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
-	// Call parent constructor	
-	Line.call(this, startX, startY, endX, endY, color, lineWidth);				
+	// Call parent constructor
+	this.color = color;
+	this.lineWidth = lineWidth;
+	this.startX = startX;
+	this.startY = startY;
+	this.endX = endX;
+	this.endY = endY;
+	
+	// Create border for movement
+	var centerX, centerY;
+	centerX = (startX + endX) / 2;
+	centerY = (startY + endY) / 2;
+	// Temporary patch
+	var p1 = new Point(startX + 5, startY);	
+	var p2 = new Point(startX - 5, startY);
+	var p3 = new Point(endX, startY + 5);	
+	var p4 = new Point(endX, startY - 5);
+	var points = [p1, p2, p3, p4];
+	/* TODO: Real border points
+	var p1, p2, p3, p4, direction;
+	direction = 
+	p1 = 
+	*/
+	MoveablePiece.call(this, "mirror", points, centerX, centerY);
 } 
-// move()
-MirrorLine.prototype.move = function (deltaX, deltaY) {
-	// TO DO
+// moveTo()
+MirrorLine.prototype.moveTo = function (newCenterX, newCenterY) {
+	var deltaX = newCenterX - this.centerX;
+	var deltaY = newCenterY - this.centerY;
+	
+	// Move all points by delta
+	this.centerX = newCenterX;
+	this.centerY = newCenterY;
+	this.startX += deltaX;
+	this.startY += deltaY;
+	this.endX += deltaX;
+	this.endY += deltaY;
+	for (var i = 0; i < this.outlinePoints.length; i++) {
+		var point = this.outlinePoints[i];
+		point.x += deltaX;
+		point.y += deltaY;
+	}
+	
 }
 // reflect()
 MirrorLine.prototype.reflect = function (line_step) {
 	
 	var result = reflect_mirror(line_step, this)
 	return result;
-}						
+}
+// draw()
+MirrorLine.prototype.draw = function () {
+	colorLine(this.startX, this.startY, 
+		 this.endX, this.endY, 
+		 this.color, this.lineWidth);
+}
+
 
 
 /* TO DO
@@ -162,18 +230,39 @@ LensLine.prototype.refract = function (line_step) {
 
 
 // === Lens =========================
-Lens.prototype = Object.create( OpticsPiece.prototype );		
+Lens.prototype = Object.create( MoveablePiece.prototype );		
 Lens.prototype.constructor = Lens;
 // constructor
 function Lens(points, refractiveIndex, color) {
 	// points: array of ordered points that make up the lens
 	// refractiveIndex: index of refraction
 	
+	this.outlinePoints = points;
 	this.refractiveIndex = refractiveIndex;	
-	this.lensLines = [];
 	this.color = color;
 	
+	this.poinstToLensLines(this.outlinePoints);
+	
+	// Find center point
+	var maxX = points[0].x, minX = points[0].x;
+	var maxY = points[0].y, minY = points[0].y;
+	for (var i = 1; i < points.length; i++) {
+		maxX = Math.max(maxX, points[i].x);
+		minX = Math.min(minX, points[i].x);
+		maxY = Math.max(maxY, points[i].y);
+		minY = Math.min(minY, points[i].y);
+	}
+	
+	var centerX = (maxX + minX) / 2;
+	var centerY = (maxY + minY) / 2;
+	
+	MoveablePiece.call(this, "lens", points, centerX, centerY);
+	
+} 
+// poinstToLensLines()
+Lens.prototype.poinstToLensLines = function (points) {
 	// Convert ponts to LensLines
+	this.lensLines = [];
 	for (var i=0; i < points.length; i++) {	
 		var startX = points[i].x;
 		var startY = points[i].y;
@@ -183,8 +272,27 @@ function Lens(points, refractiveIndex, color) {
 		var lensLine = new LensLine(startX, startY, endX, endY, this.refractiveIndex);
 		this.lensLines.push(lensLine);
 	}
+}
+// moveTo()
+Lens.prototype.moveTo = function (newCenterX, newCenterY) {
+	var deltaX = newCenterX - this.centerX;
+	var deltaY = newCenterY - this.centerY;
 	
-} 
+	// Move all points by delta
+	this.centerX = newCenterX;
+	this.centerY = newCenterY;
+	this.startX += deltaX;
+	this.startY += deltaY;
+	this.endX += deltaX;
+	this.endY += deltaY;
+	for (var i = 0; i < this.outlinePoints.length; i++) {
+		var point = this.outlinePoints[i];
+		point.x += deltaX;
+		point.y += deltaY;
+	}
+	this.poinstToLensLines(this.outlinePoints);
+	
+}
 // draw()
 Lens.prototype.draw = function () {
 	var points = [];
@@ -234,6 +342,10 @@ function Core(centerX, centerY, radius, color, coreRings) {
 	this.radius = radius;
 	this.color = color;
 	this.coreRings = coreRings; // an array of CoreRing objects
+}
+// updatePiece() *override*
+Core.prototype.updatePiece = function () {
+	this.updateCORE();
 }
 // updateCORE()
 Core.prototype.updateCORE = function () {
@@ -304,7 +416,6 @@ function CoreRing(radius, angles, active, color, lineWidth) {
 // updateRING()
 CoreRing.prototype.updateRING = function () {
 	// Send out dashed lines
-	
 }
 CoreRing.prototype.emitLasers = function (centerX, centerY) {
 	this.active = false;
@@ -372,6 +483,10 @@ function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 	this.prevX = posX;
 	this.prevY = posY;
 	this.prevDirection = this.direction;
+}
+// updatePiece() *override*
+Beam.prototype.updatePiece = function () {
+	this.updateBEAM();
 }
 // updateBEAM()
 Beam.prototype.updateBEAM = function () {
@@ -504,6 +619,10 @@ function LaserBeam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 	// Call parent constructor	
 	Beam.call(this, posX, posY, speed, angle, trailLength, color, lineWidth);		
 } 
+// updatePiece() *override*
+LaserBeam.prototype.updatePiece = function () {
+	this.updateLASER();
+}
 // updateLASER()
 LaserBeam.prototype.updateLASER = function () {
 	// Call superclass update

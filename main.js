@@ -45,6 +45,7 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
   document.addEventListener("keydown", keyPressed);
 
   canvas.addEventListener('mousedown', handleMouseClick);
+  canvas.addEventListener('mouseup', handleMouseUp);
 	
   canvas.addEventListener('mousemove', updateMousePos); 
 }
@@ -157,7 +158,7 @@ var beam7 = new LaserBeam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLine
 var beam8 = new LaserBeam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
 
 
-lasers = [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
+lasers = []; // [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
 
 
 // ##################################
