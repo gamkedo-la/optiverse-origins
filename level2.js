@@ -22,12 +22,14 @@ function OptiLevel()
 	// MEMBERS
 	//--------------------
 
-	this.beams = [];   //1
-	this.lasers = [];  //2
-	this.blocks = [];  //3
-	this.mirrors = []; //4
-	this.lenses = [];  //5
-	this.cores = [];   //6
+	this.beams = [];   
+	this.lasers = [];  
+	this.blocks = [];  
+	this.mirrors = []; 
+	this.lenses = [];  
+	this.cores = []; 
+	this.coresinks = [];   
+	this.sprites = [];
 	
 
 	return this;
@@ -49,26 +51,108 @@ OptiLevel.init = function(_pieces)
 	return instance;
 }
 
-OptiLevel.addOpticsPiece = function(piece)
+OptiLevel.prototype.addOpticsPiece = function(piece)
 {
-	if(piece.type == "beam") {
-	} else if (piece.type == "laser") {
-	} else if (piece.type == "block") {
-	} else if (piece.type == "mirror") {
-	} else if (piece.type == "lens") {
-	} else if (piece.type == "core") {
-	} else if (piece.type == "other") {
+	if(piece.kind == "beam") {
+		this.beams.push(piece);
+	} else if (piece.kind == "laser") {
+		this.lasers.push(piece);
+	} else if (piece.kind == "block") {
+		this.blocks.push(piece);
+	} else if (piece.kind == "mirror") {
+		this.mirrors.push(piece);
+	} else if (piece.kind == "lens") {
+		this.lenses.push(piece);
+	} else if (piece.kind == "core") {
+		this.cores.push(piece);
+	} else if (piece.kind == "sink") {
+		this.coresinks.push(piece);
+	} else if (piece.kind == "sprites") {
+		this.sprites.push(piece);
 	} else {
-		console.log("Unrecognized OpticsPiece type: ", piece);
+		console.log("Unrecognized OpticsPiece kind: ", piece.kind);
+		console.log("for Optics element: ", piece);
+		return;
 	}
 }
 
-OptiLevel.tick = function()
+OptiLevel.prototype.addManyOpticsPieces = function(pieces)
 {
+	for (var i=0; i < pieces.length; i++ ) {
+		this.addOpticsPiece(pieces[i]);
+	}
+}
+
+OptiLevel.prototype.removeOpticsPiece = function(piece)
+{
+	var arr, index = null;
+	
+	// Find correct list
+	if(piece.kind == "beam") {
+		arr = this.beams;
+	} else if (piece.kind == "laser") {
+		arr = this.lasers;
+	} else if (piece.kind == "block") {
+		arr = this.blocks;
+	} else if (piece.kind == "mirror") {
+		arr = this.mirrors;
+	} else if (piece.kind == "lens") {
+		arr = this.lenses;
+	} else if (piece.kind == "core") {
+		arr = this.cores;
+	} else if (piece.kind == "sprites") {
+		arr = this.sprites;
+	} else {
+		console.log("Unrecognized OpticsPiece kind: ", piece.kind);
+		console.log("for Optics element: ", piece);
+		return;
+	}
+	
+	// Find index of piece
+	for (var i=0; i < arr.length; i++) {
+		if (arr[i] == piece) {
+			index = i
+			break;
+		}
+	}
+	
+	// Remove piece from array
+	if (index) {
+		arr.splice(index, 1);
+	} else {
+		console.log("Could not remove OpticsPiece, not in OptiLevel arrays: ", piece);
+	}
+}
+
+OptiLevel.prototype.levelCompleted = function(){
+	for (var i=0; i < this.coresinks.length; i++) {
+		for (var j=0; j < this.coresinks[i].coreRings.length; j++)  {
+			
+			var ring = this.coresinks[i].coreRings[j];
+			
+			// Loop through ring's beam slots
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				if (!slot.filled) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+OptiLevel.prototype.tick = function()
+{
+
+	if (this.levelCompleted()) {
+		return;
+	}
+	
 	// ---------------------
 	// Level parts
 	// ---------------------
-	for (var i=0; i < currentLevel.pieces.length; i++) {
+	for (var i=0; i < this.pieces.length; i++) {
 		currentLevel.pieces[i].update();
 	}
 
@@ -79,46 +163,100 @@ OptiLevel.tick = function()
 	// Update all beams and check if they have expired
 	
 	// Beams
-	var expBeamsIndex = [];
-	for (var i=0; i < beams.length; i++) {
-		if(beams[i].updateBEAM()) {
-			expBeamsIndex.push(i); 
+	for (var i = this.beams.length-1; i >= 0; i--) {
+		var beam = beams[i];
+		
+		beam.updatePiece();
+		
+		if (beam.expired()) {
+			this.beams.splice(i, 1);
 		}
-	}
-	// Disregard all expired beams
-	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
-		beams.splice(expBeamsIndex[i], 1);
 	}
 	
 	// LaserBeams
-	var expBeamsIndex = [];
-	for (var i=0; i < lasers.length; i++) {
-		if(lasers[i].updateLASER()) {
-			expBeamsIndex.push(i); 
+	for (var i = this.lasers.length-1; i >= 0; i--) {
+		var laser = this.lasers[i];
+		
+		laser.updatePiece();
+		
+		if (laser.expired()) {
+			this.lasers.splice(i, 1);
 		}
 	}
-	// Disregard all expired beams
-	for (var i=expBeamsIndex.length-1; i >= 0; i--) {
-		lasers.splice(expBeamsIndex[i], 1);
-	}
-	
-	// ---------------------
-	// Mouse tractor beam 
-	// ---------------------
 	
 	
 	// ---------------------
 	// CORES
 	// ---------------------
 	// update core rings
-	for (var i=0; i < cores.length; i++) {
-		cores[i].updateCORE();
+	for (var i=0; i < this.cores.length; i++) {
+		this.cores[i].updatePiece();
 	}
 }
 
 
-OptiLevel.draw = function()
+OptiLevel.prototype.draw = function()
 {
-	// Loop through all level pieces and call their draw function
-	// (Take this from main.js)
+	// next line blanks out the screen with black
+	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
+
+	openingSequenceHandler();
+	if( isOpeningBlockingGameplay() ) {
+		return; // skip other gameplay stuff for now if doing opening
+	}
+
+	// Level pieces
+	for (var i=0; i < editorLevel.pieces.length; i++) {
+		editorLevel.pieces[i].draw();
+	}
+	
+	// Blocks	
+	for (var i=0; i < this.blocks.length; i++) {
+		this.blocks[i].draw();
+	}	
+	
+	// Lenses	
+	for (var i=0; i < this.lenses.length; i++) {
+		this.lenses[i].draw();
+	}	
+	
+	// Cores
+	for (var i=0; i < this.cores.length; i++) {
+		this.cores[i].draw();
+	}
+	
+	// Core Sinks
+	for (var i=0; i < this.coresinks.length; i++) {
+		this.coresinks[i].draw();
+	}
+	
+	// Beams
+	for (var i=0; i < this.beams.length; i++) {
+		this.beams[i].draw();
+	}
+	
+	// LaserBeams
+	for (var i=0; i < this.lasers.length; i++) {
+		this.lasers[i].draw();
+	}
+	
+	// Mirrors
+
+	for (var i=0; i < this.mirrors.length; i++) {
+		this.mirrors[i].draw();
+	}
+	
+	
+	if (this.levelCompleted()) {
+		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
+	} 
+	else if(LevelEditor.active) {
+		editorUpdate();
+	} else {
+		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
+	}
+	
+	
+	
+
 }

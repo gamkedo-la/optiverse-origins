@@ -49,7 +49,7 @@ MoveablePiece.prototype = Object.create( OpticsPiece.prototype );
 MoveablePiece.prototype.constructor = MoveablePiece;	
 
 function MoveablePiece(kind, outlinePoints, centerX, centerY) {
-	this.kind = kind; // string
+	OpticsPiece.call(this, kind);
 	this.outlinePoints = outlinePoints;
 	this.centerX = centerX;
 	this.centerY = centerY;
@@ -106,7 +106,6 @@ MirrorLine.prototype = Object.create( MoveablePiece.prototype );
 MirrorLine.prototype.constructor = MirrorLine;
 // constructor
 function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
-	// Call parent constructor
 	this.color = color;
 	this.lineWidth = lineWidth;
 	this.startX = startX;
@@ -319,6 +318,8 @@ function Block(points, color) {
 	this.points = points;
 	this.color = color;
 	
+	OpticsPiece.call(this, "block");
+	
 } 
 // draw()
 Block.prototype.draw = function () {
@@ -328,7 +329,7 @@ Block.prototype.draw = function () {
 
 
 // ----------------------------------
-// Cores and Sources
+// Cores
 // ----------------------------------
 
 // === Core =========================
@@ -342,6 +343,8 @@ function Core(centerX, centerY, radius, color, coreRings) {
 	this.radius = radius;
 	this.color = color;
 	this.coreRings = coreRings; // an array of CoreRing objects
+	
+	OpticsPiece.call(this, "core");
 }
 // updatePiece() *override*
 Core.prototype.updatePiece = function () {
@@ -392,10 +395,23 @@ Core.prototype.draw = function () {
 	
 	// Core levels
 	for(var i=0; i < this.coreRings.length; i++){
-		this.coreRings[i].draw(this.centerX, this.centerY);
+		this.coreRings[i].draw(this.centerX, this.centerY, this.kind);
 	}
 }
 
+// === CoreSink =========================
+CoreSink.prototype = Object.create( Core.prototype );		
+CoreSink.prototype.constructor = CoreSink;
+// constructor
+function CoreSink(centerX, centerY, radius, color, coreRings) {
+	Core.call(this, centerX, centerY, radius, color, coreRings);
+	OpticsPiece.call(this, "sink");
+}
+
+
+// ----------------------------------
+// Core Rings
+// ----------------------------------
 
 // === CoreRing =========================
 function CoreRing(radius, angles, active, color, lineWidth) {
@@ -428,12 +444,12 @@ CoreRing.prototype.emitLasers = function (centerX, centerY) {
 		var laser = new LaserBeam(spawnX, spawnY, LIGHTSPEED, slot.direction, 
 					LASER_TRAIL_LENGTH, this.color, LASER_LINE_WIDTH)
 		
-		lasers.push(laser); // Emit laserbeam
+		currentLevel.addOpticsPiece(laser); // Emit laserbeam
 		slot.filled = false;
 	}
 }
 // draw()
-CoreRing.prototype.draw = function (centerX, centerY) {
+CoreRing.prototype.draw = function (centerX, centerY, kind) {
 	
 	// Draw Ring
 	if (this.active) {
@@ -441,6 +457,11 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 	} else {
 		strokeCircleDashed(centerX, centerY, this.radius, this.color, 1);
 	}
+	
+	if (kind == "sink") {
+		return // core sinks don't have arrows
+	}
+	
 	// Draw arrows
 	for (var i=0; i < this.beamSlots.length; i++) {
 		var slot = this.beamSlots[i];
@@ -460,8 +481,9 @@ CoreRing.prototype.draw = function (centerX, centerY) {
 
 
 
+
 // ----------------------------------
-// Laser Beams
+// Beams
 // ----------------------------------
 
 // === Beam =========================
@@ -483,6 +505,8 @@ function Beam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 	this.prevX = posX;
 	this.prevY = posY;
 	this.prevDirection = this.direction;
+	
+	OpticsPiece.call(this, "beam");
 }
 // updatePiece() *override*
 Beam.prototype.updatePiece = function () {
@@ -492,10 +516,7 @@ Beam.prototype.updatePiece = function () {
 Beam.prototype.updateBEAM = function () {
 	if (!this.active){
 		this.trail.removeLine();
-		if (this.trail.lines.length == 0) {
-			return true; // Delete beam
-		}
-		return false; // Don't delete beam
+		return;
 	}
 	
 	// Update previous info
@@ -515,15 +536,15 @@ Beam.prototype.updateBEAM = function () {
 		      direction: this.direction};
 		      
 	// create point of most recent step
-	var point_step = new Point(this.posX, this.posY)
+	var point_step = new Point(this.posX, this.posY);
 	
 	// mirror collisions 
-	for (var i=0; i < mirrors.length; i++) {
+	for (var i=0; i < currentLevel.mirrors.length; i++) {
 	
-		if(lines_intersect(mirrors[i], line_step)){
+		if(lines_intersect(currentLevel.mirrors[i], line_step)){
 			
 			// Reflect off of mirror
-			reflection = mirrors[i].reflect(line_step);
+			reflection = currentLevel.mirrors[i].reflect(line_step);
 			
 			// Add line to intersection point
 			this.trail.addLine(this.prevX, this.prevY, 
@@ -540,14 +561,14 @@ Beam.prototype.updateBEAM = function () {
 			this.posY = reflection.newY;
 			this.direction = deg_to_dir(reflection.newDirection);		
 			
-			return false; // Only one collision event
+			return; // Only one collision event
 		}
 	}
 	
 	
 	// lens collisions
-	for (var i=0; i < lenses.length; i++) {
-		var lensLines = lenses[i].lensLines;
+	for (var i=0; i < currentLevel.lenses.length; i++) {
+		var lensLines = currentLevel.lenses[i].lensLines;
 		for (var j=0; j < lensLines.length; j++)  {
 			if(lines_intersect(lensLines[j], line_step)){
 				// Refract off of lens
@@ -568,7 +589,7 @@ Beam.prototype.updateBEAM = function () {
 				this.posY = refraction.newY;
 				this.direction = deg_to_dir(refraction.newDirection);		
 				
-				return false; // Only one collision event
+				return; // Only one collision event
 				
 			}
 		}
@@ -577,25 +598,42 @@ Beam.prototype.updateBEAM = function () {
 	
 	
 	// block collisions
-	for (var i=0; i < blocks.length; i++) {
-		if (encloses(blocks[i].points, point_step)) {
+	for (var i=0; i < currentLevel.blocks.length; i++) {
+		if (encloses(currentLevel.blocks[i].points, point_step)) {
 			this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
 			this.active = false;
-			return false;
+			return;
 		}
 	}
 	
 	// no collisions:
 	this.trail.addLine(this.prevX, this.prevY, this.posX, this.posY);
-
-	// check for screen exit
-	var lastLine = this.trail.lines[0];
-	if(lastLine.endX < 0.0 || lastLine.endY < 0.0 || lastLine.endX > canvas.width || lastLine.endY > canvas.height) {
-		this.active = false;
-		return true; // Delete beam
+	return;
+	
+}
+// expired()
+Beam.prototype.expired = function () {
+	// Does beam have a trail?
+	if (this.trail.lines.length <= 0) {
+		return true; // No trail, beam is expired
 	}
-
-	return false;
+	// Is beam trail on the screen?
+	for( var i = 0; i < this.trail.lines.length; i++) {
+		line = this.trail.lines[i];	
+		
+		// Is start point on screen?
+		if((line.startX > 0.0 && line.startX < canvas.width) &&
+		   (line.startY > 0.0 && line.startY < canvas.height)) {	
+			return false; // part of trail is on screen, beam is active
+		}
+		// Is end point on screen?
+		if((line.endX > 0.0 && line.endX < canvas.width) &&
+		   (line.endY > 0.0 && line.endY < canvas.height)) {	
+			return false; // part of trail is on screen, beam is active
+		}
+	}
+	// If no part of trail is on screen, beam is expired
+	return true;
 }
 // getSpeedX()
 Beam.prototype.getSpeedX = function () {
@@ -617,7 +655,8 @@ LaserBeam.prototype = Object.create(Beam.prototype);
 LaserBeam.prototype.constructor = LaserBeam; 
 function LaserBeam(posX, posY, speed, angle, trailLength, color, lineWidth) {
 	// Call parent constructor	
-	Beam.call(this, posX, posY, speed, angle, trailLength, color, lineWidth);		
+	Beam.call(this, posX, posY, speed, angle, trailLength, color, lineWidth);
+	OpticsPiece.call(this, "laser"); // Overrides Beam call to superclass
 } 
 // updatePiece() *override*
 LaserBeam.prototype.updatePiece = function () {
@@ -628,13 +667,17 @@ LaserBeam.prototype.updateLASER = function () {
 	// Call superclass update
 	var bool = this.updateBEAM();
 	
+	if (!this.active){
+		return;
+	}
+	
 	// core collisions
-	for (var i=0; i < cores.length; i++) {
-		for (var j=0; j < cores[i].coreRings.length; j++)  {
+	for (var i=0; i < currentLevel.cores.length; i++) {
+		for (var j=0; j < currentLevel.cores[i].coreRings.length; j++)  {
 			
-			var ring = cores[i].coreRings[j];
+			var ring = currentLevel.cores[i].coreRings[j];
 			var dist = distance_between_two_points(this.posX, this.posY, 
-						cores[i].centerX, cores[i].centerY);
+						currentLevel.cores[i].centerX, currentLevel.cores[i].centerY);
 			if(dist > ring.radius || this.color != ring.color){
 				continue;
 			}
@@ -648,13 +691,37 @@ LaserBeam.prototype.updateLASER = function () {
 					ring.active = true; // activate ring
 					this.active = false; // deactivate laser
 					
-					return false;
+					return;
 				}
 			}
 		}
 	}
 	
-	return bool;
+	// coreSink collisions
+	for (var i=0; i < currentLevel.coresinks.length; i++) {
+		for (var j=0; j < currentLevel.coresinks[i].coreRings.length; j++)  {
+			
+			var ring = currentLevel.coresinks[i].coreRings[j];
+			var dist = distance_between_two_points(this.posX, this.posY, 
+						currentLevel.coresinks[i].centerX, currentLevel.coresinks[i].centerY);
+			if(dist > ring.radius || this.color != ring.color){
+				continue;
+			}
+			
+			// Loop through ring's beam slots
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				if (!slot.filled) {
+					// Beam is absorbed
+					slot.filled = true; // fill beam slot
+					ring.active = true; // activate ring
+					this.active = false; // deactivate laser
+					
+					return;
+				}
+			}
+		}
+	}
 }
 
 // ----------------------------------
@@ -679,8 +746,10 @@ Trail.prototype.addLine = function (startX, startY, endX, endY) {
 }
 // removeLine()
 Trail.prototype.removeLine = function () {
-	var temp = this.lines.shift() //Get rid of oldest line
-	// temp is throwaway, not used
+	if (this.lines.length > 0) {
+		var temp = this.lines.shift() //Get rid of oldest line
+		// temp is throwaway, not used
+	}
 }
 // draw()
 Trail.prototype.draw = function () {

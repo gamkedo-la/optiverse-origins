@@ -28,21 +28,21 @@ function handleMouseClick(evt) {
 	mouseClicked_bool = true;
 	
 	// Check for click on moveable objects & add them to slected object
-	for (var i=0; i < lenses.length; i++) {
-		if(lenses[i].encloses(mouseX, mouseY)) {
-			selectedObject = lenses[i];
+	for (var i=0; i < currentLevel.lenses.length; i++) {
+		if(currentLevel.lenses[i].encloses(mouseX, mouseY)) {
+			selectedObject = currentLevel.lenses[i];
 		}
 	}
-	for (var i=0; i < mirrors.length; i++) {
-		if(mirrors[i].encloses(mouseX, mouseY)) {
-			selectedObject = mirrors[i];
+	for (var i=0; i < currentLevel.mirrors.length; i++) {
+		if(currentLevel.mirrors[i].encloses(mouseX, mouseY)) {
+			selectedObject = currentLevel.mirrors[i];
 			console.log("mirror selected");
 		}
 	}
 	
 	// Check for click on cores
-	for (var i=0; i < cores.length; i++) {
-		core = cores[i];
+	for (var i=0; i < currentLevel.cores.length; i++) {
+		core = currentLevel.cores[i];
 		if (core.encloses(mouseX, mouseY)){
 			core.emitLasers();
 		}
@@ -50,7 +50,7 @@ function handleMouseClick(evt) {
 }
 function handleMouseUp(evt) {
 	if(LevelEditor.active) {
-		LevelEditor.mouseUp(evt);
+		// LevelEditor.mouseUp(evt);
 		return; // bypass any gameplay interactions while in editor
 	}
 	

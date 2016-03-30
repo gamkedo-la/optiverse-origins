@@ -2,6 +2,8 @@
 var canvas;
 var ctx;
 
+var currentLevel = OptiLevel.init();
+
 // ##################################
 // Global Variables
 // ##################################
@@ -33,21 +35,24 @@ window.onload = function() {
 
 function loadingDoneSoStartGame() { // so that game and input won't start until images load
 	var framesPerSecond = 30;
+	
+	loadGameElements();
+	
 	setInterval(function() {
-			moveEverything();
-			drawEverything();	
+			currentLevel.tick();
+			currentLevel.draw();	
 		}, 1000/framesPerSecond);
 
 	LevelEditor.setup();
 
-  setupOpeningAnimTick();
-
-  document.addEventListener("keydown", keyPressed);
-
-  canvas.addEventListener('mousedown', handleMouseClick);
-  canvas.addEventListener('mouseup', handleMouseUp);
-	
-  canvas.addEventListener('mousemove', updateMousePos); 
+	setupOpeningAnimTick();
+      
+	document.addEventListener("keydown", keyPressed);
+      
+	canvas.addEventListener('mousedown', handleMouseClick);
+	canvas.addEventListener('mouseup', handleMouseUp);
+	      
+	canvas.addEventListener('mousemove', updateMousePos); 
 }
 
 
@@ -55,117 +60,125 @@ function loadingDoneSoStartGame() { // so that game and input won't start until 
 // Game elements
 // ##################################
 
-var mirrors = [], blocks = [], lenses = [], cores = [], beams = [], lasers = [], 
-	      points = [];
+/* var mirrors = [], blocks = [], lenses = [], cores = [], beams = [], lasers = [], 
+	      points = []; */
 
+function loadGameElements() {
 
-// Mirrors
-var mirrorLineWidth = 6;
-var mirror1 = new MirrorLine(100, 50, 700, 50, MIRROR_COLOR, mirrorLineWidth);
-var mirror2 = new MirrorLine(100, 50, 0, 500, MIRROR_COLOR, mirrorLineWidth);
-var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
-var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
-
-mirrors = [mirror1,mirror2,mirror3,mirror4];
-
-
-// Blocks
-var p1 = new Point(50, 450);
-var p2 = new Point(100, 450);
-var p3 = new Point(100, 500);
-var p4 = new Point(50, 500);
-points = [p1, p2, p3, p4];
-var block1 = new Block(points, BLOCK_COLOR);
-
-//Accumulate
-blocks = [block1];  
-
-
-// Lenses
-
-// Square
-var pa1 = new Point(100, 190);
-var pa2 = new Point(400, 190);
-var pa3 = new Point(400, 210);
-var pa4 = new Point(100, 210);
-points = [pa1, pa2, pa3, pa4];
-var lens1 = new Lens(points, 1.3, LENS_COLOR);
-
-// Prism
-var pb1 = new Point(400, 250);
-var pb2 = new Point(500, 110);
-var pb3 = new Point(600, 250);
-points = [pb1, pb2, pb3];
-var lens2 = new Lens(points, 1.3, LENS_COLOR);
-
-// Lens
-var pc1 = new Point(525, 300);
-var pc2 = new Point(550, 300);
-var pc3 = new Point(565, 350);
-var pc4 = new Point(575, 400);
-var pc5 = new Point(565, 450);
-var pc6 = new Point(550, 500);
-var pc7 = new Point(525, 500);
-var pc8 = new Point(510, 450);
-var pc9 = new Point(500, 400);
-var pc10 = new Point(510, 350);
-points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
-var lens3 = new Lens(points, 1.3, LENS_COLOR);
-
-//Accumulate
-lenses = [lens1, lens2, lens3];
-
-//Cores
-
-
-var dash1 = 2;
-var CR1 = new CoreRing(20, [0], false, 'red', 3);
-var arr1 = [CR1];
-var core1 = new Core(200, 400, 7, 'red', arr1);
-
-var dash2 = 5;
-var CR2 = new CoreRing(25, [90], true, 'green', 5);
-var arr2 = [CR2];
-var core2 = new Core(150, 300, 10, 'green', arr2);
-
-var dash3 = 10;
-var CR3p = new CoreRing(45, [45], false, 'purple', 3);
-var CR3b = new CoreRing(40, [210], false, 'blue', 5);
-var arr3 = [CR3p, CR3b];
-var core3 = new Core(600, 300, 10, 'purple', arr3);
-
-//CR1.active = true;
-//CR2.active = true;
-//CR3r.active = true;
-//CR3b.active = true;
-
-//Accumulate
-cores = [core2, core1, core3];
-
-
-var trailLength = 10;
-var dashLineWidth = 2;
-
-var beam1 = new LaserBeam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam2 = new LaserBeam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam3 = new LaserBeam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-var beam4 = new LaserBeam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-
-
-var beam5 = new LaserBeam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
-var beam6 = new LaserBeam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
-var beam7 = new LaserBeam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
-var beam8 = new LaserBeam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
-
-
-lasers = []; // [beam1, beam2, beam3, beam4, beam5, beam6, beam7, beam8];
+	// Mirrors
+	var mirrorLineWidth = 6;
+	var mirror1 = new MirrorLine(100, 50, 700, 50, MIRROR_COLOR, mirrorLineWidth);
+	var mirror2 = new MirrorLine(100, 50, 0, 500, MIRROR_COLOR, mirrorLineWidth);
+	var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
+	var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
+	
+	currentLevel.addOpticsPiece(mirror1);
+	currentLevel.addOpticsPiece(mirror2);
+	currentLevel.addOpticsPiece(mirror3);
+	currentLevel.addOpticsPiece(mirror4);
+	// mirrors = [mirror1,mirror2,mirror3,mirror4];
+	
+	
+	// Blocks
+	var p1 = new Point(50, 450);
+	var p2 = new Point(100, 450);
+	var p3 = new Point(100, 500);
+	var p4 = new Point(50, 500);
+	points = [p1, p2, p3, p4];
+	var block1 = new Block(points, BLOCK_COLOR);
+	
+	currentLevel.addOpticsPiece(block1);
+	
+	// Lenses
+	
+	// Square
+	var pa1 = new Point(100, 190);
+	var pa2 = new Point(400, 190);
+	var pa3 = new Point(400, 210);
+	var pa4 = new Point(100, 210);
+	points = [pa1, pa2, pa3, pa4];
+	var lens1 = new Lens(points, 1.3, LENS_COLOR);
+	
+	currentLevel.addOpticsPiece(lens1);
+	
+	// Prism
+	var pb1 = new Point(400, 250);
+	var pb2 = new Point(500, 110);
+	var pb3 = new Point(600, 250);
+	points = [pb1, pb2, pb3];
+	var lens2 = new Lens(points, 1.3, LENS_COLOR);
+	
+	currentLevel.addOpticsPiece(lens2);
+	
+	// Lens
+	var pc1 = new Point(525, 300);
+	var pc2 = new Point(550, 300);
+	var pc3 = new Point(565, 350);
+	var pc4 = new Point(575, 400);
+	var pc5 = new Point(565, 450);
+	var pc6 = new Point(550, 500);
+	var pc7 = new Point(525, 500);
+	var pc8 = new Point(510, 450);
+	var pc9 = new Point(500, 400);
+	var pc10 = new Point(510, 350);
+	points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
+	var lens3 = new Lens(points, 1.3, LENS_COLOR);
+	
+	currentLevel.addOpticsPiece(lens3);
+	
+	
+	//Cores
+	
+	
+	var dash1 = 2;
+	var CR1 = new CoreRing(20, [0], false, 'red', 3);
+	var arr1 = [CR1];
+	var core1 = new Core(200, 400, 7, 'red', arr1);
+	var CR1a = new CoreRing(20, [0], false, 'red', 3);
+	var arr1a = [CR1a];
+	var coresink1 = new CoreSink(500, 400, 7, 'red', arr1a);
+	
+	var dash2 = 5;
+	var CR2 = new CoreRing(25, [90], true, 'green', 5);
+	var arr2 = [CR2];
+	var core2 = new Core(150, 300, 10, 'green', arr2);
+	
+	var dash3 = 10;
+	var CR3p = new CoreRing(45, [45], false, 'purple', 3);
+	var CR3b = new CoreRing(40, [210], false, 'blue', 5);
+	var arr3 = [CR3p, CR3b];
+	var core3 = new Core(600, 300, 10, 'purple', arr3);
+	
+	currentLevel.addOpticsPiece(core1);
+	currentLevel.addOpticsPiece(core2);
+	currentLevel.addOpticsPiece(core3);
+	currentLevel.addOpticsPiece(coresink1);
+	
+	
+	var trailLength = 10;
+	var dashLineWidth = 2;
+	
+	var beam1 = new LaserBeam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+	var beam2 = new LaserBeam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+	var beam3 = new LaserBeam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+	var beam4 = new LaserBeam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
+	
+	
+	var beam5 = new LaserBeam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
+	var beam6 = new LaserBeam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
+	var beam7 = new LaserBeam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
+	var beam8 = new LaserBeam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
+	
+	
+	currentLevel.addManyOpticsPieces([beam1,beam2,beam3,beam4,beam5,beam6,beam7,beam8]);
+}
 
 
 // ##################################
 // Gameplay
 // ##################################
 
-var currentLevel = Level.init([]);
+var editorLevel = Level.init([]);
 
 
 function moveEverything() {
@@ -173,8 +186,8 @@ function moveEverything() {
 	// ---------------------
 	// Level parts
 	// ---------------------
-	for (var i=0; i < currentLevel.pieces.length; i++) {
-		currentLevel.pieces[i].update();
+	for (var i=0; i < editorLevel.pieces.length; i++) {
+		editorLevel.pieces[i].update();
 	}
 
 	// ---------------------
@@ -239,7 +252,7 @@ function zoomInOnShip(lerpVal) {
 }
 
 // ##################################
-// DRAW
+// DRAW functions
 // ##################################
 
 function drawEverything() {
@@ -252,8 +265,8 @@ function drawEverything() {
 	}
 
 	// Level pieces
-	for (var i=0; i < currentLevel.pieces.length; i++) {
-		currentLevel.pieces[i].draw();
+	for (var i=0; i < editorLevel.pieces.length; i++) {
+		editorLevel.pieces[i].draw();
 	}
 	
 	// Blocks	

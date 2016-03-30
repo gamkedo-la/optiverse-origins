@@ -197,23 +197,23 @@ LevelEditor.toggle = function() {
 	LevelEditor.selectedPiece = null;
 	if(LevelEditor.active) {
 		// If we just entered editor mode, import current level data as editor data
-		LevelEditor.pieces = currentLevel.pieces;
+		LevelEditor.pieces = editorLevel.pieces;
 		for(var i in LevelEditor.pieces) {
 			LevelEditor.pieces[i].stop();
 		}
 		if(LevelEditor.pieces.length > 0) {
 			SaveToTextfield();
 		}
-		currentLevel = Level.init();
+		editorLevel = Level.init();
 	} else {
 		// If we just exited editor mode, use editor data to create new level
-		currentLevel = Level.init(LevelEditor.pieces);
+		editorLevel = Level.init(LevelEditor.pieces);
 		LevelEditor.pieces = [];
 		// Register mirrors
 		// mirrors = [mirror1,mirror2,mirror3,mirror4];
-		for(var i=0; i < currentLevel.pieces.length; i++) {
-			if(currentLevel.pieces[i].constructor.name == 'Mirror') {
-				mirrors.push(currentLevel.pieces[i].mirrorLine);
+		for(var i=0; i < editorLevel.pieces.length; i++) {
+			if(editorLevel.pieces[i].constructor.name == 'Mirror') {
+				mirrors.push(editorLevel.pieces[i].mirrorLine);
 			}
 		}
 	}
