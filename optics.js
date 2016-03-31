@@ -775,3 +775,68 @@ Trail.prototype.draw = function () {
 
 
 
+// ##################################
+// Functions for making pieces
+// ##################################
+
+
+// ----------------------------------
+// Make Lenses
+// ----------------------------------
+function make_lens_1(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_lens_2(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_lens_3(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_lens_4(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_lens_5(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_lens_6(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+// ----------------------------------
+// Make Blocks
+// ----------------------------------
+
+function make_block_1(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_block_2(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
+
+function make_block_3(centerX, centerY, angle) {
+	var points = [];
+	// make points
+	return points;
+}
