@@ -260,3 +260,38 @@ OptiLevel.prototype.draw = function()
 	
 
 }
+
+
+
+OptiLevel.prototype.toString = function()
+{
+	var collection = [];
+	/*
+	for(var i in this.beams) {
+		collection.push(JSON.stringify(this.beams[i]));
+	}
+	*/
+	for(var i in this.lasers) {
+		collection.push(JSON.stringify(this.lasers[i]));
+	}
+	for(var i in this.blocks) {
+		collection.push(JSON.stringify(this.blocks[i]));
+	}
+	for(var i in this.mirrors) {
+		collection.push(JSON.stringify(this.mirrors[i]));
+	}
+	for(var i in this.lenses) {
+		collection.push(JSON.stringify(this.lenses[i]));
+	}
+	for(var i in this.cores) {
+		collection.push(JSON.stringify(this.cores[i]));
+	}
+	for(var i in this.coresinks) {
+		collection.push(JSON.stringify(this.coresinks[i]));
+	}
+	for(var i in this.sprites) {
+		collection.push(JSON.stringify(this.sprites[i]));
+	}
+	//
+	return "[" + collection.join() + "]";
+}

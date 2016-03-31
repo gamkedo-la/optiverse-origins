@@ -195,28 +195,6 @@ LevelEditor.setup = function() {
 LevelEditor.toggle = function() {
 	LevelEditor.active = !LevelEditor.active;
 	LevelEditor.selectedPiece = null;
-	if(LevelEditor.active) {
-		// If we just entered editor mode, import current level data as editor data
-		LevelEditor.pieces = editorLevel.pieces;
-		for(var i in LevelEditor.pieces) {
-			LevelEditor.pieces[i].stop();
-		}
-		if(LevelEditor.pieces.length > 0) {
-			SaveToTextfield();
-		}
-		editorLevel = Level.init();
-	} else {
-		// If we just exited editor mode, use editor data to create new level
-		editorLevel = Level.init(LevelEditor.pieces);
-		LevelEditor.pieces = [];
-		// Register mirrors
-		// mirrors = [mirror1,mirror2,mirror3,mirror4];
-		for(var i=0; i < editorLevel.pieces.length; i++) {
-			if(editorLevel.pieces[i].constructor.name == 'Mirror') {
-				mirrors.push(editorLevel.pieces[i].mirrorLine);
-			}
-		}
-	}
 }
 
 
@@ -227,12 +205,6 @@ LevelEditor.toggle = function() {
 //
 //----------------
 //
-//
-LevelEditor.selectBrush = function(_partClass) 
-{
-	LevelEditor.selectedBrush = new _partClass.init();
-	LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
-}
 //
 LevelEditor.mouseClicked = function(_evt) {
 	LevelEditor.mouseDragStart();
@@ -247,12 +219,10 @@ LevelEditor.mouseClicked = function(_evt) {
 			LevelEditor.deleting = false;
 			LevelEditor.selectedBrush = null;
 		}
-	} else if(LevelEditor.selectedBrush != null){
+	} else if(LevelEditor.selectedBrush != null) {
 		if(LevelEditor.settingRotation) {
-			LevelEditor.pieces.push(LevelEditor.selectedBrush.clone());
-			if(!_evt.shiftKey) {
-				LevelEditor.selectedBrush = null;
-			}
+			currentLevel.addOpticsPiece(LevelEditor.selectedBrush);
+			LevelEditor.selectedBrush = null;
 		}
 		LevelEditor.settingRotation = !LevelEditor.settingRotation;
 	} else if(LevelEditor.mouseOverPiece != null) {
@@ -322,7 +292,7 @@ LevelEditor.mousePositionUpdate = function() {
 			LevelEditor.selectedBrush.updateRotation(Math.atan2( mouseY - LevelEditor.selectedBrush.bounds.centerY, 
 															mouseX - LevelEditor.selectedBrush.bounds.centerX ));
 		} else {
-			LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
+			//LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
 		}
 	}
 	//
@@ -409,8 +379,7 @@ LevelEditor.refitUI = function()
 //
 LevelEditor.drawLevelPieces = function() {
 	for(var p in LevelEditor.pieces) {
-		var piece = LevelEditor.pieces[p];
-		drawBitmapCenteredAtLocationWithRotation(levObjPics[piece.kind], piece.bounds.centerX, piece.bounds.centerY, piece.rotation);
+		LevelEditor.pieces[p].draw();
 	}
 }
 //
@@ -458,8 +427,8 @@ LevelEditor.drawInterface = function() {
 LevelEditor.drawBrush = function()
 {
 	if(LevelEditor.selectedBrush != null) { 
-		drawBitmapCenteredAtLocationWithRotation(LevelEditor.selectedBrush.image,
-			LevelEditor.selectedBrush.bounds.centerX, LevelEditor.selectedBrush.bounds.centerY, LevelEditor.selectedBrush.rotation);
+		!LevelEditor.settingRotation && LevelEditor.selectedBrush.moveTo(mouseX, mouseY);
+		LevelEditor.selectedBrush.draw();
 		//
 		LevelEditor.settingRotation && colorLine(LevelEditor.selectedBrush.bounds.centerX, LevelEditor.selectedBrush.bounds.centerY, mouseX, mouseY, 'yellow', 3)
 	}
@@ -474,7 +443,7 @@ LevelEditor.refreshTooltip = function()
 	} else if(!LevelEditor.settingRotation) {
 		LevelEditor.tooltipText = "click to place object, will be able to set rotation next";
 	} else {
-		LevelEditor.tooltipText = "click to set rotation of last placed object (hold SHIFT to if you want to place more)";
+		LevelEditor.tooltipText = "click to set rotation of last placed object";
 	}
 
 	colorText(LevelEditor.tooltipText, 15, 15, 'white');
@@ -515,21 +484,56 @@ function editorDeleteNearestToMouse() {
 //
 function SaveToTextfield() {
 	levelText = document.getElementById('levelTextfield');
-	levelText.value = JSON.stringify(LevelEditor.pieces);
+	levelText.value = currentLevel.toString();
 }
 //
 function LoadTextfield() {
-	levelText = document.getElementById('levelTextfield');
-	LevelEditor.pieces = [];
 	LevelEditor.selectedPiece = null;
-	try{
-        var pData = JSON.parse(levelText.value);
-        for(var i in pData) {
-        	var className = Level.ClassRouter[pData[i].kind];
-        	LevelEditor.pieces.push(new className.init( pData[i].bounds.x, pData[i].bounds.y, pData[i].rotation ));
+	currentLevel = OptiLevel.init();
+	levelText = document.getElementById('levelTextfield');
+	try {
+        var pieces = JSON.parse(levelText.value);
+        for(var i in pieces) {
+        	/*
+        	if(pieces[i].kind == "beam") {
+				pieces[i].prototype = Object.create( Beam.prototype );
+			} 
+			*/
+			if (pieces[i].kind == "laser") {
+				var dir = pieces[i].direction;
+				var trail = pieces[i].trail;
+				pieces[i] = new LaserBeam(pieces[i].posX, pieces[i].posY, pieces[i].speed, 0,
+					trail.trailLength, trail.color, trail.lineWidth);
+				pieces[i].direction = dir;
+				pieces[i].prevDirection = dir;
+			} else if (pieces[i].kind == "block") {
+				pieces[i] = new Block(pieces[i].points, pieces[i].color);
+			} else if (pieces[i].kind == "mirror") {
+				pieces[i] = new MirrorLine(pieces[i].startX, pieces[i].startY, pieces[i].endX, pieces[i].endY, pieces[i].color, pieces[i].lineWidth);
+			} else if (pieces[i].kind == "lens") {
+				pieces[i] = new Lens(pieces[i].outlinePoints, pieces[i].refractiveIndex, pieces[i].color);
+			} else if (pieces[i].kind == "core" || pieces[i].kind == "sink") {
+				var cRings = [];
+				for(var r in pieces[i].coreRings) {
+					cRings.push(CoreRing.init( pieces[i].coreRings[r] ));
+				}
+				if(pieces[i].kind == "core") {
+					pieces[i] = new Core(pieces[i].centerX, pieces[i].centerY, pieces[i].radius, pieces[i].color, cRings);	
+				} else {
+					pieces[i] = new CoreSink(pieces[i].centerX, pieces[i].centerY, pieces[i].radius, pieces[i].color, cRings);
+				}
+			} else if (pieces[i].kind == "sprites") {
+				pieces[i].prototype = Object.create( Sprite.prototype );
+			} else continue;/*{
+				console.log("Unrecognized OpticsPiece kind: ", pieces[i].kind);
+				console.log("for Optics element: ", pieces[i]);
+				continue;
+			}*/
+    		currentLevel.addOpticsPiece(pieces[i]);
         }
     }catch(e){
         alert("invalid level data in text box below game");
+        console.log(e);
     }
 }
 
@@ -540,6 +544,8 @@ function LoadTextfield() {
 
 
 LevelEditor.buttonScripts = {
+
+	/*
 	"asteroid": {
 		"index": 0,
 		"tooltip": "asteroid",
@@ -604,6 +610,40 @@ LevelEditor.buttonScripts = {
 			LevelEditor.selectBrush(Wall);
 		}
 	},
+	*/
+	"lens": {
+		"index": 0,
+		"tooltip": "lens",
+		"imagecode": LEVELPART_LENS,
+		"command": function() {
+			// Lens
+			var pc1 = new Point(525, 300);
+			var pc2 = new Point(550, 300);
+			var pc3 = new Point(565, 350);
+			var pc4 = new Point(575, 400);
+			var pc5 = new Point(565, 450);
+			var pc6 = new Point(550, 500);
+			var pc7 = new Point(525, 500);
+			var pc8 = new Point(510, 450);
+			var pc9 = new Point(500, 400);
+			var pc10 = new Point(510, 350);
+			points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
+			LevelEditor.selectedBrush = new Lens(points, 1.3, LENS_COLOR);
+		}
+	},
+	"block": {
+		"index": 1,
+		"tooltip": "light blocking object",
+		"imagecode": LEVELPART_WALL,
+		"command": function() {
+			var p1 = new Point(50, 450);
+			var p2 = new Point(100, 450);
+			var p3 = new Point(100, 500);
+			var p4 = new Point(50, 500);
+			points = [p1, p2, p3, p4];
+			LevelEditor.selectedBrush = new Block(points, BLOCK_COLOR);
+		}
+	},
 	"delete": {
 		"index": 8,
 		"tooltip": "click to delete nearest part (hold SHIFT to stay in delete mode)",
@@ -611,7 +651,12 @@ LevelEditor.buttonScripts = {
 		"command": function() {
 			LevelEditor.deleting = true;
 			LevelEditor.selectedPiece = null;
-			LevelEditor.selectedBrush = new Graphic(levObjPics[LEVELPART_DELETE]);
+			LevelEditor.selectedBrush = {
+				"draw": function() {
+					drawBitmapCenteredAtLocationWithRotation(levObjPics[LEVELPART_DELETE], mouseX, mouseY, 0.0);
+				}, 
+				"moveTo": function() {}
+			};
 		}
 	},
 	"export": {

@@ -12,12 +12,11 @@ const LASER_LINE_WIDTH = 3;
 // Classes (Prototype Constructors)
 // ##################################
 
-
 //-----------------------------------------------------------------------------//
 /*
  *	Name: 		OpticsPiece
  * 	Abstract: 	YES
- * 	Superclass:     n/a
+ * 	Superclass: Graphic
  * 	Subclasses:	Line, Beam, LaserBeam, etc.
  * 	
  * 	Description:	Describes a level object
@@ -28,7 +27,9 @@ OpticsPiece.prototype = Object.create( Graphic.prototype );
 OpticsPiece.prototype.constructor = OpticsPiece;	
 
 function OpticsPiece(kind) {
+	Graphic.call(this);
 	this.kind = kind;
+	this.selected = false;
 }
 OpticsPiece.prototype.updatePiece = function () {
 }
@@ -290,7 +291,8 @@ Lens.prototype.moveTo = function (newCenterX, newCenterY) {
 		point.y += deltaY;
 	}
 	this.poinstToLensLines(this.outlinePoints);
-	
+	//
+	Graphic.prototype.updatePos.call(this, this.centerX, this.centerY);
 }
 // draw()
 Lens.prototype.draw = function () {
@@ -428,6 +430,14 @@ function CoreRing(radius, angles, active, color, lineWidth) {
 	
 	this.color = color;
 	this.lineWidth = lineWidth;	
+}
+// Clone type constructor
+CoreRing.init = function(_org) 
+{
+	var instance = new CoreRing(_org.radius, [], _org.active, _org.color, _org.lineWidth);
+	instance.beamSlots = _org.beamSlots;
+	//
+	return instance;
 }
 // updateRING()
 CoreRing.prototype.updateRING = function () {

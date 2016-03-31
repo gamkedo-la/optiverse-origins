@@ -32,7 +32,6 @@ function Level()
 	//
 	//
 	this.pieces = [];
-	this.editorPiecesDescr = [];
 
 	return this;
 }

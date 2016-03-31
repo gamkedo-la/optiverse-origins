@@ -178,7 +178,7 @@ function loadGameElements() {
 // Gameplay
 // ##################################
 
-var editorLevel = Level.init([]);
+var editorLevel = OptiLevel.init([]);
 
 
 function moveEverything() {

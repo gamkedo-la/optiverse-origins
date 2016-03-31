@@ -4,7 +4,7 @@
  *	Name: 		Graphic
  * 	Abstract: 	NO
  * 	Superclass: n/a
- * 	Subclasses:	Button, LevelPiece
+ * 	Subclasses:	Button, OpticsPiece
  * 	
  * 	Description: 
  * 	
@@ -21,13 +21,14 @@
  *
  * @return {Graphic}
  */
-function Graphic(_img, _tooltip, _x, _y, _w, _h) 
+function Graphic(_tooltip, _x, _y, _w, _h, _rot) 
 {
 	_tooltip = typeof _tooltip != 'undefined' ? _tooltip : "";
 	_x = typeof _x != 'undefined' ? _x : 0.0;
 	_y = typeof _y != 'undefined' ? _y : 0.0;
-	_w = typeof _w != 'undefined' ? _w : (typeof _img != 'undefined' ? _img.width : 0.0);
-	_h = typeof _h != 'undefined' ? _h : (typeof _img != 'undefined' ? _img.height : 0.0);
+	_w = typeof _w != 'undefined' ? _w : 0.0;
+	_h = typeof _h != 'undefined' ? _h : 0.0;
+	_rot = typeof _rot != 'undefined' ? _rot : 0.0;
 	//
 	this.bounds = {
 		'x': _x,
@@ -39,8 +40,8 @@ function Graphic(_img, _tooltip, _x, _y, _w, _h)
 		'w': _w,
 		'h': _h,
 	};
+	this.rotation = _rot;
 	this.centered = true;
-	this.image = _img;
 	this.tooltip = _tooltip;
 	this.active = true;
 	//
@@ -83,6 +84,31 @@ Graphic.prototype.changePos = function(_x, _y)
 };
 
 
+
+/**
+ * Replaces rotation
+ * 
+ * @param 	{Number} 	_angle 	
+ */
+Graphic.prototype.updateRotation = function(_angle)
+{
+	this.rotation = _angle;
+}
+
+
+/**
+ * Modifies rotation by an amount
+ * 
+ * @param 	{Number} 	_angle 	
+ */
+Graphic.prototype.changeRotation = function(_angle)
+{
+	this.updateRotation(this.rotation + _angle);
+}
+
+
+
+
 /**
  * Check if xy exists within bounds
  * 
@@ -97,20 +123,6 @@ Graphic.prototype.pointHit = function(_x, _y)
 	} 
 	return (_x > this.bounds.x && _x < this.bounds.x2 && _y > this.bounds.y && _y < this.bounds.y2);
 }
-
-
-/**
- * Draws bitmap image to Canvas
- *
- */
-Graphic.prototype.draw = function() 
-{ 
-	if(!this.active) {
-		return;
-	} 
-	drawBitmapFitIntoLocation(this.image, this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
-}
-
 
 /**
  * Draw a line along the bounds of the object
@@ -160,8 +172,13 @@ Button.prototype.constructor = Button;
  * @return {Button}
  */
 function Button(_onclick, _img, _tooltip, _x, _y, _w, _h) {
-	Graphic.call(this, _img, _tooltip, _x, _y, _w, _h);
+	
+	_w = typeof _w != 'undefined' ? _w : (typeof _img != 'undefined' ? _img.width : 0.0);
+	_h = typeof _h != 'undefined' ? _h : (typeof _img != 'undefined' ? _img.height : 0.0);
+	
+	Graphic.call(this, _tooltip, _x, _y, _w, _h);
 	//
+	this.image = _img;
 	this.centered = false;
 	this.onClick = _onclick;
 	//
@@ -175,7 +192,9 @@ Button.prototype.draw = function()
 	if(!this.active) {
 		return;
 	} 
-	Graphic.prototype.draw.call(this);
+	
+	drawBitmapFitIntoLocation(this.image, this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
+
 	if(LevelEditor.selectedBrush != null && levObjPics[LevelEditor.selectedBrush.kind] == this.image) {
 		this.stroke('#00FFFF', 3);
 	} else {
