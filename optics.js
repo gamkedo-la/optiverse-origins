@@ -7,6 +7,7 @@ const LIGHTSPEED = 3;
 const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
 const LASER_TRAIL_LENGTH = 10; 
 const LASER_LINE_WIDTH = 3; 
+const MIRROR_LINE_BOX_WIDTH = 20; 
 
 // ##################################
 // Classes (Prototype Constructors)
@@ -119,16 +120,7 @@ function MirrorLine(startX, startY, endX, endY, color, lineWidth) {
 	centerX = (startX + endX) / 2;
 	centerY = (startY + endY) / 2;
 	// Temporary patch
-	var p1 = new Point(startX + 5, startY);	
-	var p2 = new Point(startX - 5, startY);
-	var p3 = new Point(endX, startY + 5);	
-	var p4 = new Point(endX, startY - 5);
-	var points = [p1, p2, p3, p4];
-	/* TODO: Real border points
-	var p1, p2, p3, p4, direction;
-	direction = 
-	p1 = 
-	*/
+	var points = create_outline_box(startX, startY, endX, endY);
 	MoveablePiece.call(this, "mirror", points, centerX, centerY);
 } 
 // moveTo()
@@ -779,41 +771,57 @@ Trail.prototype.draw = function () {
 // Functions for making pieces
 // ##################################
 
-
 // ----------------------------------
 // Make Lenses
 // ----------------------------------
-function make_lens_1(centerX, centerY, angle) {
+
+// biconvex
+function make_points_lens_1(centerX, centerY, angle) {	
+	var positions = [[-5,  80],
+			 [ 5,  80],
+			 [ 5, -80],
+			 [-5, -80]];
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+// planoconvex
+function make_points_lens_2(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_lens_2(centerX, centerY, angle) {
+// biconcave
+function make_points_lens_3(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_lens_3(centerX, centerY, angle) {
+// planoconcave
+function make_points_lens_4(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_lens_4(centerX, centerY, angle) {
+// meniscus
+function make_points_lens_5(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_lens_5(centerX, centerY, angle) {
-	var points = [];
-	// make points
-	return points;
-}
-
-function make_lens_6(centerX, centerY, angle) {
+// prism
+function make_points_lens_6(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
@@ -823,19 +831,20 @@ function make_lens_6(centerX, centerY, angle) {
 // Make Blocks
 // ----------------------------------
 
-function make_block_1(centerX, centerY, angle) {
+// prism
+function make_points_block_1(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_block_2(centerX, centerY, angle) {
+function make_points_block_2(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;
 }
 
-function make_block_3(centerX, centerY, angle) {
+function make_points_block_3(centerX, centerY, angle) {
 	var points = [];
 	// make points
 	return points;

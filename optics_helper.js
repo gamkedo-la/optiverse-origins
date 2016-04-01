@@ -64,6 +64,66 @@ function distance_between_two_points(x0, y0, x1, y1) {
     
 }
 
+// Translate Point objects
+function translate_points(points, deltaX, deltaY) {
+    for (var i=0; i < points.length; i++) {
+	points[i].x += deltaX;
+	points[i].y += deltaY;
+    }
+    return points;
+}
+
+// Rotate Points around origin
+function rotate_around_origin(points, angle) {
+    // Calculates rotation of point around origin using angle.
+    // angle in degrees
+    var s = Math.sin(deg_to_rad(angle));
+    var c = Math.cos(deg_to_rad(angle));
+    
+    for (var i=0; i < points.length; i++) {
+	var newX = (points[i].x * c  - points[i].y * s);
+	var newY = (points[i].x * s  + points[i].y * c);
+	points[i].x = newX;
+	points[i].y = newY;
+    }
+    
+    return points;
+    
+}
+
+// Turn position arrays into Point objects
+function positions_to_points(positions) {
+    var points = [];
+    for (var i=0; i < positions.length; i++) {
+	var pos = positions[i];
+	var point = new Point(pos[0], pos[1]);
+	points.push(point);
+    }
+    return points;
+}
+
+// Create box around line
+function create_outline_box(startX, startY, endX, endY) {
+    var angle, d = MIRROR_LINE_BOX_WIDTH / 2; 
+    
+    // Find angle
+    angle = Math.atan2(endY - startY, endX - startX) + Math.PI/2;
+    var deltaX = d * Math.cos(angle);
+    var deltaY = d * Math.sin(angle);
+    
+    // calculate points
+    var p1, p2, p3, p4;
+    p1 = new Point(startX + deltaX, startY + deltaY);
+    p2 = new Point(startX - deltaX, startY - deltaY);
+    p3 = new Point(endX + deltaX, endY + deltaY);
+    p4 = new Point(endX - deltaX, endY - deltaY);
+    
+    var points = [p1,p2,p3,p4];
+    
+    return points;
+}
+
+
 // Helper for function intersect()
 function ccw(A,B,C) {  
         return Boolean( (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0]) ); 

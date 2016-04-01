@@ -67,10 +67,10 @@ function loadGameElements() {
 
 	// Mirrors
 	var mirrorLineWidth = 6;
-	var mirror1 = new MirrorLine(100, 50, 700, 50, MIRROR_COLOR, mirrorLineWidth);
-	var mirror2 = new MirrorLine(100, 50, 0, 500, MIRROR_COLOR, mirrorLineWidth);
-	var mirror3 = new MirrorLine(0, 500, 700, 500, MIRROR_COLOR, mirrorLineWidth);
-	var mirror4 = new MirrorLine(700, 500, 700, 0, MIRROR_COLOR, mirrorLineWidth);
+	var mirror1 = new MirrorLine(100, 50, 200, 50, MIRROR_COLOR, mirrorLineWidth);
+	var mirror2 = new MirrorLine(100, 250, 0, 100, MIRROR_COLOR, mirrorLineWidth);
+	var mirror3 = new MirrorLine(600, 500, 700, 550, MIRROR_COLOR, mirrorLineWidth);
+	var mirror4 = new MirrorLine(750, 500, 700, 530, MIRROR_COLOR, mirrorLineWidth);
 	
 	currentLevel.addOpticsPiece(mirror1);
 	currentLevel.addOpticsPiece(mirror2);
@@ -144,8 +144,8 @@ function loadGameElements() {
 	var core2 = new Core(150, 300, 10, 'green', arr2);
 	
 	var dash3 = 10;
-	var CR3p = new CoreRing(45, [45], false, 'purple', 3);
-	var CR3b = new CoreRing(40, [210], false, 'blue', 5);
+	var CR3p = new CoreRing(45, [45], true, 'purple', 3);
+	var CR3b = new CoreRing(40, [210], true, 'blue', 5);
 	var arr3 = [CR3p, CR3b];
 	var core3 = new Core(600, 300, 10, 'purple', arr3);
 	
@@ -171,6 +171,15 @@ function loadGameElements() {
 	
 	
 	currentLevel.addManyOpticsPieces([beam1,beam2,beam3,beam4,beam5,beam6,beam7,beam8]);
+	
+	
+	
+	// Test
+	var testpoints = make_points_lens_1(100, 100, 45);
+	var newblock = new Block(testpoints, BLOCK_COLOR);
+	
+	currentLevel.addOpticsPiece(newblock);
+	
 }
 
 
