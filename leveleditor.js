@@ -129,7 +129,8 @@ LevelEditor.rotSymbol = null;
 LevelEditor.plusSign = null;
 LevelEditor.minusSign = null;
 LevelEditor.mouseOverButton = null;
-LevelEditor.mouseOverPiece = null;
+LevelEditor.mouseOverPieces = [];
+LevelEditor.mouseOverIndex = 0;
 LevelEditor.selectedBrush = null;
 LevelEditor.selectedPiece = null;
 // 
@@ -179,7 +180,7 @@ LevelEditor.setup = function() {
 	}, tmpCanvas, "resize panel");
 	//
 	// Misc UI
-	LevelEditor.rotSymbol = new Graphic(LevelEditorRotSymbol);
+	LevelEditor.rotSymbol = new Button(null, LevelEditorRotSymbol);
 	LevelEditor.rotSymbol.active = false;
 	//
 	LevelEditor.plusSign = new Button(function() {LevelEditor.selectedPiece.changeRotation(0.1);}, LevelEditorPlusSign, "rotate CW");
@@ -240,12 +241,17 @@ LevelEditor.mouseClicked = function(_evt) {
 			LevelEditor.selectedBrush = null;
 		}
 		LevelEditor.settingRotation = !LevelEditor.settingRotation;
-	} else if(LevelEditor.mouseOverPiece != null) {
-		if(LevelEditor.selectedPiece != LevelEditor.mouseOverPiece) {
-			LevelEditor.selectedPiece = LevelEditor.mouseOverPiece;
+	} else if(LevelEditor.mouseOverPieces.length > 0) {
+		if(LevelEditor.mouseOverIndex >= LevelEditor.mouseOverPieces.length) {
+			LevelEditor.mouseOverIndex = 0;
+		}
+		var candidate = LevelEditor.mouseOverPieces[LevelEditor.mouseOverIndex++];
+		if(LevelEditor.selectedPiece != candidate) {
+			LevelEditor.selectedPiece = candidate;
 			LevelEditor.minusSign.active = true;
 			LevelEditor.plusSign.active = true;
 			LevelEditor.rotSymbol.active = true;
+
 		} else {
 			LevelEditor.trScript = LevelEditor.trScripts.possiblePieceGrab;
 		}
@@ -256,7 +262,7 @@ LevelEditor.mouseClicked = function(_evt) {
 //
 LevelEditor.mousePositionUpdate = function() {
 	LevelEditor.mouseOverButton = null;
-	LevelEditor.mouseOverPiece = null;
+	LevelEditor.mouseOverPieces = [];
 	//
 	// Check if mouse is over the editor panel
 	var x2 = LevelEditor.bounds.x2 + LevelEditor.panelSenseZone;
@@ -280,14 +286,13 @@ LevelEditor.mousePositionUpdate = function() {
 	} else {
 		for(var i=0; i < LevelEditor.pieces.length; i++) {
 			if(LevelEditor.pieces[i].pointHit( mouseX, mouseY )) {
-				LevelEditor.mouseOverPiece = LevelEditor.pieces[i];
-				break;
+				LevelEditor.mouseOverPieces.push(LevelEditor.pieces[i]);
 			}
 		}
-		if(LevelEditor.mouseOverPiece == null) {
+		if(LevelEditor.mouseOverPieces.length == 0) {
 			for(var i=0; i < LevelEditor.miscButtons.length; i++) {
 				if(LevelEditor.miscButtons[i].pointHit( mouseX, mouseY )) {
-					LevelEditor.mouseOverPiece = LevelEditor.miscButtons[i];
+					LevelEditor.mouseOverPieces.push(LevelEditor.miscButtons[i]);
 					break;
 				}
 			}	
@@ -520,6 +525,7 @@ function LoadTextfield() {
     		optic.updatePos(pieces[i].bounds.x, pieces[i].bounds.y, true);
 			var lp = new LevelPiece(optic);
 			lp.updateRotation(pieces[i].rotation);
+			lp.refitBounds();
 			LevelEditor.pieces.push(lp);
         }
     }catch(e){
@@ -648,6 +654,7 @@ LevelEditor.buttonScripts = {
 			var lens_1 = new Lens(pointsData.points, 1.3, LENS_COLOR);
 			lens_1.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_1);
+			LevelEditor.selectedBrush.refitBounds();
 		}
 	},
 	/*
@@ -750,6 +757,24 @@ function LevelPiece(_opticsPiece)
 	//
 	return this;
 }
+
+
+LevelPiece.prototype.refitBounds = function()
+{
+	var maxDim = Math.max(this.bounds.w, this.bounds.h);
+	this.bounds = {
+		'x': this.bounds.x,
+		'y': this.bounds.y,
+		'x2': (this.bounds.x + maxDim),
+		'y2': (this.bounds.y + maxDim),
+		'centerX': (this.bounds.x + (maxDim/2.0)),
+		'centerY': (this.bounds.y + (maxDim/2.0)),
+		'w': maxDim,
+		'h': maxDim,
+	};
+}
+
+
 
 
 /**
