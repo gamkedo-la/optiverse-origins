@@ -195,6 +195,20 @@ LevelEditor.setup = function() {
 LevelEditor.toggle = function() {
 	LevelEditor.active = !LevelEditor.active;
 	LevelEditor.selectedPiece = null;
+	if(LevelEditor.active) {
+		var typesNotHandled = [].concat(currentLevel.beams, currentLevel.lasers, currentLevel.blocks, currentLevel.mirrors, currentLevel.cores, currentLevel.coresinks, currentLevel.sprites);
+		// Handled: currentLevel.lenses
+		currentLevel = new OptiLevel.init();
+		currentLevel.addManyOpticsPieces(typesNotHandled);
+	} else {
+		for(var i in LevelEditor.pieces) {
+			var piece = LevelEditor.pieces[i];
+			if(piece.kind == "lens") {
+				var points = make_points_lens_1(piece.bounds.centerX, piece.bounds.centerY, rad_to_deg(piece.rotation));
+				currentLevel.addOpticsPiece(new Lens(points, 1.3, LENS_COLOR));
+			}
+		}
+	}
 }
 
 
@@ -221,7 +235,8 @@ LevelEditor.mouseClicked = function(_evt) {
 		}
 	} else if(LevelEditor.selectedBrush != null) {
 		if(LevelEditor.settingRotation) {
-			currentLevel.addOpticsPiece(LevelEditor.selectedBrush);
+			LevelEditor.pieces.push(LevelEditor.selectedBrush);
+			//currentLevel.addOpticsPiece(LevelEditor.selectedBrush);
 			LevelEditor.selectedBrush = null;
 		}
 		LevelEditor.settingRotation = !LevelEditor.settingRotation;
@@ -292,7 +307,7 @@ LevelEditor.mousePositionUpdate = function() {
 			LevelEditor.selectedBrush.updateRotation(Math.atan2( mouseY - LevelEditor.selectedBrush.bounds.centerY, 
 															mouseX - LevelEditor.selectedBrush.bounds.centerX ));
 		} else {
-			//LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
+			LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
 		}
 	}
 	//
@@ -427,7 +442,7 @@ LevelEditor.drawInterface = function() {
 LevelEditor.drawBrush = function()
 {
 	if(LevelEditor.selectedBrush != null) { 
-		!LevelEditor.settingRotation && LevelEditor.selectedBrush.moveTo(mouseX, mouseY);
+		!LevelEditor.settingRotation && LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
 		LevelEditor.selectedBrush.draw();
 		//
 		LevelEditor.settingRotation && colorLine(LevelEditor.selectedBrush.bounds.centerX, LevelEditor.selectedBrush.bounds.centerY, mouseX, mouseY, 'yellow', 3)
@@ -484,57 +499,70 @@ function editorDeleteNearestToMouse() {
 //
 function SaveToTextfield() {
 	levelText = document.getElementById('levelTextfield');
-	levelText.value = currentLevel.toString();
+	levelText.value = JSON.stringify(LevelEditor.pieces);
+	//levelText.value = currentLevel.toString();
 }
 //
 function LoadTextfield() {
 	LevelEditor.selectedPiece = null;
-	currentLevel = OptiLevel.init();
+	LevelEditor.pieces = [];
+	//currentLevel = OptiLevel.init();
 	levelText = document.getElementById('levelTextfield');
 	try {
         var pieces = JSON.parse(levelText.value);
         for(var i in pieces) {
-        	/*
-        	if(pieces[i].kind == "beam") {
-				pieces[i].prototype = Object.create( Beam.prototype );
-			} 
-			*/
-			if (pieces[i].kind == "laser") {
-				var dir = pieces[i].direction;
-				var trail = pieces[i].trail;
-				pieces[i] = new LaserBeam(pieces[i].posX, pieces[i].posY, pieces[i].speed, 0,
-					trail.trailLength, trail.color, trail.lineWidth);
-				pieces[i].direction = dir;
-				pieces[i].prevDirection = dir;
-			} else if (pieces[i].kind == "block") {
-				pieces[i] = new Block(pieces[i].points, pieces[i].color);
-			} else if (pieces[i].kind == "mirror") {
-				pieces[i] = new MirrorLine(pieces[i].startX, pieces[i].startY, pieces[i].endX, pieces[i].endY, pieces[i].color, pieces[i].lineWidth);
-			} else if (pieces[i].kind == "lens") {
-				pieces[i] = new Lens(pieces[i].outlinePoints, pieces[i].refractiveIndex, pieces[i].color);
-			} else if (pieces[i].kind == "core" || pieces[i].kind == "sink") {
-				var cRings = [];
-				for(var r in pieces[i].coreRings) {
-					cRings.push(CoreRing.init( pieces[i].coreRings[r] ));
-				}
-				if(pieces[i].kind == "core") {
-					pieces[i] = new Core(pieces[i].centerX, pieces[i].centerY, pieces[i].radius, pieces[i].color, cRings);	
-				} else {
-					pieces[i] = new CoreSink(pieces[i].centerX, pieces[i].centerY, pieces[i].radius, pieces[i].color, cRings);
-				}
-			} else if (pieces[i].kind == "sprites") {
-				pieces[i].prototype = Object.create( Sprite.prototype );
-			} else continue;/*{
-				console.log("Unrecognized OpticsPiece kind: ", pieces[i].kind);
-				console.log("for Optics element: ", pieces[i]);
-				continue;
-			}*/
-    		currentLevel.addOpticsPiece(pieces[i]);
+        	var optic = null;
+        	if(pieces[i].kind == "lens") {
+        		var pointsData = LevelEditor.makePoints(make_points_lens_1);
+				optic = new Lens(pointsData.points, 1.3, LENS_COLOR);
+				optic.bounds = pointsData.bounds;
+        	} else continue;
+    		optic.updatePos(pieces[i].bounds.x, pieces[i].bounds.y, true);
+			var lp = new LevelPiece(optic);
+			lp.updateRotation(pieces[i].rotation);
+			LevelEditor.pieces.push(lp);
         }
     }catch(e){
         alert("invalid level data in text box below game");
         console.log(e);
     }
+}
+
+
+
+
+LevelEditor.makePoints = function(_maker) 
+{
+	var points = _maker(5,80,0);
+	//
+	// Find bounds
+	var top = points[0].y;
+	var left = points[0].x;
+	var bottom = points[0].y;
+	var right = points[0].x;
+	for(var i in points) {
+		top = Math.min(top, points[i].y);
+		left = Math.min(left, points[i].x);
+		bottom = Math.max(bottom, points[i].y);
+		right = Math.max(right, points[i].x);
+	}
+	// Shift to top left aligned
+	for(var i in points) {
+		points[i].x -= left;
+		points[i].y -= top;
+	}
+	bottom -= top;
+	right -= left;
+
+	return { 
+		"points": points, 
+		"bounds": {	
+			"x":0, "y":0, 
+			"x2":right, "y2":bottom,
+			"centerX": right/2, "centerY": bottom/2, 
+			"w":right, "h":bottom
+		} 
+	};
 }
 
 
@@ -613,37 +641,25 @@ LevelEditor.buttonScripts = {
 	*/
 	"lens": {
 		"index": 0,
-		"tooltip": "lens",
+		"tooltip": "lens_1",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			// Lens
-			var pc1 = new Point(525, 300);
-			var pc2 = new Point(550, 300);
-			var pc3 = new Point(565, 350);
-			var pc4 = new Point(575, 400);
-			var pc5 = new Point(565, 450);
-			var pc6 = new Point(550, 500);
-			var pc7 = new Point(525, 500);
-			var pc8 = new Point(510, 450);
-			var pc9 = new Point(500, 400);
-			var pc10 = new Point(510, 350);
-			points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
-			LevelEditor.selectedBrush = new Lens(points, 1.3, LENS_COLOR);
+			var pointsData = LevelEditor.makePoints(make_points_lens_1);
+			var lens_1 = new Lens(pointsData.points, 1.3, LENS_COLOR);
+			lens_1.bounds = pointsData.bounds;
+			LevelEditor.selectedBrush = new LevelPiece(lens_1);
 		}
 	},
+	/*
 	"block": {
 		"index": 1,
 		"tooltip": "light blocking object",
-		"imagecode": LEVELPART_WALL,
+		"imagecode": LEVELPART_ASTEROID,
 		"command": function() {
-			var p1 = new Point(50, 450);
-			var p2 = new Point(100, 450);
-			var p3 = new Point(100, 500);
-			var p4 = new Point(50, 500);
-			points = [p1, p2, p3, p4];
-			LevelEditor.selectedBrush = new Block(points, BLOCK_COLOR);
+			LevelEditor.selectedBrush = LevelEditor.createBlockPiece();
 		}
 	},
+	*/
 	"delete": {
 		"index": 8,
 		"tooltip": "click to delete nearest part (hold SHIFT to stay in delete mode)",
@@ -654,8 +670,8 @@ LevelEditor.buttonScripts = {
 			LevelEditor.selectedBrush = {
 				"draw": function() {
 					drawBitmapCenteredAtLocationWithRotation(levObjPics[LEVELPART_DELETE], mouseX, mouseY, 0.0);
-				}, 
-				"moveTo": function() {}
+				},
+				"updatePos": function() {}
 			};
 		}
 	},
@@ -674,4 +690,85 @@ LevelEditor.buttonScripts = {
 };
 
 
+
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------------------------------------------------//
+/*
+ *	Name: 		LevelPiece
+ * 	
+ * 	Description: Placeholder for a future OpticsPiece
+ * 																		
+*/
+
+
+
+
+LevelPiece.prototype = Object.create( Graphic.prototype );		
+LevelPiece.prototype.constructor = LevelPiece;	
+
+
+
+/**
+ * CONSTRUCTOR
+ *
+ * @return {LevelPiece}
+ */
+function LevelPiece(_opticsPiece) 
+{
+	Graphic.call(this);
+	this.bounds = _opticsPiece.bounds;
+
+	//--------------------
+	//
+	// 		MEMBERS
+	//
+	//----------------
+	//
+	//
+	this.selected = false;
+	this.image = document.createElement('canvas');
+	this.opticsPiece = _opticsPiece;
+	this.kind = this.opticsPiece.kind;
+	//
+	
+	var mainCtx = ctx;
+	ctx = this.image.getContext('2d');
+	this.image.width = this.bounds.w;
+	this.image.height = this.bounds.h;
+	//colorRect(0,0,this.bounds.w,this.bounds.h, "red");
+	this.opticsPiece.draw();
+	ctx = mainCtx;
+	//
+	return this;
+}
+
+
+/**
+ * Creates and returns a clone
+ * 
+ * @return {LevelPiece}
+ */
+LevelPiece.prototype.clone = function()
+{
+	
+}
+
+
+/**
+ * Draw to global Canvas
+ * 
+ */
+LevelPiece.prototype.draw = function() 
+{ 
+	drawBitmapCenteredAtLocationWithRotation(this.image, this.bounds.centerX, this.bounds.centerY, this.rotation);
+};
 

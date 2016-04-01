@@ -55,9 +55,11 @@ function Graphic(_tooltip, _x, _y, _w, _h, _rot)
  * @param {Number} 	_x 		New x
  * @param {Number} 	_y 		New y
  */
-Graphic.prototype.updatePos = function(_x, _y) 
+Graphic.prototype.updatePos = function(_x, _y, _rotOverride) 
 { 
-	if(this.centered) {
+	_rotOverride = typeof _rotOverride != 'undefined' ? _rotOverride : false;
+	//
+	if(this.centered && !_rotOverride) {
 		_x -= this.bounds.w/2.0;
 		_y -= this.bounds.h/2.0;
 	}
