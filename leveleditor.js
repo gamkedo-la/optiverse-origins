@@ -16,6 +16,7 @@ const LEVELPART_ENUM_KINDS = (levPartEnum++);
 
 const BTN_SIZE = 40;
 
+var noCmd = function() {};
 
 
 // Transformation scripts
@@ -59,8 +60,25 @@ LevelEditor.trScripts = {
 								 LevelEditor.lastMouseX - LevelEditor.selectedPiece.bounds.centerX);
 
 		LevelEditor.selectedPiece.changeRotation(angle1-angle2);
+	},
+	"mouseRotateStart": function() {
+		this.onMouseMove = LevelEditor.trScripts.mouseRotate;
+		this.onMouseClick = LevelEditor.trScripts.mousePut;
+	},
+	"mouseRotate": function() {
+		var deltaY = mouseY - this.bounds.centerY;
+		var deltaX = mouseX - this.bounds.centerX;
+		this.updateRotation(Math.atan2( deltaY, deltaX ));
+	},
+	"mouseMagnet": function() {
+		this.updatePos(mouseX, mouseY);
+	},
+	"mousePut": function() {
+		this.onMouseMove = noCmd;
+		this.onMouseClick = noCmd;
+		LevelEditor.pieces.push(this);
+		LevelEditor.selectedBrush = new LevelPiece();
 	}
-
 };
 
 
@@ -85,7 +103,11 @@ function editorUpdate()
 																																										
 	METHODS:
 
-	setup		selectBrush
+	setup		mouseClicked 			refitUI					makePoints
+	toggle		mousePositionUpdate		drawLevelPieces
+				mouseDragStart 			drawInterface
+				mouseDragEnd 			drawBrush
+										refreshTooltip
 
 */
 
@@ -137,7 +159,6 @@ LevelEditor.selectedPiece = null;
 // States
 LevelEditor.inPanel = false;
 LevelEditor.overflow = false;
-LevelEditor.settingRotation = false;
 LevelEditor.deleting = false;
 //
 LevelEditor.lastMouseX = 0.0;
@@ -197,6 +218,7 @@ LevelEditor.toggle = function() {
 	LevelEditor.active = !LevelEditor.active;
 	LevelEditor.selectedPiece = null;
 	if(LevelEditor.active) {
+		LevelEditor.selectedBrush = new LevelPiece();
 		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.mirrors, currentLevel.cores, currentLevel.coresinks, currentLevel.sprites);
 		// Handled: currentLevel.lenses, currentLevel.blocks,  TMP handled: currentLevel.beams
 		currentLevel = new OptiLevel.init();
@@ -228,23 +250,18 @@ LevelEditor.toggle = function() {
 LevelEditor.mouseClicked = function(_evt) {
 	LevelEditor.mouseDragStart();
 	//
-	if(LevelEditor.mouseOverButton != null && !LevelEditor.settingRotation) { 
-		LevelEditor.mouseOverButton.onClick(_evt); 											// Clicked one of the buttons in the tool panel
+	if(LevelEditor.mouseOverButton != null) { 
+		LevelEditor.mouseOverButton.onClick(_evt); 				// Clicked one of the buttons in the tool panel
 	} else if(LevelEditor.inPanel) {
-		LevelEditor.trScript = LevelEditor.trScripts.panelGrab;		// Clicked somewhere on the panel background
+		LevelEditor.trScript = LevelEditor.trScripts.panelGrab;	// Clicked somewhere on the panel background
 	} else if(LevelEditor.deleting) {
 		editorDeleteNearestToMouse();
 		if(!_evt.shiftKey) {
 			LevelEditor.deleting = false;
-			LevelEditor.selectedBrush = null;
+			LevelEditor.selectedBrush = new LevelPiece();
 		}
-	} else if(LevelEditor.selectedBrush != null) {
-		if(LevelEditor.settingRotation) {
-			LevelEditor.pieces.push(LevelEditor.selectedBrush);
-			//currentLevel.addOpticsPiece(LevelEditor.selectedBrush);
-			LevelEditor.selectedBrush = null;
-		}
-		LevelEditor.settingRotation = !LevelEditor.settingRotation;
+	} else if(LevelEditor.selectedBrush.onMouseClick != noCmd) {
+		LevelEditor.selectedBrush.onMouseClick.call(LevelEditor.selectedBrush);
 	} else if(LevelEditor.mouseOverPieces.length > 0) {
 		if(LevelEditor.mouseOverIndex >= LevelEditor.mouseOverPieces.length) {
 			LevelEditor.mouseOverIndex = 0;
@@ -311,14 +328,7 @@ LevelEditor.mousePositionUpdate = function() {
 	}
 	//
 	// Handle brush movement/rotation
-	if(LevelEditor.selectedBrush != null) {
-		if(LevelEditor.settingRotation) {
-			LevelEditor.selectedBrush.updateRotation(Math.atan2( mouseY - LevelEditor.selectedBrush.bounds.centerY, 
-															mouseX - LevelEditor.selectedBrush.bounds.centerX ));
-		} else {
-			LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
-		}
-	}
+	LevelEditor.selectedBrush.onMouseMove.call(LevelEditor.selectedBrush);
 	//
 	// Call the transformationscript
 	var deltaMouseX = mouseX - LevelEditor.lastMouseX;
@@ -450,16 +460,15 @@ LevelEditor.drawInterface = function() {
 //
 LevelEditor.drawBrush = function()
 {
-	if(LevelEditor.selectedBrush != null) { 
-		!LevelEditor.settingRotation && LevelEditor.selectedBrush.updatePos(mouseX, mouseY);
-		LevelEditor.selectedBrush.draw();
-		//
-		LevelEditor.settingRotation && colorLine(LevelEditor.selectedBrush.bounds.centerX, LevelEditor.selectedBrush.bounds.centerY, mouseX, mouseY, 'yellow', 3)
+	LevelEditor.selectedBrush.draw();
+	if(LevelEditor.selectedBrush.onMouseMove == LevelEditor.trScripts.mouseRotate) {
+		colorLine(LevelEditor.selectedBrush.bounds.centerX, LevelEditor.selectedBrush.bounds.centerY, mouseX, mouseY, 'yellow', 3)
 	}
 }
 //
 LevelEditor.refreshTooltip = function()
 {
+	/*
 	if(LevelEditor.mouseOverButton != null) {
 		LevelEditor.tooltipText = LevelEditor.mouseOverButton.tooltip;	
 	} else if(LevelEditor.selectedBrush == null) {
@@ -469,8 +478,9 @@ LevelEditor.refreshTooltip = function()
 	} else {
 		LevelEditor.tooltipText = "click to set rotation of last placed object";
 	}
-
+	
 	colorText(LevelEditor.tooltipText, 15, 15, 'white');
+	*/
 }
 
 
@@ -532,11 +542,11 @@ function LoadTextfield() {
 		   	}
 			optic.bounds = pointsData.bounds;	
 			optic.updatePos(piece.bounds.x, piece.bounds.y, true);
+			//
 			var lp = new LevelPiece(optic, piece.subtype);
 			lp.updateRotation(piece.rotation);
-			lp.refitBounds();
+			lp.expandBounds();
 			LevelEditor.pieces.push(lp);
-		   	
         }
     }catch(e){
         alert("invalid level data in text box below game");
@@ -604,8 +614,9 @@ LevelEditor.buttonScripts = {
 			var pointsData = LevelEditor.makePoints("lens_1");
 			var lens_1 = new Lens(pointsData.points, 1.3, LENS_COLOR);
 			lens_1.bounds = pointsData.bounds;
-			LevelEditor.selectedBrush = new LevelPiece(lens_1, 1);
-			LevelEditor.selectedBrush.refitBounds();
+			LevelEditor.selectedBrush = new LevelPiece(lens_1, 1, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
+			LevelEditor.selectedBrush.expandBounds();
+
 		}
 	},
 	"block_1": {
@@ -616,8 +627,8 @@ LevelEditor.buttonScripts = {
 			var pointsData = LevelEditor.makePoints("block_1");
 			var block_1 = new Block(pointsData.points, BLOCK_COLOR);
 			block_1.bounds = pointsData.bounds;
-			LevelEditor.selectedBrush = new LevelPiece(block_1, 1);
-			LevelEditor.selectedBrush.refitBounds();
+			LevelEditor.selectedBrush = new LevelPiece(block_1, 1, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
+			LevelEditor.selectedBrush.expandBounds();
 		}
 	},
 	"block_2": {
@@ -628,8 +639,8 @@ LevelEditor.buttonScripts = {
 			var pointsData = LevelEditor.makePoints("block_2");
 			var block_2 = new Block(pointsData.points, BLOCK_COLOR);
 			block_2.bounds = pointsData.bounds;
-			LevelEditor.selectedBrush = new LevelPiece(block_2, 2);
-			LevelEditor.selectedBrush.refitBounds();
+			LevelEditor.selectedBrush = new LevelPiece(block_2, 2, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
+			LevelEditor.selectedBrush.expandBounds();
 		}
 	},
 	"block_3": {
@@ -640,8 +651,22 @@ LevelEditor.buttonScripts = {
 			var pointsData = LevelEditor.makePoints("block_3");
 			var block_3 = new Block(pointsData.points, BLOCK_COLOR);
 			block_3.bounds = pointsData.bounds;
+			LevelEditor.selectedBrush = new LevelPiece(block_3, 3, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
+			LevelEditor.selectedBrush.expandBounds();
+		}
+	},
+	"mirror": {
+		"index": 4,
+		"tooltip": "mirror line stretching between two points",
+		"imagecode": LEVELPART_MIRROR,
+		"command": function() {
+			/*
+			var pointsData = LevelEditor.makePoints("block_3");
+			var block_3 = new Block(pointsData.points, BLOCK_COLOR);
+			block_3.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(block_3, 3);
-			LevelEditor.selectedBrush.refitBounds();
+			LevelEditor.selectedBrush.expandBounds();
+			*/
 		}
 	},
 	"delete": {
@@ -706,10 +731,12 @@ LevelPiece.prototype.constructor = LevelPiece;
  *
  * @return {LevelPiece}
  */
-function LevelPiece(_opticsPiece, _subtype) 
+function LevelPiece(_opticsPiece, _subtype, _onMouseMove, _onMouseClick) 
 {
+	_onMouseMove  = typeof _onMouseMove  != 'undefined' ? _onMouseMove  : noCmd;
+	_onMouseClick = typeof _onMouseClick != 'undefined' ? _onMouseClick : noCmd;
+	//
 	Graphic.call(this);
-	this.bounds = _opticsPiece.bounds;
 
 	//--------------------
 	//
@@ -719,25 +746,36 @@ function LevelPiece(_opticsPiece, _subtype)
 	//
 	//
 	this.selected = false;
-	this.image = document.createElement('canvas');
 	this.opticsPiece = _opticsPiece;
-	this.kind = this.opticsPiece.kind;
 	this.subtype = _subtype;
 	//
+	this.onMouseMove = _onMouseMove;
+	this.onMouseClick = _onMouseClick;
 	
-	var mainCtx = ctx;
-	ctx = this.image.getContext('2d');
-	this.image.width = this.bounds.w;
-	this.image.height = this.bounds.h;
-	//colorRect(0,0,this.bounds.w,this.bounds.h, "red");
-	this.opticsPiece.draw();
-	ctx = mainCtx;
+	if(typeof _opticsPiece != 'undefined') {
+		this.kind = _opticsPiece.kind;
+		this.bounds = _opticsPiece.bounds;
+		var mainCtx = ctx;
+		this.image = document.createElement('canvas');
+		ctx = this.image.getContext('2d');
+		this.image.width = this.bounds.w;
+		this.image.height = this.bounds.h;
+		//colorRect(0,0,this.bounds.w,this.bounds.h, "red");
+		this.opticsPiece.draw();
+		ctx = mainCtx;
+	} else {
+		this.image = null;
+	}
 	//
 	return this;
 }
 
 
-LevelPiece.prototype.refitBounds = function()
+/**
+ * Expand bounds so that it fits any type of rotated version (ie w,h = max(w,h))
+ * 
+ */
+LevelPiece.prototype.expandBounds = function()
 {
 	var maxDim = Math.max(this.bounds.w, this.bounds.h);
 	this.bounds = {
@@ -759,6 +797,8 @@ LevelPiece.prototype.refitBounds = function()
  */
 LevelPiece.prototype.draw = function() 
 { 
-	drawBitmapCenteredAtLocationWithRotation(this.image, this.bounds.centerX, this.bounds.centerY, this.rotation);
+	if(this.image != null) {
+		drawBitmapCenteredAtLocationWithRotation(this.image, this.bounds.centerX, this.bounds.centerY, this.rotation);
+	}
 };
 
