@@ -78,6 +78,35 @@ LevelEditor.trScripts = {
 		this.onMouseClick = noCmd;
 		LevelEditor.pieces.push(this);
 		LevelEditor.selectedBrush = new LevelPiece();
+	},
+	"startMirror": function() {
+		LevelEditor.lastClickX = mouseX;
+		LevelEditor.lastClickY = mouseY;
+		this.onMouseMove = LevelEditor.trScripts.previewMirror;
+		this.onMouseClick = LevelEditor.trScripts.finishMirror;
+	},
+	"previewMirror": function() {
+		colorLine(LevelEditor.lastClickX, LevelEditor.lastClickY, mouseX, mouseY, 'green', 1);
+	},
+	"finishMirror": function() {
+		var x1 = Math.min(LevelEditor.lastClickX, mouseX);
+		var y1 = Math.min(LevelEditor.lastClickY, mouseY);
+		var x2 = Math.max(LevelEditor.lastClickX, mouseX);
+		var y2 = Math.max(LevelEditor.lastClickY, mouseY);
+		var mirror = new MirrorLine(LevelEditor.lastClickX-x1, LevelEditor.lastClickY-y1, mouseX-x1, mouseY-y1, MIRROR_COLOR, 6);
+		var w = x2-x1;
+		var h = y2-y1;
+		mirror.bounds = {	
+			"x":0, "y":0, 
+			"x2":w, "y2":h,
+			"centerX": w/2, "centerY": h/2, 
+			"w":w, "h":h
+		};
+		mirror.points = [new Point(LevelEditor.lastClickX, LevelEditor.lastClickY), new Point(mouseX, mouseY)];
+		var lp = new LevelPiece(mirror, 0);
+		lp.updatePos(x1+(w/2), y1+(h/2));
+		LevelEditor.pieces.push(lp);	
+		LevelEditor.selectedBrush = new LevelPiece();
 	}
 };
 
@@ -161,8 +190,10 @@ LevelEditor.inPanel = false;
 LevelEditor.overflow = false;
 LevelEditor.deleting = false;
 //
-LevelEditor.lastMouseX = 0.0;
-LevelEditor.lastMouseY = 0.0;
+LevelEditor.lastMouseX = 0;
+LevelEditor.lastMouseY = 0;
+LevelEditor.lastClickX = 0;
+LevelEditor.lastClickY = 0;
 
 LevelEditor.tooltipText = "";
 LevelEditor.trScript = LevelEditor.trScripts.none;
@@ -219,8 +250,8 @@ LevelEditor.toggle = function() {
 	LevelEditor.selectedPiece = null;
 	if(LevelEditor.active) {
 		LevelEditor.selectedBrush = new LevelPiece();
-		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.mirrors, currentLevel.cores, currentLevel.coresinks, currentLevel.sprites);
-		// Handled: currentLevel.lenses, currentLevel.blocks,  TMP handled: currentLevel.beams
+		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.cores, currentLevel.coresinks, currentLevel.sprites);
+		// Handled: currentLevel.lenses, currentLevel.blocks, currentLevel.mirrors  TMP handled: currentLevel.beams
 		currentLevel = new OptiLevel.init();
 		currentLevel.addManyOpticsPieces(typesNotHandled);
 	} else {
@@ -229,9 +260,12 @@ LevelEditor.toggle = function() {
 			var maker = LevelEditor.makerRouter[piece.kind+"_"+piece.subtype];
 			var points = maker(piece.bounds.centerX, piece.bounds.centerY, rad_to_deg(piece.rotation));
 			if(piece.kind == "lens") {
-				currentLevel.addOpticsPiece(new Lens(points, 1.3, LENS_COLOR));
+				currentLevel.addOpticsPiece(new Lens( points, LENS_INDEX_REF, LENS_COLOR ));
 			} else if(piece.kind == "block") {
-				currentLevel.addOpticsPiece(new Block(points, BLOCK_COLOR));
+				currentLevel.addOpticsPiece(new Block( points, BLOCK_COLOR ));
+			} else if(piece.kind == "mirror") {
+				points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				currentLevel.addOpticsPiece(new MirrorLine( points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6 ));
 			}
 		}
 
@@ -249,6 +283,7 @@ LevelEditor.toggle = function() {
 //
 LevelEditor.mouseClicked = function(_evt) {
 	LevelEditor.mouseDragStart();
+	var shift = _evt.shiftKey;
 	//
 	if(LevelEditor.mouseOverButton != null) { 
 		LevelEditor.mouseOverButton.onClick(_evt); 				// Clicked one of the buttons in the tool panel
@@ -256,12 +291,14 @@ LevelEditor.mouseClicked = function(_evt) {
 		LevelEditor.trScript = LevelEditor.trScripts.panelGrab;	// Clicked somewhere on the panel background
 	} else if(LevelEditor.deleting) {
 		editorDeleteNearestToMouse();
-		if(!_evt.shiftKey) {
+		if(!shift) {
 			LevelEditor.deleting = false;
 			LevelEditor.selectedBrush = new LevelPiece();
 		}
 	} else if(LevelEditor.selectedBrush.onMouseClick != noCmd) {
 		LevelEditor.selectedBrush.onMouseClick.call(LevelEditor.selectedBrush);
+	} else if(shift && LevelEditor.selectedPiece != null) {
+		LevelEditor.trScript = LevelEditor.trScripts.possiblePieceGrab;
 	} else if(LevelEditor.mouseOverPieces.length > 0) {
 		if(LevelEditor.mouseOverIndex >= LevelEditor.mouseOverPieces.length) {
 			LevelEditor.mouseOverIndex = 0;
@@ -534,9 +571,23 @@ function LoadTextfield() {
         	var optic = null;
         	var pointsData = LevelEditor.makePoints(piece.kind+"_"+piece.subtype);
         	if(piece.kind == "lens") {
-				optic = new Lens(pointsData.points, 1.3, LENS_COLOR);
+				optic = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			} else if(piece.kind == "block") {
 				optic = new Block(pointsData.points, BLOCK_COLOR);
+			} else if(piece.kind == "mirror") {
+				points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				//pointsData = {"points":points, "bounds":piece.bounds};
+				var x1 = points[0].x - piece.bounds.x;
+				var y1 = points[0].y - piece.bounds.y;
+				var x2 = points[1].x - piece.bounds.x;
+				var y2 = points[1].y - piece.bounds.y;
+				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, 6 );
+				mirror.bounds = piece.bounds;
+				mirror.points = piece.opticsPiece.points;
+				var lp = new LevelPiece(mirror, 0);
+				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
+				LevelEditor.pieces.push(lp);
+				continue;
 		   	} else {
 		   		continue;
 		   	}
@@ -560,6 +611,7 @@ function LoadTextfield() {
 LevelEditor.makePoints = function(_maker) 
 {
 	var points = LevelEditor.makerRouter[_maker](0,0,0);
+	if(points == null) return;
 	//
 	// Find bounds
 	var top = points[0].y;
@@ -596,7 +648,9 @@ LevelEditor.makerRouter = {
 	"lens_1": make_points_lens_1,
 	"block_1": make_points_block_1,
 	"block_2": make_points_block_2,
-	"block_3": make_points_block_3
+	"block_3": make_points_block_3,
+	"mirror_0": function() {return null;}
+	
 };
 
 
@@ -660,13 +714,8 @@ LevelEditor.buttonScripts = {
 		"tooltip": "mirror line stretching between two points",
 		"imagecode": LEVELPART_MIRROR,
 		"command": function() {
-			/*
-			var pointsData = LevelEditor.makePoints("block_3");
-			var block_3 = new Block(pointsData.points, BLOCK_COLOR);
-			block_3.bounds = pointsData.bounds;
-			LevelEditor.selectedBrush = new LevelPiece(block_3, 3);
-			LevelEditor.selectedBrush.expandBounds();
-			*/
+			LevelEditor.selectedBrush = new LevelPiece(null, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.startMirror);
+			LevelEditor.selectedBrush.image = LevelEditorPlusSign;
 		}
 	},
 	"delete": {
@@ -674,6 +723,11 @@ LevelEditor.buttonScripts = {
 		"tooltip": "click to delete nearest part (hold SHIFT to stay in delete mode)",
 		"imagecode": LEVELPART_DELETE,
 		"command": function() {
+			if(LevelEditor.selectedPiece != null) {
+				LevelEditor.pieces.splice(LevelEditor.pieces.indexOf(LevelEditor.selectedPiece), 1);
+				LevelEditor.selectedPiece = null;
+			}
+			/*
 			LevelEditor.deleting = true;
 			LevelEditor.selectedPiece = null;
 			LevelEditor.selectedBrush = {
@@ -682,6 +736,7 @@ LevelEditor.buttonScripts = {
 				},
 				"updatePos": function() {}
 			};
+			*/
 		}
 	},
 	"export": {
@@ -733,6 +788,7 @@ LevelPiece.prototype.constructor = LevelPiece;
  */
 function LevelPiece(_opticsPiece, _subtype, _onMouseMove, _onMouseClick) 
 {
+	_opticsPiece = typeof _opticsPiece != 'undefined' ? _opticsPiece : null;
 	_onMouseMove  = typeof _onMouseMove  != 'undefined' ? _onMouseMove  : noCmd;
 	_onMouseClick = typeof _onMouseClick != 'undefined' ? _onMouseClick : noCmd;
 	//
@@ -752,7 +808,7 @@ function LevelPiece(_opticsPiece, _subtype, _onMouseMove, _onMouseClick)
 	this.onMouseMove = _onMouseMove;
 	this.onMouseClick = _onMouseClick;
 	
-	if(typeof _opticsPiece != 'undefined') {
+	if(_opticsPiece != null) {
 		this.kind = _opticsPiece.kind;
 		this.bounds = _opticsPiece.bounds;
 		var mainCtx = ctx;
