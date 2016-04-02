@@ -44,6 +44,10 @@ function handleMouseClick(evt) {
 	for (var i=0; i < currentLevel.cores.length; i++) {
 		core = currentLevel.cores[i];
 		if (core.encloses(mouseX, mouseY)){
+			// Remove all dashed lines in level
+			currentLevel.beams = [];		
+			
+			// Emit laser from all cores
 			core.emitLasers();
 		}
 	}

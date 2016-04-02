@@ -3,8 +3,10 @@
 // Global Variables
 // ##################################
 
-const LIGHTSPEED = 3;
+const LIGHTSPEED = 5;
+const LIGHTSPEED_DASHED = 2;
 const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
+const DASHED_LINE_WIDTH = 1; 
 const LASER_TRAIL_LENGTH = 10; 
 const LASER_LINE_WIDTH = 3; 
 const MIRROR_LINE_BOX_WIDTH = 20; 
@@ -346,9 +348,9 @@ Core.prototype.updatePiece = function () {
 }
 // updateCORE()
 Core.prototype.updateCORE = function () {
-
+	// update each ring
 	for (var i=0; i < this.coreRings.length; i++) {	
-		this.coreRings[i].updateRING();	 // update each ring
+		this.coreRings[i].updateRING(this.centerX, this.centerY);	 
 	}	
 }
 // isFull()
@@ -420,6 +422,9 @@ function CoreRing(radius, angles, active, color, lineWidth) {
 		this.beamSlots.push(slot);
 	}
 	
+	this.dashedLineInterval = DASHED_LINE_LENGTH * 2;
+	this.countdown = this.dashedLineInterval;
+	
 	this.color = color;
 	this.lineWidth = lineWidth;	
 }
@@ -432,8 +437,29 @@ CoreRing.init = function(_org)
 	return instance;
 }
 // updateRING()
-CoreRing.prototype.updateRING = function () {
-	// Send out dashed lines
+CoreRing.prototype.updateRING = function (centerX, centerY) {
+	
+	if (this.active == false) {
+		return;
+	}
+	
+	this.countdown--;
+	if (this.countdown <= 0) {
+		// emit dashed line
+		for (var i=0; i < this.beamSlots.length; i++) {
+			var slot = this.beamSlots[i];
+			var distance = this.radius + RING_ARROW_HEAD_LENGTH;
+			var spawnX = centerX + distance * Math.cos(deg_to_rad(slot.direction));
+			var spawnY = centerY + distance * Math.sin(deg_to_rad(slot.direction));
+			var dash = new Beam(spawnX, spawnY, LIGHTSPEED_DASHED, slot.direction, 
+						DASHED_LINE_LENGTH, this.color, DASHED_LINE_WIDTH)
+			
+			currentLevel.addOpticsPiece(dash); // Emit laserbeam
+		}
+		// reset countdown
+		this.countdown = this.dashedLineInterval;
+	}
+	
 }
 CoreRing.prototype.emitLasers = function (centerX, centerY) {
 	this.active = false;
@@ -780,7 +806,8 @@ function make_points_lens_1(centerX, centerY, angle) {
 	var positions = [[-5,  80],
 			 [ 5,  80],
 			 [ 5, -80],
-			 [-5, -80]];
+			 [-5, -80],
+			 [-6, -85]];
 	
 	// make points
 	var points = positions_to_points(positions);
@@ -831,21 +858,53 @@ function make_points_lens_6(centerX, centerY, angle) {
 // Make Blocks
 // ----------------------------------
 
-// prism
+// large square
 function make_points_block_1(centerX, centerY, angle) {
-	var points = [];
+	var positions = [[-50,  50],
+			 [ 50,  50],
+			 [ 50, -50],
+			 [-50, -50]];
+	
 	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
 	return points;
 }
 
+// thin rectangle
 function make_points_block_2(centerX, centerY, angle) {
-	var points = [];
+	var positions = [[-5,  30],
+			 [ 5,  30],
+			 [ 5, -30],
+			 [-5, -30]];
+	
 	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
 	return points;
 }
 
+// small square
 function make_points_block_3(centerX, centerY, angle) {
-	var points = [];
+	var positions = [[-10,  10],
+			 [ 10,  10],
+			 [ 10, -10],
+			 [-10, -10]];
+	
 	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
 	return points;
 }

@@ -210,22 +210,6 @@ LevelEditor.toggle = function() {
 			}
 		}
 
-
-		/** TEMP SOLUTION **/
-		var trailLength = 10;
-		var dashLineWidth = 2;
-		var beam1 = new LaserBeam(650,325, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-		var beam2 = new LaserBeam(650,375, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-		var beam3 = new LaserBeam(650,425, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-		var beam4 = new LaserBeam(650,475, LIGHTSPEED, 180, trailLength, 'red', dashLineWidth);
-		var beam5 = new LaserBeam(400,150, LIGHTSPEED, -15, trailLength, 'red', dashLineWidth);
-		var beam6 = new LaserBeam(400,150, LIGHTSPEED, -10, trailLength, 'green', dashLineWidth);
-		var beam7 = new LaserBeam(400,150, LIGHTSPEED, -5, trailLength, 'blue', dashLineWidth);
-		var beam8 = new LaserBeam(400,150, LIGHTSPEED, 0, trailLength, 'purple', dashLineWidth);
-		currentLevel.addManyOpticsPieces([beam1,beam2,beam3,beam4,beam5,beam6,beam7,beam8]);
-		/** END **/
-
-
 	}
 }
 

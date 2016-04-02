@@ -164,7 +164,7 @@ OptiLevel.prototype.tick = function()
 	
 	// Beams
 	for (var i = this.beams.length-1; i >= 0; i--) {
-		var beam = beams[i];
+		var beam = this.beams[i];
 		
 		beam.updatePiece();
 		
