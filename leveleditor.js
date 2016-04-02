@@ -612,7 +612,7 @@ LevelEditor.buttonScripts = {
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints("lens_1");
-			var lens_1 = new Lens(pointsData.points, 1.3, LENS_COLOR);
+			var lens_1 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_1.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_1, 1, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
 			LevelEditor.selectedBrush.expandBounds();

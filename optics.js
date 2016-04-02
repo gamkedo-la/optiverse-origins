@@ -4,12 +4,14 @@
 // ##################################
 
 const LIGHTSPEED = 5;
-const LIGHTSPEED_DASHED = 2;
+const LIGHTSPEED_DASHED = 4;
 const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
 const DASHED_LINE_WIDTH = 1; 
 const LASER_TRAIL_LENGTH = 10; 
 const LASER_LINE_WIDTH = 3; 
 const MIRROR_LINE_BOX_WIDTH = 20; 
+
+const LENS_INDEX_REF = 1.3
 
 // ##################################
 // Classes (Prototype Constructors)
@@ -803,6 +805,257 @@ Trail.prototype.draw = function () {
 
 // biconvex
 function make_points_lens_1(centerX, centerY, angle) {	
+	var positions = [
+		[ -4.90 , 75 ], 
+		[ -7.66 , 70 ], 
+		[ -10.19 , 65 ], 
+		[ -12.48 , 60 ], 
+		[ -14.55 , 55 ], 
+		[ -16.42 , 50 ], 
+		[ -18.09 , 45 ], 
+		[ -19.57 , 40 ], 
+		[ -20.86 , 35 ], 
+		[ -21.97 , 30 ], 
+		[ -22.90 , 25 ], 
+		[ -23.66 , 20 ], 
+		[ -24.25 , 15 ], 
+		[ -24.67 , 10 ], 
+		[ -24.92 , 5 ], 
+		[ -25.00 , 0 ], 
+		[ -24.92 , -5 ], 
+		[ -24.67 , -10 ], 
+		[ -24.25 , -15 ], 
+		[ -23.66 , -20 ], 
+		[ -22.90 , -25 ], 
+		[ -21.97 , -30 ], 
+		[ -20.86 , -35 ], 
+		[ -19.57 , -40 ], 
+		[ -18.09 , -45 ], 
+		[ -16.42 , -50 ], 
+		[ -14.55 , -55 ], 
+		[ -12.48 , -60 ], 
+		[ -10.19 , -65 ], 
+		[ -7.66 , -70 ], 
+		[ -4.90 , -75 ], 
+		[ 4.90 , -75 ], 
+		[ 7.66 , -70 ], 
+		[ 10.19 , -65 ], 
+		[ 12.48 , -60 ], 
+		[ 14.55 , -55 ], 
+		[ 16.42 , -50 ], 
+		[ 18.09 , -45 ], 
+		[ 19.57 , -40 ], 
+		[ 20.86 , -35 ], 
+		[ 21.97 , -30 ], 
+		[ 22.90 , -25 ], 
+		[ 23.66 , -20 ], 
+		[ 24.25 , -15 ], 
+		[ 24.67 , -10 ], 
+		[ 24.92 , -5 ], 
+		[ 25.00 , 0 ], 
+		[ 24.92 , 5 ], 
+		[ 24.67 , 10 ], 
+		[ 24.25 , 15 ], 
+		[ 23.66 , 20 ], 
+		[ 22.90 , 25 ], 
+		[ 21.97 , 30 ], 
+		[ 20.86 , 35 ], 
+		[ 19.57 , 40 ], 
+		[ 18.09 , 45 ], 
+		[ 16.42 , 50 ], 
+		[ 14.55 , 55 ], 
+		[ 12.48 , 60 ], 
+		[ 10.19	, 65 ],	
+		[ 7.66 , 70 ], 
+		[ 4.90 , 75 ]
+				]; 
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+
+// planoconvex
+function make_points_lens_2(centerX, centerY, angle) {
+	var positions = [
+		[ -4.90 , 75 ], 
+		[ -4.90 , -75 ], 
+		[ 4.90 , -75 ], 
+		[ 7.66 , -70 ], 
+		[ 10.19 , -65 ], 
+		[ 12.48 , -60 ], 
+		[ 14.55 , -55 ], 
+		[ 16.42 , -50 ], 
+		[ 18.09 , -45 ], 
+		[ 19.57 , -40 ], 
+		[ 20.86 , -35 ], 
+		[ 21.97 , -30 ], 
+		[ 22.90 , -25 ], 
+		[ 23.66 , -20 ], 
+		[ 24.25 , -15 ], 
+		[ 24.67 , -10 ], 
+		[ 24.92 , -5 ], 
+		[ 25.00 , 0 ], 
+		[ 24.92 , 5 ], 
+		[ 24.67 , 10 ], 
+		[ 24.25 , 15 ], 
+		[ 23.66 , 20 ], 
+		[ 22.90 , 25 ], 
+		[ 21.97 , 30 ], 
+		[ 20.86 , 35 ], 
+		[ 19.57 , 40 ], 
+		[ 18.09 , 45 ], 
+		[ 16.42 , 50 ], 
+		[ 14.55 , 55 ], 
+		[ 12.48 , 60 ], 
+		[ 10.19	, 65 ],	
+		[ 7.66 , 70 ], 
+		[ 4.90 , 75 ]
+				]; 
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+// biconcave
+function make_points_lens_3(centerX, centerY, angle) {
+	var positions = [
+		[ -25.10 , 75 ], 
+		[ -22.34 , 70 ], 
+		[ -19.81 , 65 ], 
+		[ -17.52 , 60 ], 
+		[ -15.45 , 55 ], 
+		[ -13.58 , 50 ], 
+		[ -11.91 , 45 ], 
+		[ -10.43 , 40 ], 
+		[ -9.14 , 35 ], 
+		[ -8.03 , 30 ], 
+		[ -7.10 , 25 ], 
+		[ -6.34 , 20 ], 
+		[ -5.75 , 15 ], 
+		[ -5.33 , 10 ], 
+		[ -5.08 , 5 ], 
+		[ -5.00 , 0 ], 
+		[ -5.08 , -5 ], 
+		[ -5.33 , -10 ], 
+		[ -5.75 , -15 ], 
+		[ -6.34 , -20 ], 
+		[ -7.10 , -25 ], 
+		[ -8.03 , -30 ], 
+		[ -9.14 , -35 ], 
+		[ -10.43 , -40 ], 
+		[ -11.91 , -45 ], 
+		[ -13.58 , -50 ], 
+		[ -15.45 , -55 ], 
+		[ -17.52 , -60 ], 
+		[ -19.81 , -65 ], 
+		[ -22.34 , -70 ], 
+		[ -25.10 , -75 ], 
+		[ 25.10 , -75 ], 
+		[ 22.34 , -70 ], 
+		[ 19.81 , -65 ], 
+		[ 17.52 , -60 ], 
+		[ 15.45 , -55 ], 
+		[ 13.58 , -50 ], 
+		[ 11.91 , -45 ], 
+		[ 10.43 , -40 ], 
+		[ 9.14 , -35 ], 
+		[ 8.03 , -30 ], 
+		[ 7.10 , -25 ], 
+		[ 6.34 , -20 ], 
+		[ 5.75 , -15 ], 
+		[ 5.33 , -10 ], 
+		[ 5.08 , -5 ], 
+		[ 5.00 , 0 ], 
+		[ 5.08 , 5 ], 
+		[ 5.33 , 10 ], 
+		[ 5.75 , 15 ], 
+		[ 6.34 , 20 ], 
+		[ 7.10 , 25 ], 
+		[ 8.03 , 30 ], 
+		[ 9.14 , 35 ], 
+		[ 10.43 , 40 ], 
+		[ 11.91 , 45 ], 
+		[ 13.58 , 50 ], 
+		[ 15.45 , 55 ], 
+		[ 17.52 , 60 ], 
+		[ 19.81 , 65 ], 
+		[ 22.34 , 70 ], 
+		[ 25.10 , 75 ]
+				];
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+// planoconcave
+function make_points_lens_4(centerX, centerY, angle) {
+	var positions = [
+		[ -5 , 75 ], 
+		[ -5 , -75 ], 
+		[ 25.10 , -75 ], 
+		[ 22.34 , -70 ], 
+		[ 19.81 , -65 ], 
+		[ 17.52 , -60 ], 
+		[ 15.45 , -55 ], 
+		[ 13.58 , -50 ], 
+		[ 11.91 , -45 ], 
+		[ 10.43 , -40 ], 
+		[ 9.14 , -35 ], 
+		[ 8.03 , -30 ], 
+		[ 7.10 , -25 ], 
+		[ 6.34 , -20 ], 
+		[ 5.75 , -15 ], 
+		[ 5.33 , -10 ], 
+		[ 5.08 , -5 ], 
+		[ 5.00 , 0 ], 
+		[ 5.08 , 5 ], 
+		[ 5.33 , 10 ], 
+		[ 5.75 , 15 ], 
+		[ 6.34 , 20 ], 
+		[ 7.10 , 25 ], 
+		[ 8.03 , 30 ], 
+		[ 9.14 , 35 ], 
+		[ 10.43 , 40 ], 
+		[ 11.91 , 45 ], 
+		[ 13.58 , 50 ], 
+		[ 15.45 , 55 ], 
+		[ 17.52 , 60 ], 
+		[ 19.81 , 65 ], 
+		[ 22.34 , 70 ], 
+		[ 25.10 , 75 ]
+				];
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+// meniscus
+function make_points_lens_5(centerX, centerY, angle) {
 	var positions = [[-5,  80],
 			 [ 5,  80],
 			 [ 5, -80],
@@ -819,38 +1072,35 @@ function make_points_lens_1(centerX, centerY, angle) {
 	return points;
 }
 
-// planoconvex
-function make_points_lens_2(centerX, centerY, angle) {
-	var points = [];
-	// make points
-	return points;
-}
-
-// biconcave
-function make_points_lens_3(centerX, centerY, angle) {
-	var points = [];
-	// make points
-	return points;
-}
-
-// planoconcave
-function make_points_lens_4(centerX, centerY, angle) {
-	var points = [];
-	// make points
-	return points;
-}
-
-// meniscus
-function make_points_lens_5(centerX, centerY, angle) {
-	var points = [];
-	// make points
-	return points;
-}
-
-// prism
+// triangular prism (equilateral)
 function make_points_lens_6(centerX, centerY, angle) {
-	var points = [];
+	var positions = [[-80,  58],
+			 [  0, -80],
+			 [ 80,  58]];
+	
 	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
+	return points;
+}
+
+// circular orb
+function make_points_lens_7(centerX, centerY, angle) {
+	var positions = [[-50,  22],
+			 [  0, -50],
+			 [ 5, -80]];
+	
+	// make points
+	var points = positions_to_points(positions);
+	// rotate points
+	points = rotate_around_origin(points, angle);
+	// translate points
+	points = translate_points(points, centerX, centerY);
+	
 	return points;
 }
 
@@ -894,10 +1144,10 @@ function make_points_block_2(centerX, centerY, angle) {
 
 // small square
 function make_points_block_3(centerX, centerY, angle) {
-	var positions = [[-10,  10],
-			 [ 10,  10],
-			 [ 10, -10],
-			 [-10, -10]];
+	var positions = [[-20,  20],
+			 [ 20,  20],
+			 [ 20, -20],
+			 [-20, -20]];
 	
 	// make points
 	var points = positions_to_points(positions);

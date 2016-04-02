@@ -97,7 +97,7 @@ function loadGameElements() {
 	var pa3 = new Point(400, 210);
 	var pa4 = new Point(100, 210);
 	points = [pa1, pa2, pa3, pa4];
-	var lens1 = new Lens(points, 1.3, LENS_COLOR);
+	var lens1 = new Lens(points, LENS_INDEX_REF, LENS_COLOR);
 	
 	currentLevel.addOpticsPiece(lens1);
 	
@@ -106,7 +106,7 @@ function loadGameElements() {
 	var pb2 = new Point(500, 110);
 	var pb3 = new Point(600, 250);
 	points = [pb1, pb2, pb3];
-	var lens2 = new Lens(points, 1.3, LENS_COLOR);
+	var lens2 = new Lens(points, LENS_INDEX_REF, LENS_COLOR);
 	
 	currentLevel.addOpticsPiece(lens2);
 	
@@ -122,7 +122,7 @@ function loadGameElements() {
 	var pc9 = new Point(500, 400);
 	var pc10 = new Point(510, 350);
 	points = [pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10];
-	var lens3 = new Lens(points, 1.3, LENS_COLOR);
+	var lens3 = new Lens(points, LENS_INDEX_REF, LENS_COLOR);
 	
 	currentLevel.addOpticsPiece(lens3);
 	
