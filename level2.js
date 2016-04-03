@@ -125,6 +125,7 @@ OptiLevel.prototype.removeOpticsPiece = function(piece)
 }
 
 OptiLevel.prototype.levelCompleted = function(){
+	if(this.coresinks.length == 0) return false; // Added by Andreas while testing level editor
 	for (var i=0; i < this.coresinks.length; i++) {
 		for (var j=0; j < this.coresinks[i].coreRings.length; j++)  {
 			

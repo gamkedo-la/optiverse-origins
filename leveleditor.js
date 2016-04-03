@@ -155,9 +155,9 @@ LevelEditor.pieces = [];
 // Location and dimensions
 LevelEditor.bounds = {
 	'x': 650.0,
-	'y': 60.0,
+	'y': 40.0,
 	'w': 125.0,
-	'h': 400.0,
+	'h': 500.0,
 	'x2': 0,
 	'y2': 0
 };
@@ -250,23 +250,23 @@ LevelEditor.toggle = function() {
 	LevelEditor.selectedPiece = null;
 	if(LevelEditor.active) {
 		LevelEditor.selectedBrush = new LevelPiece();
-		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.cores, currentLevel.coresinks, currentLevel.sprites);
-		// Handled: currentLevel.lenses, currentLevel.blocks, currentLevel.mirrors  TMP handled: currentLevel.beams
+		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.sprites);
+		// Handled: currentLevel.lenses, currentLevel.blocks, currentLevel.mirrors, currentLevel.cores, currentLevel.coresinks  TMP handled: currentLevel.beams
 		currentLevel = new OptiLevel.init();
 		currentLevel.addManyOpticsPieces(typesNotHandled);
 	} else {
 		for(var i in LevelEditor.pieces) {
 			var piece = LevelEditor.pieces[i];
-			var maker = LevelEditor.makerRouter[piece.kind+"_"+piece.subtype];
-			var points = maker(piece.bounds.centerX, piece.bounds.centerY, rad_to_deg(piece.rotation));
-			if(piece.kind == "lens") {
-				currentLevel.addOpticsPiece(new Lens( points, LENS_INDEX_REF, LENS_COLOR ));
-			} else if(piece.kind == "block") {
-				currentLevel.addOpticsPiece(new Block( points, BLOCK_COLOR ));
-			} else if(piece.kind == "mirror") {
-				points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
-				currentLevel.addOpticsPiece(new MirrorLine( points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6 ));
+			var optic = null;
+			if(piece.kind == "mirror") {
+				var points = piece.opticsPiece.points;
+				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6);
+				optic.moveTo(piece.bounds.centerX, piece.bounds.centerY);
+			} else {
+				var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
+				optic = maker(piece.bounds.centerX, piece.bounds.centerY, rad_to_deg(piece.rotation));
 			}
+			currentLevel.addOpticsPiece(optic);
 		}
 
 	}
@@ -608,10 +608,13 @@ function LoadTextfield() {
 
 
 
-LevelEditor.makePoints = function(_maker) 
+LevelEditor.makePoints = function(_maker, _cx, _cy, _cRot) 
 {
-	var points = LevelEditor.makerRouter[_maker](0,0,0);
-	if(points == null) return;
+	_cx = typeof _cx != 'undefined' ? _cx : 0;
+	_cy = typeof _cy != 'undefined' ? _cy : 0;
+	_cRot = typeof _cRot != 'undefined' ? _cRot : 0;
+	//
+	var points = _maker(_cx, _cy, _cRot);
 	//
 	// Find bounds
 	var top = points[0].y;
@@ -644,25 +647,66 @@ LevelEditor.makePoints = function(_maker)
 }
 
 
-LevelEditor.makerRouter = {
-	"lens_1": make_points_lens_1,
-	"lens_2": make_points_lens_2,
-	"lens_3": make_points_lens_3,
-	"lens_4": make_points_lens_4,
-	"lens_5": make_points_lens_5,
-	"lens_6": make_points_lens_6,
-	"lens_7": make_points_lens_7,
-	"block_1": make_points_block_1,
-	"block_2": make_points_block_2,
-	"block_3": make_points_block_3,
-	"mirror_0": function() {return null;},
-	"source_0": function() {return null;},
-	"sink_0": function() {return null;}
+LevelEditor.makeScripts = {
+	"lens_1": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_1(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_2": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_2(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_3": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_3(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_4": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_4(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_5": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_5(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_6": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_6(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"lens_7": function(_cx, _cy, _cRot) {
+		return new Lens(make_points_lens_7(_cx, _cy, _cRot), LENS_INDEX_REF, LENS_COLOR);		
+	},
+	"block_1": function(_cx, _cy, _cRot) {
+		return new Block(make_points_block_1(_cx, _cy, _cRot), BLOCK_COLOR);		
+	},
+	"block_2": function(_cx, _cy, _cRot) {
+		return new Block(make_points_block_2(_cx, _cy, _cRot), BLOCK_COLOR);		
+	},
+	"block_3": function(_cx, _cy, _cRot) {
+		return new Block(make_points_block_3(_cx, _cy, _cRot), BLOCK_COLOR);		
+	},
+	"mirror_0": function(_points) {
+
+	},
+	"core_0": function(_cx, _cy, _cRot) { 
+		var dash2 = 5;
+		var CR2 = new CoreRing(25, [90+_cRot], true, 'green', 5);
+		var arr2 = [CR2];
+		return new Core(_cx, _cy, 10, 'green', arr2);	
+	},
+	"sink_0": function(_cx, _cy, _cRot) { 
+		var CR1a = new CoreRing(20, [0], false, 'green', 3);
+		var arr1a = [CR1a];
+		return new CoreSink(_cx, _cy, 7, 'green', arr1a);
+	}
 	
 	// Added to this list. -Erik
 	
 };
 
+
+function makeCore(_centerX, _centerY, _diam)
+{
+	var r = _diam/2;
+	var x1 = _centerX - r;
+	var y1 = _centerY - r;
+	var x2 = _centerX + r;
+	var y2 = _centerY + r;
+	return [new Point(x1,y1), new Point(x2,y2)];
+}
 
 
 //----------------------------------------------------------------------------
@@ -686,19 +730,6 @@ LevelEditor.buttonScripts = {
 
 		}
 	},
-	"sink_0": {
-		"index": 6,
-		"tooltip": "sink_0",
-		"imagecode": LEVELPART_CORE,
-		"command": function() {
-			var pointsData = LevelEditor.makePoints("sink_0");
-			var sink_0 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
-			sink_0.bounds = pointsData.bounds;
-			LevelEditor.selectedBrush = new LevelPiece(sink_0, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
-			LevelEditor.selectedBrush.expandBounds();
-
-		}
-	},
 	*/
 	// --------------- END Added by Erik 1 --------------
 	
@@ -707,7 +738,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_1",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_1");
+			var pointsData = LevelEditor.makePoints(make_points_lens_1);
 			var lens_1 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_1.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_1, 1, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -722,7 +753,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_2",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_2");
+			var pointsData = LevelEditor.makePoints(make_points_lens_2);
 			var lens_2 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_2.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_2, 2, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -735,7 +766,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_3",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_3");
+			var pointsData = LevelEditor.makePoints(make_points_lens_3);
 			var lens_3 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_3.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_3, 3, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -748,7 +779,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_4",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_4");
+			var pointsData = LevelEditor.makePoints(make_points_lens_4);
 			var lens_4 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_4.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_4, 4, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -761,7 +792,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_5",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_5");
+			var pointsData = LevelEditor.makePoints(make_points_lens_5);
 			var lens_5 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_5.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_5, 5, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -774,7 +805,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_6",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_6");
+			var pointsData = LevelEditor.makePoints(make_points_lens_6);
 			var lens_6 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_6.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_6, 6, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -787,7 +818,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "lens_7",
 		"imagecode": LEVELPART_LENS,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("lens_7");
+			var pointsData = LevelEditor.makePoints(make_points_lens_7);
 			var lens_7 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
 			lens_7.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(lens_7, 7, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -802,7 +833,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "block_1",
 		"imagecode": LEVELPART_WALL,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("block_1");
+			var pointsData = LevelEditor.makePoints(make_points_block_1);
 			var block_1 = new Block(pointsData.points, BLOCK_COLOR);
 			block_1.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(block_1, 1, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -814,7 +845,7 @@ LevelEditor.buttonScripts = {
 		"tooltip": "block_2",
 		"imagecode": LEVELPART_WALL,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("block_2");
+			var pointsData = LevelEditor.makePoints(make_points_block_2);
 			var block_2 = new Block(pointsData.points, BLOCK_COLOR);
 			block_2.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(block_2, 2, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
@@ -826,20 +857,51 @@ LevelEditor.buttonScripts = {
 		"tooltip": "block_3",
 		"imagecode": LEVELPART_WALL,
 		"command": function() {
-			var pointsData = LevelEditor.makePoints("block_3");
+			var pointsData = LevelEditor.makePoints(make_points_block_3);
 			var block_3 = new Block(pointsData.points, BLOCK_COLOR);
 			block_3.bounds = pointsData.bounds;
 			LevelEditor.selectedBrush = new LevelPiece(block_3, 3, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
 			LevelEditor.selectedBrush.expandBounds();
 		}
 	},
-	"mirror": {
+	"mirror_0": {
 		"index": 4,
 		"tooltip": "mirror line stretching between two points",
 		"imagecode": LEVELPART_MIRROR,
 		"command": function() {
 			LevelEditor.selectedBrush = new LevelPiece(null, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.startMirror);
 			LevelEditor.selectedBrush.image = LevelEditorPlusSign;
+		}
+	},
+	"core_0": {
+		"index": 5,
+		"tooltip": "core_0",
+		"imagecode": LEVELPART_CORE,
+		"command": function() {
+			var coreData = LevelEditor.makePoints(makeCore, 40, 40, 80);
+			var dash2 = 5;
+			var CR2 = new CoreRing(25, [90], true, 'green', 5);
+			var arr2 = [CR2];
+			var core = new Core(40, 40, 10, 'green', arr2);
+			core.bounds = coreData.bounds;		
+			core.points = [];	
+			LevelEditor.selectedBrush = new LevelPiece(core, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mouseRotateStart);
+			LevelEditor.selectedBrush.expandBounds();
+		}
+	},
+	"sink_0": {
+		"index": 6,
+		"tooltip": "sink_0",
+		"imagecode": LEVELPART_CORE,
+		"command": function() {
+			var coreData = LevelEditor.makePoints(makeCore, 28, 28, 56);
+			var CR1a = new CoreRing(20, [0], false, 'green', 3);
+			var arr1a = [CR1a];
+			var sink = new CoreSink(28, 28, 7, 'green', arr1a);
+			sink.bounds = coreData.bounds;		
+			sink.points = [];	
+			LevelEditor.selectedBrush = new LevelPiece(sink, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mousePut);
+			LevelEditor.selectedBrush.expandBounds();
 		}
 	},
 	"delete": {
@@ -969,6 +1031,18 @@ LevelPiece.prototype.expandBounds = function()
 		'h': maxDim,
 	};
 }
+
+
+/** @OVERRIDE **/
+LevelPiece.prototype.updateRotation = function(_angle)
+{
+	if(this.opticsPiece != null) {  // for special case: Mirrors
+		this.opticsPiece.points = rotate_around_origin(this.opticsPiece.points, rad_to_deg(_angle-this.rotation));
+	}
+	//
+	Graphic.prototype.updateRotation.call(this, _angle);
+}
+
 
 
 /**
