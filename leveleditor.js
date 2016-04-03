@@ -102,7 +102,8 @@ LevelEditor.trScripts = {
 			"centerX": w/2, "centerY": h/2, 
 			"w":w, "h":h
 		};
-		mirror.points = [new Point(LevelEditor.lastClickX, LevelEditor.lastClickY), new Point(mouseX, mouseY)];
+		//mirror.points = [new Point(LevelEditor.lastClickX, LevelEditor.lastClickY), new Point(mouseX, mouseY)];
+		mirror.points = [new Point(mirror.startX, mirror.startY), new Point(mirror.endX, mirror.endY)];
 		var lp = new LevelPiece(mirror, 0);
 		lp.updatePos(x1+(w/2), y1+(h/2));
 		LevelEditor.pieces.push(lp);	
@@ -268,7 +269,6 @@ LevelEditor.toggle = function() {
 			}
 			currentLevel.addOpticsPiece(optic);
 		}
-
 	}
 }
 
@@ -568,7 +568,23 @@ function LoadTextfield() {
         var pieces = JSON.parse(levelText.value);
         for(var i in pieces) {
         	var piece = pieces[i];
-        	var optic = null;
+        	if(piece.kind == "mirror") {
+				var points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				//console.log(points);
+				var x1 = points[0].x - piece.bounds.x;
+				var y1 = points[0].y - piece.bounds.y;
+				var x2 = points[1].x - piece.bounds.x;
+				var y2 = points[1].y - piece.bounds.y;
+				console.log(x1,y1,x2,y2);
+				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, 6);
+				mirror.bounds = piece.bounds;
+				mirror.points = piece.opticsPiece.points;
+				var lp = new LevelPiece(mirror, 0);
+				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
+				LevelEditor.pieces.push(lp);
+				continue;
+		   	}
+        	/*
         	var pointsData = LevelEditor.makePoints(piece.kind+"_"+piece.subtype);
         	if(piece.kind == "lens") {
 				optic = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -591,9 +607,13 @@ function LoadTextfield() {
 		   	} else {
 		   		continue;
 		   	}
-			optic.bounds = pointsData.bounds;	
-			optic.updatePos(piece.bounds.x, piece.bounds.y, true);
+		   	*/
+			//optic.bounds = pointsData.bounds;	
+			//optic.updatePos(piece.bounds.x, piece.bounds.y, true);
 			//
+			var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
+			var optic = maker(piece.bounds.w/2,piece.bounds.h/2,0);
+			optic.bounds = piece.bounds;
 			var lp = new LevelPiece(optic, piece.subtype);
 			lp.updateRotation(piece.rotation);
 			lp.expandBounds();
@@ -1030,6 +1050,19 @@ LevelPiece.prototype.expandBounds = function()
 		'w': maxDim,
 		'h': maxDim,
 	};
+}
+
+
+
+/** @OVERRIDE **/
+LevelPiece.prototype.updatePos = function(_x, _y)
+{
+	if(this.opticsPiece != null && typeof this.opticsPiece.points != 'undefined') {  // for special case: Mirrors
+		this.opticsPiece.points = translate_points(this.opticsPiece.points, _x-this.bounds.centerX, _y-this.bounds.centerY);
+		//console.log(_x-this.bounds.centerX, _y-this.bounds.centerY);
+	}
+	//
+	Graphic.prototype.updatePos.call(this, _x, _y);
 }
 
 
