@@ -1036,7 +1036,7 @@ LevelPiece.prototype.expandBounds = function()
 /** @OVERRIDE **/
 LevelPiece.prototype.updateRotation = function(_angle)
 {
-	if(this.opticsPiece != null) {  // for special case: Mirrors
+	if(this.opticsPiece != null && typeof this.opticsPiece.points != 'undefined') {  // for special case: Mirrors
 		this.opticsPiece.points = rotate_around_origin(this.opticsPiece.points, rad_to_deg(_angle-this.rotation));
 	}
 	//
