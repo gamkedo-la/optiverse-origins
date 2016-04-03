@@ -569,18 +569,18 @@ function LoadTextfield() {
         for(var i in pieces) {
         	var piece = pieces[i];
         	if(piece.kind == "mirror") {
-				var points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
-				//console.log(points);
+				//var points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				var points = piece.opticsPiece.points;
 				var x1 = points[0].x - piece.bounds.x;
 				var y1 = points[0].y - piece.bounds.y;
 				var x2 = points[1].x - piece.bounds.x;
 				var y2 = points[1].y - piece.bounds.y;
-				console.log(x1,y1,x2,y2);
 				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, 6);
 				mirror.bounds = piece.bounds;
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);
 				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
+				lp.expandBounds();
 				LevelEditor.pieces.push(lp);
 				continue;
 		   	}
@@ -1069,8 +1069,9 @@ LevelPiece.prototype.updatePos = function(_x, _y)
 /** @OVERRIDE **/
 LevelPiece.prototype.updateRotation = function(_angle)
 {
-	if(this.opticsPiece != null && typeof this.opticsPiece.points != 'undefined') {  // for special case: Mirrors
+	if(this.opticsPiece != null && this.opticsPiece.kind == "mirror") {  // for special case: Mirrors
 		this.opticsPiece.points = rotate_around_origin(this.opticsPiece.points, rad_to_deg(_angle-this.rotation));
+		this.opticsPiece.moveTo(this.bounds.centerX, this.bounds.centerY);
 	}
 	//
 	Graphic.prototype.updateRotation.call(this, _angle);
