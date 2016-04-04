@@ -312,15 +312,20 @@ LevelEditor.mouseClicked = function(_evt) {
 		var candidate = LevelEditor.mouseOverPieces[LevelEditor.mouseOverIndex++];
 		if(LevelEditor.selectedPiece != candidate) {
 			LevelEditor.selectedPiece = candidate;
-			LevelEditor.minusSign.active = true;
-			LevelEditor.plusSign.active = true;
-			LevelEditor.rotSymbol.active = true;
-
+			if(LevelEditor.selectedPiece.kind != "mirror") {
+				LevelEditor.minusSign.active = true;
+				LevelEditor.plusSign.active = true;
+				LevelEditor.rotSymbol.active = true;
+			}
 		} else {
 			LevelEditor.trScript = LevelEditor.trScripts.possiblePieceGrab;
 		}
 	} else if(LevelEditor.selectedPiece != null) {
-		LevelEditor.trScript = LevelEditor.trScripts.possiblePieceRotate;
+		if(LevelEditor.selectedPiece.kind == "mirror") {
+			LevelEditor.selectedPiece = null;
+		} else {
+			LevelEditor.trScript = LevelEditor.trScripts.possiblePieceRotate;
+		}
 	}
 }
 //
@@ -586,7 +591,7 @@ function LoadTextfield() {
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);
 				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
-				lp.expandBounds();
+				//lp.expandBounds();
 				LevelEditor.pieces.push(lp);
 				continue;
 		   	}
