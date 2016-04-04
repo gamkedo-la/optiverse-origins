@@ -3,12 +3,18 @@ var levPartEnum = 0;
 const NO_SELECTION = -1;
 const LEVELPART_ASTEROID = (levPartEnum++);
 const LEVELPART_CORE = (levPartEnum++);
-const LEVELPART_LENS = (levPartEnum++);
+const LEVELPART_LENS1 = (levPartEnum++);
 const LEVELPART_LENS2 = (levPartEnum++);
 const LEVELPART_LENS3 = (levPartEnum++);
+const LEVELPART_LENS4 = (levPartEnum++);
+const LEVELPART_LENS5 = (levPartEnum++);
+const LEVELPART_LENS6 = (levPartEnum++);
+const LEVELPART_LENS7 = (levPartEnum++);
 const LEVELPART_MIRROR = (levPartEnum++);
 const LEVELPART_SOURCE = (levPartEnum++);
-const LEVELPART_WALL = (levPartEnum++);
+const LEVELPART_WALL1 = (levPartEnum++);
+const LEVELPART_WALL2 = (levPartEnum++);
+const LEVELPART_WALL3 = (levPartEnum++);
 const LEVELPART_DELETE = (levPartEnum++);
 const LEVELPART_EXPORT = (levPartEnum++);
 const LEVELPART_IMPORT = (levPartEnum++);
@@ -756,7 +762,7 @@ LevelEditor.buttonScripts = {
 	"lens_1": {
 		"index": 0,
 		"tooltip": "lens_1",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS1,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_1);
 			var lens_1 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -771,7 +777,7 @@ LevelEditor.buttonScripts = {
 	"lens_2": {
 		"index": 11,
 		"tooltip": "lens_2",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS2,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_2);
 			var lens_2 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -784,7 +790,7 @@ LevelEditor.buttonScripts = {
 	"lens_3": {
 		"index": 12,
 		"tooltip": "lens_3",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS3,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_3);
 			var lens_3 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -797,7 +803,7 @@ LevelEditor.buttonScripts = {
 	"lens_4": {
 		"index": 13,
 		"tooltip": "lens_4",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS4,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_4);
 			var lens_4 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -810,7 +816,7 @@ LevelEditor.buttonScripts = {
 	"lens_5": {
 		"index": 14,
 		"tooltip": "lens_5",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS5,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_5);
 			var lens_5 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -823,7 +829,7 @@ LevelEditor.buttonScripts = {
 	"lens_6": {
 		"index": 15,
 		"tooltip": "lens_6",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS6,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_6);
 			var lens_6 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -836,7 +842,7 @@ LevelEditor.buttonScripts = {
 	"lens_7": {
 		"index": 16,
 		"tooltip": "lens_7",
-		"imagecode": LEVELPART_LENS,
+		"imagecode": LEVELPART_LENS7,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_7);
 			var lens_7 = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
@@ -851,7 +857,7 @@ LevelEditor.buttonScripts = {
 	"block_1": {
 		"index": 1,
 		"tooltip": "block_1",
-		"imagecode": LEVELPART_WALL,
+		"imagecode": LEVELPART_WALL1,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_1);
 			var block_1 = new Block(pointsData.points, BLOCK_COLOR);
@@ -863,7 +869,7 @@ LevelEditor.buttonScripts = {
 	"block_2": {
 		"index": 2,
 		"tooltip": "block_2",
-		"imagecode": LEVELPART_WALL,
+		"imagecode": LEVELPART_WALL2,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_2);
 			var block_2 = new Block(pointsData.points, BLOCK_COLOR);
@@ -875,7 +881,7 @@ LevelEditor.buttonScripts = {
 	"block_3": {
 		"index": 3,
 		"tooltip": "block_3",
-		"imagecode": LEVELPART_WALL,
+		"imagecode": LEVELPART_WALL3,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_3);
 			var block_3 = new Block(pointsData.points, BLOCK_COLOR);
@@ -896,7 +902,7 @@ LevelEditor.buttonScripts = {
 	"core_0": {
 		"index": 5,
 		"tooltip": "core_0",
-		"imagecode": LEVELPART_CORE,
+		"imagecode": LEVELPART_SOURCE,
 		"command": function() {
 			var coreData = LevelEditor.makePoints(makeCore, 40, 40, 80);
 			var dash2 = 5;

@@ -254,7 +254,7 @@ OptiLevel.prototype.draw = function()
 	else if(LevelEditor.active) {
 		editorUpdate();
 	} else {
-		colorText("Press E to toggle editor (can't save or play yet)", 15, 15, 'white');
+		colorText("Press E to toggle editor (export to text box at the bottom)", 15, 15, 'white');
 	}
 	
 	

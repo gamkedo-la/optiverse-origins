@@ -1,0 +1,13 @@
+1. Choose a letter for your series and make a header text document (e.g. level_B__series-YOURNAME) with a description.
+
+2. Run index.html in your browser.
+
+3. Make level using level editor, press E to toggle back and forth.
+
+4. Export your level to text box using export button, and copy to new level file in your series.
+
+5. Make more levels!
+
+
+Mirrors and lenses can be moved in game with the mouse, in final game all cores will emit their beams at the same time when you click on one of them.
+
