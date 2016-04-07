@@ -6,8 +6,11 @@ angular.module('optiverse', [])
         ctrl.levels = level;
         ctrl.load = function(levelStr) {
             //getLevel
-            LoadTextfield(levelStr)
+            LoadLevel(levelStr)
             ctrl.showMenu = false;
+
+            LevelEditor.toggle();
+            LevelEditor.toggle();
 
         }
     }]);

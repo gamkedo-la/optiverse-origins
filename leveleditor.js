@@ -636,6 +636,72 @@ function LoadTextfield() {
     }
 }
 
+function LoadLevel(LevelStr) {
+	LevelEditor.selectedPiece = null;
+	LevelEditor.pieces = [];
+	//currentLevel = OptiLevel.init();
+	levelText = LevelStr
+	try {
+        var pieces = levelText;
+        for(var i in pieces) {
+        	var piece = pieces[i];
+        	if(piece.kind == "mirror") {
+				//var points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				var points = piece.opticsPiece.points;
+				var x1 = points[0].x - piece.bounds.x;
+				var y1 = points[0].y - piece.bounds.y;
+				var x2 = points[1].x - piece.bounds.x;
+				var y2 = points[1].y - piece.bounds.y;
+				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, 6);
+				mirror.bounds = piece.bounds;
+				mirror.points = piece.opticsPiece.points;
+				var lp = new LevelPiece(mirror, 0);
+				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
+				//lp.expandBounds();
+				LevelEditor.pieces.push(lp);
+				continue;
+		   	}
+        	/*
+        	var pointsData = LevelEditor.makePoints(piece.kind+"_"+piece.subtype);
+        	if(piece.kind == "lens") {
+				optic = new Lens(pointsData.points, LENS_INDEX_REF, LENS_COLOR);
+			} else if(piece.kind == "block") {
+				optic = new Block(pointsData.points, BLOCK_COLOR);
+			} else if(piece.kind == "mirror") {
+				points = rotate_around_origin(piece.opticsPiece.points, piece.rotation);
+				//pointsData = {"points":points, "bounds":piece.bounds};
+				var x1 = points[0].x - piece.bounds.x;
+				var y1 = points[0].y - piece.bounds.y;
+				var x2 = points[1].x - piece.bounds.x;
+				var y2 = points[1].y - piece.bounds.y;
+				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, 6 );
+				mirror.bounds = piece.bounds;
+				mirror.points = piece.opticsPiece.points;
+				var lp = new LevelPiece(mirror, 0);
+				lp.updatePos(piece.bounds.centerX, piece.bounds.centerY);
+				LevelEditor.pieces.push(lp);
+				continue;
+		   	} else {
+		   		continue;
+		   	}
+		   	*/
+			//optic.bounds = pointsData.bounds;	
+			//optic.updatePos(piece.bounds.x, piece.bounds.y, true);
+			//
+			var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
+			var optic = maker(piece.bounds.w/2,piece.bounds.h/2,0);
+			optic.bounds = piece.bounds;
+			var lp = new LevelPiece(optic, piece.subtype);
+			lp.updateRotation(piece.rotation);
+			lp.expandBounds();
+			LevelEditor.pieces.push(lp);
+        }
+    }catch(e){
+        alert("invalid level data in text box below game");
+        console.log(e);
+    }
+}
+
 
 
 
