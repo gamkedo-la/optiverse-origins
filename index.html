@@ -1,30 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="optiverse">
+
 <head>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
-<link rel="stylesheet" type="text/css" href="css/site.css" media="screen" />
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" type="text/css" href="css/site.css" media="screen" />
 </head>
 
 <body>
-<canvas id="gameCanvas" width="800" height="600"></canvas>
-
-<script src="imagecode.js"></script>
-<script src="Graphic.js"></script>
-
-<script src="level2.js"></script>
-<script src="openingsequence.js"></script>
-<script src="input.js"></script>
-<script src="optics_helper.js"></script>
-<script src="optics.js"></script>
-<script src="leveleditor.js"></script>
-<script src="main.js"></script>
-
-<div>
-	<!-- <div class="placeholderstuff"> stuff stuff stuff stuff stuff stufff </div> -->
- <textarea rows="3" cols="102" id="levelTextfield">
-Paste level data from saved text file here to load it
-</textarea> <!-- <button type="button" onclick="LoadTextfield()">Load It</button> -->
-</div>
+    <div class="canvas-wrapper" ng-controller="menuCtrl as ctrl">
+        <canvas id="gameCanvas" width="800" height="600" ng-hide="ctrl.showMenu">
+        </canvas>
+        <div class="main-menu" ng-if="ctrl.showMenu" >
+            <h1>Optiverse</h1>
+            <br/>
+            <button ng-repeat="(key, value) in ctrl.levels" ng-click="ctrl.load(value)">{{key}} </button>
+            <button ng-click="ctrl.load(2)">level 2 </button>
+            <button ng-click="ctrl.load(3)">level 3 </button>
+            <br/>
+            <button ng-click="ctrl.showMenu = false">Hide Menu </button>
+            <!-- <pre>{{ctrl | json}}</pre> -->
+    	</div>
+    </div>
+    	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+    	<script src="menuCtrl.js"></script>
+        <script src="imagecode.js"></script>
+        <script src="Graphic.js"></script>
+        <script src="level2.js"></script>
+        <script src="openingsequence.js"></script>
+        <script src="input.js"></script>
+        <script src="optics_helper.js"></script>
+        <script src="optics.js"></script>
+        <script src="leveleditor.js"></script>
+        <script src="main.js"></script>
+        <script src="levels/level_A_bigblox_1.js"></script>
+        <div>
+            <!-- <div class="placeholderstuff"> stuff stuff stuff stuff stuff stufff </div> -->
+            <textarea rows="3" cols="102" id="levelTextfield">
+                Paste level data from saved text file here to load it
+            </textarea>
+            <button type="button" onclick="LoadTextfield()">Load It</button>
+        </div>
 </body>
+
 </html>

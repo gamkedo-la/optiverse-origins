@@ -3,6 +3,7 @@ var canvas;
 var ctx;
 
 var currentLevel = OptiLevel.init();
+var level = {};
 
 // ##################################
 // Global Variables

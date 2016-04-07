@@ -15,3 +15,24 @@ textarea {
     color: #EAEAFB;
     height: 300px;
 }
+
+.canvas-wrapper {
+	position:relative;
+	width:800px;
+	height:600px;
+}
+
+.main-menu{
+	position:absolute;
+	top: 0px;
+	color:white;
+	width: 100%;
+	text-align: center;
+	width:800px;
+	height:600px;
+	background-color: #191616;
+}
+
+.main-menu h1 {
+	width:100%;
+}
