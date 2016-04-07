@@ -567,7 +567,20 @@ function editorDeleteNearestToMouse() {
 function SaveToTextfield() {
 	levelText = document.getElementById('levelTextfield');
 	levelText.value = JSON.stringify(LevelEditor.pieces);
-	//levelText.value = currentLevel.toString();
+
+	
+	var levelData = {}
+	var name = prompt("Please name your level", "Level Name");
+	
+	var content = "level['" + name + "'] = "+JSON.stringify(LevelEditor.pieces);
+	
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+	element.setAttribute('download', name);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
 }
 //
 function LoadTextfield() {
