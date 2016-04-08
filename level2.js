@@ -251,6 +251,12 @@ OptiLevel.prototype.draw = function()
 	
 	if (this.levelCompleted()) {
 		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
+		if(lvlFinished_sound.currentTime == 0){
+			lvlFinished_sound.play()
+			intro_song.pause()
+		} else if(lvlFinished_sound.ended &&  intro_song.paused){
+			intro_song.play()
+		}
 	} 
 	else if(LevelEditor.active && LevelEditor.canEdit) {
 		editorUpdate();

@@ -278,6 +278,32 @@ LevelEditor.toggle = function() {
 	}
 }
 
+LevelEditor.toggleoff = function() {
+	LevelEditor.active = false;
+	LevelEditor.selectedPiece = null;
+	if(LevelEditor.active) {
+		LevelEditor.selectedBrush = new LevelPiece();
+		var typesNotHandled = [].concat(currentLevel.lasers, currentLevel.sprites);
+		// Handled: currentLevel.lenses, currentLevel.blocks, currentLevel.mirrors, currentLevel.cores, currentLevel.coresinks  TMP handled: currentLevel.beams
+		currentLevel = new OptiLevel.init();
+		currentLevel.addManyOpticsPieces(typesNotHandled);
+	} else {
+		for(var i in LevelEditor.pieces) {
+			var piece = LevelEditor.pieces[i];
+			var optic = null;
+			if(piece.kind == "mirror") {
+				var points = piece.opticsPiece.points;
+				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6);
+				optic.moveTo(piece.bounds.centerX, piece.bounds.centerY);
+			} else {
+				var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
+				optic = maker(piece.bounds.centerX, piece.bounds.centerY, rad_to_deg(piece.rotation));
+			}
+			currentLevel.addOpticsPiece(optic);
+		}
+	}
+}
+
 
 
 //--------------------

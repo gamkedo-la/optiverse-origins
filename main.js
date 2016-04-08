@@ -23,7 +23,7 @@ const RING_ARROW_HEAD_LINE_WIDTH = 1;
 // ##################################
 // ON LOAD
 // ##################################
-
+var reflect_sound = null
 window.onload = function() {
 	loadImages();
 
@@ -35,6 +35,14 @@ window.onload = function() {
 
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	colorText("Loading images...", 15, 15, 'white');
+
+	
+	reflect_sound = document.getElementById("reflect"); 
+	refract_sound = document.getElementById("refract"); lvlFinished
+	lvlFinished_sound = document.getElementById("lvlFinished"); 
+	intro_song = document.getElementById("intro"); 
+	intro_song.volume = .5
+	
 
 }
 
@@ -161,7 +169,7 @@ function strokeCircleDashed(centerX, centerY, radius, drawColor, lineWidth) {
 function colorRect(leftX, topY, width, height, drawColor, context) {
 	if(!context)
 		context = ctx
-	
+
 	context.fillStyle = drawColor;
 	context.fillRect(leftX, topY, width, height);
 }

@@ -17,11 +17,14 @@
             <h1>Credits</h1>
             <br/>
             <ul>
-                <li>FirstName LastName</li>
-                <li>FirstName LastName</li>
-                <li>FirstName LastName</li>
-                <li>FirstName LastName</li>
-                <li>FirstName LastName</li>
+                <li>Erik Verlage </li>
+                <li>Andreas Lathe</li>
+                <li>Dionell Macabugao</li>
+                <li>Jeremy Kenyon</li>
+                <li>Chris Deleon</li>
+                <li>Thomas Kresge</li>
+                <li>Jo Leigh</li>
+                <li>Marcus Silva</li>
             </ul>
             <button ng-click="ctrl.goToMenu()"> Back </button>
         </div>
@@ -35,14 +38,16 @@
             <button ng-click="ctrl.showEditor()">Level Editor </button>
             <br/>
             <button ng-click="ctrl.goToCredits()">credits </button>
+            <!-- <button onclick="reflect_sound.currentTime = 0; reflect_sound.play()">reflect </button> -->
 
             <!-- <pre>{{ctrl | json}}</pre> -->
         </div>
-        <audio controls autoplay loop ng-if="!ctrl.debug">
+        <audio controls autoplay loop ng-if="!ctrl.debug" id="intro">
           <source src="audio/Energy Pop.ogg" type="audio/ogg">
           <source src="audio/Energy Pop.mp3" type="audio/mpeg">
           Your browser does not support the audio tag.
-        </audio> 
+        </audio>
+
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
@@ -58,7 +63,26 @@
     <script src="main.js"></script>
     <script src="levels/level_A_bigblox_1.js"></script>
     <script src="levels/Marcus Levels/Level1 Curves.js"></script>
+    <audio id="reflect">
+      <source src="audio/Laser bounce off mirror.ogg" type="audio/ogg">
+      <source src="audio/Laser bounce off mirror.mp3" type="audio/mpeg">
+      Your browser does not support the audio tag.
+    </audio>
+    <audio id="refract">
+      <source src="audio/Laser going through lens.ogg" type="audio/ogg">
+      <source src="audio/Laser going through lens.mp3" type="audio/mpeg">
+      Your browser does not support the audio tag.
+    </audio>
+    <audio id="lvlFinished">
+      <source src="audio/Level finished.ogg" type="audio/ogg">
+      <source src="audio/Level finished.mp3" type="audio/mpeg">
+      Your browser does not support the audio tag.
+    </audio>
     <div>
+
+        
+
+        
         <!-- <div class="placeholderstuff"> stuff stuff stuff stuff stuff stufff </div> -->
         <!--<textarea rows="3" cols="102" id="levelTextfield">
             Paste level data from saved text file here to load it

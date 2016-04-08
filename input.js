@@ -6,6 +6,7 @@ var selectedObject = null;
 
 const KEYCODE_E = 69;
 const KEYCODE_O = 79;
+const KEYCODE_ESC = 27;
 
 
 function updateMousePos(evt) {
@@ -71,6 +72,9 @@ function keyPressed(evt) {
   		break;
   	case KEYCODE_O:
   		startOpening();
+  		break;
+	case KEYCODE_ESC:
+  		leakMenu();
   		break;
   	default: // to allow any non-game key actions to affect browser
   		anyValidKeyPressed = false;

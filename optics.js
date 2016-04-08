@@ -572,7 +572,10 @@ Beam.prototype.updateBEAM = function () {
 	for (var i=0; i < currentLevel.mirrors.length; i++) {
 	
 		if(lines_intersect(currentLevel.mirrors[i], line_step)){
-			
+			if(this.kind != "beam"){
+				reflect_sound.currentTime = 0; 
+				reflect_sound.play()
+			}
 			// Reflect off of mirror
 			reflection = currentLevel.mirrors[i].reflect(line_step);
 			
@@ -599,8 +602,13 @@ Beam.prototype.updateBEAM = function () {
 	// lens collisions
 	for (var i=0; i < currentLevel.lenses.length; i++) {
 		var lensLines = currentLevel.lenses[i].lensLines;
+
 		for (var j=0; j < lensLines.length; j++)  {
 			if(lines_intersect(lensLines[j], line_step)){
+				if(this.kind != "beam"){
+					refract_sound.currentTime = 0; 
+					refract_sound.play()
+				}
 				// Refract off of lens
 				refraction = lensLines[j].refract(line_step);
 				
