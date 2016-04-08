@@ -30,9 +30,21 @@ textarea {
 	text-align: center;
 	width:800px;
 	height:600px;
-	background-color: #191616;
+	//background-color: #191616;
 }
 
 .main-menu h1 {
 	width:100%;
+	font-size: 5em;
 }
+
+button{
+    padding: 5px;
+    margin: 5px;
+}
+
+audio{
+	position: absolute;
+    bottom: 0;
+}
+

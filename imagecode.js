@@ -66,31 +66,36 @@ function loadImages() {
 
 } // end of function loadImages
 
-function drawBitmapCenteredAtLocationWithRotation(graphic, atX, atY,withAngle) {
-  ctx.save(); // allows us to undo translate movement and rotate spin
-  ctx.translate(atX,atY); // sets the point where our graphic will go
-  ctx.rotate(withAngle); // sets the rotation
+function drawBitmapCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, context) {
+  if(!context)
+    context = ctx;
+  context.save(); // allows us to undo translate movement and rotate spin
+  context.translate(atX,atY); // sets the point where our graphic will go
+  context.rotate(withAngle); // sets the rotation
   try {
-    ctx.drawImage(graphic,-graphic.width/2,-graphic.height/2); // center, draw
+    context.drawImage(graphic,-graphic.width/2,-graphic.height/2); // center, draw
   } catch(err) {
     console.log(err);
   }
-  ctx.restore(); // undo the translation movement and rotation since save()
+  context.restore(); // undo the translation movement and rotation since save()
 }
 
-function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle) {
-  ctx.save();
-  ctx.translate(atX,atY);
-  ctx.rotate(withAngle);
+function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, context) {
+  if(!context)
+    context = ctx;
+  
+  context.save();
+  context.translate(atX,atY);
+  context.rotate(withAngle);
   var spriteDim = graphic.height; // note: assuming square images in horizontal strip
   var frameMax = graphic.width/spriteDim;
   var frameNow = animTick % frameMax;
-  ctx.drawImage(graphic,
+  context.drawImage(graphic,
     frameNow*spriteDim,0,
     spriteDim,spriteDim,
     -spriteDim/2,-spriteDim/2,    
     spriteDim,spriteDim);
-  ctx.restore();
+  context.restore();
 }
 
 function drawBitmapFitIntoLocation(graphic, atX, atY, targetWid, targetHei) {

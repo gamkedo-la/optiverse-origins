@@ -200,6 +200,7 @@ OptiLevel.prototype.draw = function()
 {
 	// next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
+	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR, Cutctx);
 
 	openingSequenceHandler();
 	if( isOpeningBlockingGameplay() ) {

@@ -29,6 +29,10 @@ window.onload = function() {
 
 	canvas = document.getElementById('gameCanvas');
 	ctx = canvas.getContext('2d');
+
+	CutSceneCanvas = document.getElementById('cutSceneCanvas');
+   	Cutctx = CutSceneCanvas.getContext('2d');
+
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	colorText("Loading images...", 15, 15, 'white');
 
@@ -154,9 +158,12 @@ function strokeCircleDashed(centerX, centerY, radius, drawColor, lineWidth) {
 	}
 }
 
-function colorRect(leftX, topY, width, height, drawColor) {
-	ctx.fillStyle = drawColor;
-	ctx.fillRect(leftX, topY, width, height);
+function colorRect(leftX, topY, width, height, drawColor, context) {
+	if(!context)
+		context = ctx
+	
+	context.fillStyle = drawColor;
+	context.fillRect(leftX, topY, width, height);
 }
 
 function strokeRect(leftX, topY, width, height, drawColor, lineWidth) {
