@@ -9,7 +9,9 @@
 
 <body>
     <div class="canvas-wrapper" ng-controller="menuCtrl as ctrl">
-        <canvas id="gameCanvas" width="800" height="600" ng-hide="ctrl.showMenu">
+        <canvas id="gameCanvas" width="800" height="600" ng-show="ctrl.showCanvas">
+        </canvas>
+        <canvas id="cutSceneCanvas" width="800" height="600" ng-show="ctrl.showCutScene">
         </canvas>
         <div class="main-menu" ng-if="ctrl.showMenu">
             <h1>Optiverse</h1>
@@ -38,9 +40,9 @@
     <script src="levels/Marcus Levels/Level1 Curves.js"></script>
     <div>
         <!-- <div class="placeholderstuff"> stuff stuff stuff stuff stuff stufff </div> -->
-        <textarea rows="3" cols="102" id="levelTextfield">
+        <!--<textarea rows="3" cols="102" id="levelTextfield">
             Paste level data from saved text file here to load it
-        </textarea>
+        </textarea>-->
 
         <audio controls autoplay>
           <source src="audio/Energy Pop.ogg" type="audio/ogg">

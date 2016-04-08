@@ -36,13 +36,13 @@ function startOpening() {
 function openingSequenceHandler() {
 	switch(openingSequence) {
 		case OPENING_SEQUENCE_START_ANIM:
-			drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall, canvas.width/2, canvas.height/2, 0);
+			drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall, canvas.width/2, canvas.height/2, 0, Cutctx);
 			break;
 		case OPENING_SEQUENCE_ZOOM_TO_SIDE:
 			zoomInOnShip(animTick / OPENING_ZOOM_STEPS);
 			break;
 		case OPENING_SEQUENCE_SHOWING:
-			drawBitmapCenteredAtLocationWithRotation(imgShipLarge, canvas.width, canvas.height/2, 0);
+			drawBitmapCenteredAtLocationWithRotation(imgShipLarge, canvas.width, canvas.height/2, 0, Cutctx);
 			break;
 	}
 }
