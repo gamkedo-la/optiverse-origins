@@ -252,10 +252,11 @@ OptiLevel.prototype.draw = function()
 	if (this.levelCompleted()) {
 		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
 	} 
-	else if(LevelEditor.active) {
+	else if(LevelEditor.active && LevelEditor.canEdit) {
 		editorUpdate();
-	} else {
-		colorText("Press E to toggle editor (export to text box at the bottom)", 15, 15, 'white');
+		colorText("Press E to run level ", 15, 15, 'white');
+	} else if(LevelEditor.canEdit) {
+		colorText("Press E to toggle editor", 15, 15, 'white');
 	}
 	
 	

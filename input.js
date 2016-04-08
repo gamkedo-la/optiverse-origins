@@ -66,7 +66,8 @@ function keyPressed(evt) {
   var anyValidKeyPressed = true;
   switch(evt.keyCode) {
   	case KEYCODE_E:
-  		LevelEditor.toggle();
+  		if(LevelEditor.canEdit)
+  			LevelEditor.toggle();
   		break;
   	case KEYCODE_O:
   		startOpening();

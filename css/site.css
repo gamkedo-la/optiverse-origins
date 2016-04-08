@@ -38,6 +38,17 @@ textarea {
 	font-size: 5em;
 }
 
+.credits{
+	position:absolute;
+	top: 0px;
+	color:white;
+	width: 100%;
+	text-align: center;
+	width:800px;
+	height:600px;
+	background-color: #191616;
+}
+
 button{
     padding: 5px;
     margin: 5px;
@@ -46,5 +57,9 @@ button{
 audio{
 	position: absolute;
     bottom: 0;
+}
+ul {
+	list-style-type: none;
+    padding: 0;
 }
 

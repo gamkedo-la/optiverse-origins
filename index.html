@@ -13,6 +13,18 @@
         </canvas>
         <canvas id="cutSceneCanvas" width="800" height="600" ng-show="ctrl.showCutScene">
         </canvas>
+        <div ng-if="ctrl.showCredits" class="credits">
+            <h1>Credits</h1>
+            <br/>
+            <ul>
+                <li>FirstName LastName</li>
+                <li>FirstName LastName</li>
+                <li>FirstName LastName</li>
+                <li>FirstName LastName</li>
+                <li>FirstName LastName</li>
+            </ul>
+            <button ng-click="ctrl.goToMenu()"> Back </button>
+        </div>
         <div class="main-menu" ng-if="ctrl.showMenu">
             <h1>Optiverse</h1>
             <br/>
@@ -20,14 +32,17 @@
                 <button ng-repeat="(key, value) in ctrl.levels" ng-click="ctrl.load(value)">{{key}} </button>
             </div>
             <br/>
-            <button ng-click="ctrl.showMenu = false">Level Editor </button>
+            <button ng-click="ctrl.showEditor()">Level Editor </button>
+            <br/>
+            <button ng-click="ctrl.goToCredits()">credits </button>
+
             <!-- <pre>{{ctrl | json}}</pre> -->
         </div>
-        <audio controls autoplay loop >
+        <audio controls autoplay loop ng-if="!ctrl.debug">
           <source src="audio/Energy Pop.ogg" type="audio/ogg">
           <source src="audio/Energy Pop.mp3" type="audio/mpeg">
           Your browser does not support the audio tag.
-        </audio>
+        </audio> 
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
