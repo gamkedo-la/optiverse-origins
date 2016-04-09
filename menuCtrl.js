@@ -28,7 +28,7 @@ angular.module('optiverse', [])
             ctrl.showCutScene = false;
             LevelEditor.toggle();
             LevelEditor.toggle();
-            LevelEditor.toggleoff()
+            //LevelEditor.toggleoff()
 
        }
        ctrl.showEditor = function(){
