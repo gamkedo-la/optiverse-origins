@@ -10,6 +10,7 @@ var level = {};
 // ##################################
 
 const LENS_COLOR = '#EAEAFB';
+const LENS_OUTLINE_COLOR = 'black';
 const MIRROR_COLOR = 'gray';
 const BACKGROUND_COLOR = "#191616"
 const BLOCK_COLOR = '#303030';
@@ -134,6 +135,20 @@ function colorPolygon(points, drawColor) {
 	}
 	ctx.closePath();
 	ctx.fill();
+}
+
+
+function strokePolygon(points, drawColor, lineWidth) {
+	ctx.strokeStyle = drawColor;
+	ctx.lineWidth = lineWidth;
+	ctx.beginPath();
+	
+	ctx.moveTo(points[0].x, points[0].y);
+	for(var i=1; i < points.length; i++){
+		ctx.lineTo(points[i].x, points[i].y);
+	}
+	ctx.closePath();
+	ctx.stroke();
 }
 
 

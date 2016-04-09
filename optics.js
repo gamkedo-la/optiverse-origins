@@ -11,6 +11,8 @@ const LASER_TRAIL_LENGTH = 10;
 const LASER_LINE_WIDTH = 3; 
 const MIRROR_LINE_BOX_WIDTH = 20; 
 
+const LENS_OUTLINE_LINEWIDTH = 1;
+
 const LENS_INDEX_REF = 1.3
 
 // ##################################
@@ -299,6 +301,16 @@ Lens.prototype.draw = function () {
 	}
 	colorPolygon(points, this.color);
 }
+// drawOutline()
+Lens.prototype.drawOutline = function () {
+	var points = [];
+	for(var i=0; i < this.lensLines.length; i++){
+		var point = new Point(this.lensLines[i].startX, this.lensLines[i].startY);
+		points.push(point);
+	}
+	strokePolygon(points, LENS_OUTLINE_COLOR, LENS_OUTLINE_LINEWIDTH);
+}
+
 
 
 // ----------------------------------

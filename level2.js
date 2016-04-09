@@ -226,7 +226,12 @@ OptiLevel.prototype.draw = function()
 	// Lenses	
 	for (var i=0; i < this.lenses.length; i++) {
 		this.lenses[i].draw();
-	}	
+	}
+	
+	// Lenses (outlines)	
+	for (var i=0; i < this.lenses.length; i++) {
+		this.lenses[i].drawOutline();
+	}
 	
 	// Cores
 	for (var i=0; i < this.cores.length; i++) {
