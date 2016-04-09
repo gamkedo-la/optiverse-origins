@@ -337,16 +337,20 @@ OptiLevel.prototype.draw = function()
 	
 	if (this.levelCompleted()) {
 		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
-		if(lvlFinished_sound.currentTime == 0){
+		console.log(lvlFinished_sound.paused);
+		if(lvlFinished_sound.paused && !(intro_song.paused)){
+			lvlFinished_sound.currentTime = 0;
 			lvlFinished_sound.play();
 			intro_song.pause();
 		} else if (lvlFinished_sound.ended) {
-			
-			lvlFinished_sound = 0;
 			intro_song.currentTime = 0;
 			intro_song.play();
 			// TO DO
 			// RETURN TO MAIN MENU
+			// Reset level pieces
+			
+			// Temp solution
+			this.coresinks = [];
 		}
 	} 
 	
