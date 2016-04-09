@@ -49,7 +49,7 @@ function handleMouseClick(evt) {
 			currentLevel.beams = [];		
 			
 			// Emit laser from all cores
-			core.emitLasers();
+			currentLevel.emitLasers();
 		}
 	}
 }

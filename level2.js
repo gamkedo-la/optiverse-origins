@@ -143,6 +143,12 @@ OptiLevel.prototype.levelCompleted = function(){
 	return true;
 }
 
+OptiLevel.prototype.emitLasers = function() {
+	for (var i=0; i < this.cores.length; i++) {
+		this.cores[i].emitLasers();
+	}
+}
+
 OptiLevel.prototype.tick = function()
 {
 
