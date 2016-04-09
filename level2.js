@@ -143,9 +143,68 @@ OptiLevel.prototype.levelCompleted = function(){
 	return true;
 }
 
+OptiLevel.prototype.levelFailed = function(){
+	if(this.coresinks.length == 0) return false; // For level editor
+	
+	// Check cores to see if at least one is filled
+	for (var i=0; i < this.cores.length; i++) {
+		for (var j=0; j < this.cores[i].coreRings.length; j++)  {
+			
+			var ring = this.cores[i].coreRings[j];
+			
+			// Loop through ring's beam slots
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				if (slot.filled) {
+					return false;
+				}
+			}
+		}
+	}
+	// Check for beams in flight
+	if(this.lasers.length != 0) return false;
+	
+	// Level failed.
+	return true;
+}
+
 OptiLevel.prototype.emitLasers = function() {
 	for (var i=0; i < this.cores.length; i++) {
 		this.cores[i].emitLasers();
+	}
+}
+
+OptiLevel.prototype.resetCores = function() {
+	for (var i=0; i < this.cores.length; i++) {
+		for (var j=0; j < this.cores[i].coreRings.length; j++)  {
+			
+			var ring = this.cores[i].coreRings[j];
+			
+			ring.active = true;
+			
+			// Loop through ring's beam slots and reactivate them
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				slot.filled = true;
+			}
+		}
+	}
+}
+
+OptiLevel.prototype.resetSinks = function() {
+	for (var i=0; i < this.coresinks.length; i++) {
+		for (var j=0; j < this.coresinks[i].coreRings.length; j++)  {
+			
+			var ring = this.coresinks[i].coreRings[j];
+			
+			ring.active = false;
+			
+			// Loop through ring's beam slots and reactivate them
+			for (var k=0; k < ring.beamSlots.length; k++) { 
+				var slot = ring.beamSlots[k];
+				slot.filled = false;
+			}
+		}
 	}
 }
 
@@ -153,6 +212,12 @@ OptiLevel.prototype.tick = function()
 {
 
 	if (this.levelCompleted()) {
+		return;
+	}
+	
+	if (this.levelFailed()) {
+		this.resetCores();
+		this.resetSinks();
 		return;
 	}
 	

@@ -3,7 +3,7 @@
 // Global Variables
 // ##################################
 
-const LIGHTSPEED = 5;
+const LIGHTSPEED = 7;
 const LIGHTSPEED_DASHED = 4;
 const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
 const DASHED_LINE_WIDTH = 1; 
