@@ -216,8 +216,14 @@ OptiLevel.prototype.tick = function()
 	}
 	
 	if (this.levelFailed()) {
+		// Reset everything
 		this.resetCores();
 		this.resetSinks();
+		
+		// Play level failed
+		lvlFailed_sound.currentTime = 0;
+		lvlFailed_sound.play();
+		//intro_song.pause();
 		return;
 	}
 	
@@ -325,16 +331,33 @@ OptiLevel.prototype.draw = function()
 	}
 	
 	
+	// --------------------------
+	// Sound Effects and Messages
+	// --------------------------
+	
 	if (this.levelCompleted()) {
 		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
 		if(lvlFinished_sound.currentTime == 0){
-			lvlFinished_sound.play()
-			intro_song.pause()
-		} else if(lvlFinished_sound.ended &&  intro_song.paused){
-			intro_song.play()
+			lvlFinished_sound.play();
+			intro_song.pause();
+		} else if (lvlFinished_sound.ended) {
+			
+			lvlFinished_sound = 0;
+			intro_song.currentTime = 0;
+			intro_song.play();
+			// TO DO
+			// RETURN TO MAIN MENU
 		}
 	} 
-	else if(LevelEditor.active && LevelEditor.canEdit) {
+	
+	
+	
+	
+	// --------------------------
+	// Level Editor
+	// --------------------------
+	
+	if(LevelEditor.active && LevelEditor.canEdit) {
 		editorUpdate();
 		colorText("Press E to run level ", 15, 15, 'white');
 	} else if(LevelEditor.canEdit) {

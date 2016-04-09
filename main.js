@@ -41,8 +41,9 @@ window.onload = function() {
 	reflect_sound = document.getElementById("reflect"); 
 	refract_sound = document.getElementById("refract"); lvlFinished
 	lvlFinished_sound = document.getElementById("lvlFinished"); 
-	intro_song = document.getElementById("intro"); 
-	intro_song.volume = .5
+	lvlFailed_sound = document.getElementById("lvlFailed"); 
+	intro_song = document.getElementById("intro");
+	intro_song.volume = .5;
 	
 
 }
