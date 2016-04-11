@@ -37,7 +37,6 @@ function handleMouseClick(evt) {
 	for (var i=0; i < currentLevel.mirrors.length; i++) {
 		if(currentLevel.mirrors[i].encloses(mouseX, mouseY)) {
 			selectedObject = currentLevel.mirrors[i];
-			console.log("mirror selected");
 		}
 	}
 	

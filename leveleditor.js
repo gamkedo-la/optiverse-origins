@@ -99,7 +99,7 @@ LevelEditor.trScripts = {
 		var y1 = Math.min(LevelEditor.lastClickY, mouseY);
 		var x2 = Math.max(LevelEditor.lastClickX, mouseX);
 		var y2 = Math.max(LevelEditor.lastClickY, mouseY);
-		var mirror = new MirrorLine(LevelEditor.lastClickX-x1, LevelEditor.lastClickY-y1, mouseX-x1, mouseY-y1, MIRROR_COLOR, 6);
+		var mirror = new MirrorLine(LevelEditor.lastClickX-x1, LevelEditor.lastClickY-y1, mouseX-x1, mouseY-y1, MIRROR_COLOR, MIRROR_LINEWIDTH);
 		var w = x2-x1;
 		var h = y2-y1;
 		mirror.bounds = {	
@@ -267,7 +267,7 @@ LevelEditor.toggle = function() {
 			var optic = null;
 			if(piece.kind == "mirror") {
 				var points = piece.opticsPiece.points;
-				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6);
+				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, MIRROR_LINEWIDTH);
 				optic.moveTo(piece.bounds.centerX, piece.bounds.centerY);
 			} else {
 				var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
@@ -293,7 +293,7 @@ LevelEditor.toggleoff = function() {
 			var optic = null;
 			if(piece.kind == "mirror") {
 				var points = piece.opticsPiece.points;
-				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, 6);
+				optic = new MirrorLine(points[0].x, points[0].y, points[1].x, points[1].y, MIRROR_COLOR, MIRROR_LINEWIDTH);
 				optic.moveTo(piece.bounds.centerX, piece.bounds.centerY);
 			} else {
 				var maker = LevelEditor.makeScripts[piece.kind+"_"+piece.subtype];
@@ -625,7 +625,7 @@ function LoadTextfield() {
 				var y1 = points[0].y - piece.bounds.y;
 				var x2 = points[1].x - piece.bounds.x;
 				var y2 = points[1].y - piece.bounds.y;
-				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, 6);
+				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, MIRROR_LINEWIDTH);
 				mirror.bounds = piece.bounds;
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);
@@ -647,7 +647,7 @@ function LoadTextfield() {
 				var y1 = points[0].y - piece.bounds.y;
 				var x2 = points[1].x - piece.bounds.x;
 				var y2 = points[1].y - piece.bounds.y;
-				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, 6 );
+				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, MIRROR_LINEWIDTH );
 				mirror.bounds = piece.bounds;
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);
@@ -691,7 +691,7 @@ function LoadLevel(LevelStr) {
 				var y1 = points[0].y - piece.bounds.y;
 				var x2 = points[1].x - piece.bounds.x;
 				var y2 = points[1].y - piece.bounds.y;
-				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, 6);
+				var mirror = new MirrorLine(x1, y1, x2, y2, MIRROR_COLOR, MIRROR_LINEWIDTH);
 				mirror.bounds = piece.bounds;
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);
@@ -713,7 +713,7 @@ function LoadLevel(LevelStr) {
 				var y1 = points[0].y - piece.bounds.y;
 				var x2 = points[1].x - piece.bounds.x;
 				var y2 = points[1].y - piece.bounds.y;
-				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, 6 );
+				var mirror = new MirrorLine( x1, y1, x2, y2, MIRROR_COLOR, MIRROR_LINEWIDTH );
 				mirror.bounds = piece.bounds;
 				mirror.points = piece.opticsPiece.points;
 				var lp = new LevelPiece(mirror, 0);

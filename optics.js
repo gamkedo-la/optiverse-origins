@@ -9,7 +9,7 @@ const DASHED_LINE_LENGTH = 5; // must be >1, not sure if decimals do anything
 const DASHED_LINE_WIDTH = 1; 
 const LASER_TRAIL_LENGTH = 10; 
 const LASER_LINE_WIDTH = 3; 
-const MIRROR_LINE_BOX_WIDTH = 20; 
+const MIRROR_LINE_BOX_WIDTH = 30; 
 
 const LENS_OUTLINE_LINEWIDTH = 1;
 
@@ -156,9 +156,16 @@ MirrorLine.prototype.reflect = function (line_step) {
 }
 // draw()
 MirrorLine.prototype.draw = function () {
+
+	var lineWidth = this.lineWidth;
+	
+	if(this.encloses(mouseX, mouseY)) {
+		lineWidth = MIRROR_LINEWIDTH_SEL;
+	}
+	
 	colorLine(this.startX, this.startY, 
 		 this.endX, this.endY, 
-		 this.color, this.lineWidth);
+		 this.color, lineWidth);
 }
 
 
@@ -308,7 +315,12 @@ Lens.prototype.drawOutline = function () {
 		var point = new Point(this.lensLines[i].startX, this.lensLines[i].startY);
 		points.push(point);
 	}
-	strokePolygon(points, LENS_OUTLINE_COLOR, LENS_OUTLINE_LINEWIDTH);
+	// Stroke lens
+	if(this.encloses(mouseX, mouseY)) {
+		strokePolygon(points, LENS_OUTLINE_COLOR_SEL, LENS_OUTLINE_LINEWIDTH_SEL);
+	} else {
+		strokePolygon(points, LENS_OUTLINE_COLOR, LENS_OUTLINE_LINEWIDTH);
+	}
 }
 
 
@@ -410,8 +422,17 @@ Core.prototype.draw = function () {
 	
 	// Core levels
 	for(var i=0; i < this.coreRings.length; i++){
-		this.coreRings[i].draw(this.centerX, this.centerY, this.kind);
+		var ring = this.coreRings[i];
+		ring.draw(this.centerX, this.centerY, this.kind);
+		
+		// TEMP FIX for mouse-over
+		if(ring.active && this.encloses(mouseX, mouseY)) {
+			strokeCircle(this.centerX, this.centerY, ring.radius, ring.color, 10);
+		}
 	}
+	
+	
+	
 }
 
 // === CoreSink =========================

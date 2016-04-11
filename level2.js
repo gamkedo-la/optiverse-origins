@@ -144,6 +144,9 @@ OptiLevel.prototype.levelCompleted = function(){
 }
 
 OptiLevel.prototype.levelFailed = function(){
+	
+	if(this.levelCompleted()) return false;
+
 	if(this.coresinks.length == 0) return false; // For level editor
 	
 	// Check cores to see if at least one is filled
@@ -210,10 +213,11 @@ OptiLevel.prototype.resetSinks = function() {
 
 OptiLevel.prototype.tick = function()
 {
-
+	/* Commented out by Erik on 4/10/2016
 	if (this.levelCompleted()) {
 		return;
 	}
+	*/
 	
 	if (this.levelFailed()) {
 		// Reset everything
@@ -311,7 +315,7 @@ OptiLevel.prototype.draw = function()
 	
 	// Core Sinks
 	for (var i=0; i < this.coresinks.length; i++) {
-		this.coresinks[i].draw();
+		// this.coresinks[i].draw();
 		// Draw mineral over core
 		var pos = this.coresinks[i].getPosition();
 		
@@ -366,9 +370,6 @@ OptiLevel.prototype.draw = function()
 			//!!!!!!!!!!!!!!!!!!!
 		}
 	} 
-	
-	
-	console.log(angular.element(document.getElementById('ctrl')));
 	
 	
 	
