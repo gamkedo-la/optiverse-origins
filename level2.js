@@ -312,6 +312,16 @@ OptiLevel.prototype.draw = function()
 	// Core Sinks
 	for (var i=0; i < this.coresinks.length; i++) {
 		this.coresinks[i].draw();
+		// Draw mineral over core
+		var pos = this.coresinks[i].getPosition();
+		
+		if (this.coresinks[i].isFull()) {
+			// Draw opened mineral at core position
+			drawAnimCenteredAtLocationWithRotation(mineral,pos.x,pos.y,0);
+		} else {
+			// Draw unopened mineral at core position
+			drawAnimCenteredAtLocationWithRotation(mineral_rock,pos.x,pos.y,0);
+		}
 	}
 	
 	// Beams
@@ -337,7 +347,6 @@ OptiLevel.prototype.draw = function()
 	
 	if (this.levelCompleted()) {
 		colorText("LEVEL COMPLETED!!!", 15, 15, 'white');
-		console.log(lvlFinished_sound.paused);
 		if(lvlFinished_sound.paused && !(intro_song.paused)){
 			lvlFinished_sound.currentTime = 0;
 			lvlFinished_sound.play();
@@ -345,15 +354,21 @@ OptiLevel.prototype.draw = function()
 		} else if (lvlFinished_sound.ended) {
 			intro_song.currentTime = 0;
 			intro_song.play();
-			// TO DO
-			// RETURN TO MAIN MENU
-			// Reset level pieces
 			
-			// Temp solution
-			this.coresinks = [];
+			// Reset level pieces
+			this.coresinks = []; // Temp solution
+			
+			// HERE MARCUS!!!!!!			
+			
+			// RETURN TO MAIN MENU
+			//angular.element(document.getElementById('ctrl')).scope().goToCredits();
+			
+			//!!!!!!!!!!!!!!!!!!!
 		}
 	} 
 	
+	
+	console.log(angular.element(document.getElementById('ctrl')));
 	
 	
 	

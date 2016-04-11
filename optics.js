@@ -370,7 +370,7 @@ Core.prototype.updateCORE = function () {
 // isFull()
 Core.prototype.isFull = function () {
 	for (var i=0; i < this.coreRings.length; i++) {
-		if (!(this.coreRings[i].isActive())) {
+		if (!(this.coreRings[i].active)) {
 			return false;
 		}
 	}
@@ -396,6 +396,11 @@ Core.prototype.encloses = function (x, y) {
 		}
 	}
 	return false;
+}
+// getPosition()
+Core.prototype.getPosition = function () {
+	var point = new Point(this.centerX, this.centerY);
+	return point;
 }
 // draw()
 Core.prototype.draw = function () {

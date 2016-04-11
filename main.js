@@ -37,13 +37,15 @@ window.onload = function() {
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	colorText("Loading images...", 15, 15, 'white');
 
+	menu_ctrl = document.getElementById("menuCtrl");	
+	
 	
 	reflect_sound = document.getElementById("reflect"); 
 	refract_sound = document.getElementById("refract"); lvlFinished
 	lvlFinished_sound = document.getElementById("lvlFinished"); 
 	lvlFailed_sound = document.getElementById("lvlFailed"); 
 	intro_song = document.getElementById("intro");
-	intro_song.volume = .5;
+	intro_song.volume = .4;
 	
 
 }

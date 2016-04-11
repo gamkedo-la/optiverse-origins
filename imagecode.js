@@ -5,6 +5,8 @@ var imgShipAnimSmall = document.createElement("img");
 var LevelEditorRotSymbol = document.createElement("img");
 var LevelEditorPlusSign = document.createElement("img");
 var LevelEditorMinusSign = document.createElement("img");
+var mineral_rock = document.createElement("img");
+var mineral = document.createElement("img");
 
 var picsToLoad = 0;
 
@@ -33,6 +35,8 @@ function loadImages() {
     {varName:LevelEditorRotSymbol, theFile:"symbolRot.png"},
     {varName:LevelEditorPlusSign, theFile:"btn_plussign.png"},
     {varName:LevelEditorMinusSign, theFile:"btn_minussign.png"},
+    {varName:mineral_rock, theFile:"minerals_rock.png"},
+    {varName:mineral, theFile:"minerals.png"},
 
     // this format loads level parts (and editor UI buttons)
     {levPartType:LEVELPART_ASTEROID, theFile:"asteroid.png"},
