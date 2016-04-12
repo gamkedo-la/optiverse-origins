@@ -26,7 +26,7 @@ function mouseIsInFireButtion() {
 			mouseX > left && mouseY > top);
 }
 
-function drawFireButtion() {
+function drawFireButton() {
 	drawBitmapCenteredAtLocationWithRotation( (buttonFired ? fireButtonPressed : fireButtonWaiting),
 		fireButtonX,fireButtonY,0);
 }

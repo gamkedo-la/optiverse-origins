@@ -380,7 +380,9 @@ OptiLevel.prototype.draw = function()
 	// Fire Button (defined in input.js)
 	// --------------------------
 	
-	drawFireButtion();
+	if(LevelEditor.active == false) {
+		drawFireButton();
+	}
 	
 	// --------------------------
 	// Level Editor
@@ -388,9 +390,13 @@ OptiLevel.prototype.draw = function()
 	
 	if(LevelEditor.active && LevelEditor.canEdit) {
 		editorUpdate();
-		colorText("Press E to run level ", 15, 15, 'white');
+		if(LevelEditor.mouseOverButton != null) { 
+			colorText(LevelEditor.mouseOverButton.tooltip, 15, 15, 'yellow');
+		} else {
+			colorText("Press E to Test Level, Esc for Main Menu", 15, 15, 'white');
+		}
 	} else if(LevelEditor.canEdit) {
-		colorText("Press E to toggle editor", 15, 15, 'white');
+		colorText("Press E to Toggle Editor", 15, 15, 'white');
 	}
 	
 	

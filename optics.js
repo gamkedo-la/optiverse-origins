@@ -432,9 +432,6 @@ Core.prototype.draw = function () {
 			strokeCircle(this.centerX, this.centerY, ring.radius, ring.color, 7);
 		}
 	}
-	
-	
-	
 }
 
 // === CoreSink =========================
@@ -444,6 +441,10 @@ CoreSink.prototype.constructor = CoreSink;
 function CoreSink(centerX, centerY, radius, color, coreRings) {
 	Core.call(this, centerX, centerY, radius, color, coreRings);
 	OpticsPiece.call(this, "sink");
+}
+
+CoreSink.prototype.draw = function () { // for now just draws as a mineral rock -cdeleon
+	drawBitmapCenteredAtLocationWithRotation(mineral_rock,this.centerX,this.centerY,0);		
 }
 
 

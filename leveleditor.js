@@ -59,7 +59,6 @@ LevelEditor.trScripts = {
 		}
 	},
 	"pieceRotate": function(_dx, _dy) {
-
 		var angle1 = Math.atan2( mouseY - LevelEditor.selectedPiece.bounds.centerY, 
 								mouseX - LevelEditor.selectedPiece.bounds.centerX);
 		var angle2 = Math.atan2( LevelEditor.lastMouseY - LevelEditor.selectedPiece.bounds.centerY, 
@@ -873,7 +872,7 @@ LevelEditor.buttonScripts = {
 	
 	"lens_1": {
 		"index": 0,
-		"tooltip": "lens_1",
+		"tooltip": "Lens: Biconcave",
 		"imagecode": LEVELPART_LENS1,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_1);
@@ -888,7 +887,7 @@ LevelEditor.buttonScripts = {
 	// --------------- Added by Erik 2 --------------
 	"lens_2": {
 		"index": 11,
-		"tooltip": "lens_2",
+		"tooltip": "Lens: Plano-Convex",
 		"imagecode": LEVELPART_LENS2,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_2);
@@ -901,7 +900,7 @@ LevelEditor.buttonScripts = {
 	},
 	"lens_3": {
 		"index": 12,
-		"tooltip": "lens_3",
+		"tooltip": "Lens: Biconcave",
 		"imagecode": LEVELPART_LENS3,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_3);
@@ -914,7 +913,7 @@ LevelEditor.buttonScripts = {
 	},
 	"lens_4": {
 		"index": 13,
-		"tooltip": "lens_4",
+		"tooltip": "Lens: Plano-Concave",
 		"imagecode": LEVELPART_LENS4,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_4);
@@ -927,7 +926,7 @@ LevelEditor.buttonScripts = {
 	},
 	"lens_5": {
 		"index": 14,
-		"tooltip": "lens_5",
+		"tooltip": "Lens: Flat",
 		"imagecode": LEVELPART_LENS5,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_5);
@@ -940,7 +939,7 @@ LevelEditor.buttonScripts = {
 	},
 	"lens_6": {
 		"index": 15,
-		"tooltip": "lens_6",
+		"tooltip": "Lens: Prism",
 		"imagecode": LEVELPART_LENS6,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_6);
@@ -953,7 +952,7 @@ LevelEditor.buttonScripts = {
 	},
 	"lens_7": {
 		"index": 16,
-		"tooltip": "lens_7",
+		"tooltip": "Lens: Round",
 		"imagecode": LEVELPART_LENS7,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_lens_7);
@@ -968,7 +967,7 @@ LevelEditor.buttonScripts = {
 	
 	"block_1": {
 		"index": 1,
-		"tooltip": "block_1",
+		"tooltip": "Barrier: Large Square",
 		"imagecode": LEVELPART_WALL1,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_1);
@@ -980,7 +979,7 @@ LevelEditor.buttonScripts = {
 	},
 	"block_2": {
 		"index": 2,
-		"tooltip": "block_2",
+		"tooltip": "Barrier: Small Thin",
 		"imagecode": LEVELPART_WALL2,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_2);
@@ -992,7 +991,7 @@ LevelEditor.buttonScripts = {
 	},
 	"block_3": {
 		"index": 3,
-		"tooltip": "block_3",
+		"tooltip": "Barrier: Small Square",
 		"imagecode": LEVELPART_WALL3,
 		"command": function() {
 			var pointsData = LevelEditor.makePoints(make_points_block_3);
@@ -1004,7 +1003,7 @@ LevelEditor.buttonScripts = {
 	},
 	"mirror_0": {
 		"index": 4,
-		"tooltip": "mirror line stretching between two points",
+		"tooltip": "Create a mirror between two points (player will be able to drag but not rotate)",
 		"imagecode": LEVELPART_MIRROR,
 		"command": function() {
 			LevelEditor.selectedBrush = new LevelPiece(null, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.startMirror);
@@ -1013,7 +1012,7 @@ LevelEditor.buttonScripts = {
 	},
 	"core_0": {
 		"index": 5,
-		"tooltip": "core_0",
+		"tooltip": "Player laser source",
 		"imagecode": LEVELPART_SOURCE,
 		"command": function() {
 			var coreData = LevelEditor.makePoints(makeCore, 40, 40, 80);
@@ -1029,7 +1028,7 @@ LevelEditor.buttonScripts = {
 	},
 	"sink_0": {
 		"index": 6,
-		"tooltip": "sink_0",
+		"tooltip": "Player mineral goal",
 		"imagecode": LEVELPART_CORE,
 		"command": function() {
 			var coreData = LevelEditor.makePoints(makeCore, 28, 28, 56);
@@ -1037,14 +1036,14 @@ LevelEditor.buttonScripts = {
 			var arr1a = [CR1a];
 			var sink = new CoreSink(28, 28, 7, 'green', arr1a);
 			sink.bounds = coreData.bounds;		
-			sink.points = [];	
+			sink.points = [];
 			LevelEditor.selectedBrush = new LevelPiece(sink, 0, LevelEditor.trScripts.mouseMagnet, LevelEditor.trScripts.mousePut);
 			LevelEditor.selectedBrush.expandBounds();
 		}
 	},
 	"delete": {
 		"index": 8,
-		"tooltip": "click to delete nearest part (hold SHIFT to stay in delete mode)",
+		"tooltip": "Click to delete nearest part (hold SHIFT to stay in delete mode)",
 		"imagecode": LEVELPART_DELETE,
 		"command": function() {
 			if(LevelEditor.selectedPiece != null) {
@@ -1065,13 +1064,13 @@ LevelEditor.buttonScripts = {
 	},
 	"export": {
 		"index": 9,
-		"tooltip": "click to update text below game to be current layout",
+		"tooltip": "Click to save layout",
 		"imagecode": LEVELPART_EXPORT,
 		"command": SaveToTextfield
 	},
 	"import": {
 		"index": 10,
-		"tooltip": "click to load layout from text below the game",
+		"tooltip": "To import a level: rename it to .js, add it to the list in index.html, put it in a series (see bottom of any other level for an example)",
 		"imagecode": LEVELPART_IMPORT,
 		"command": LoadTextfield
 	}
@@ -1191,6 +1190,14 @@ LevelPiece.prototype.updateRotation = function(_angle)
 		this.opticsPiece.points = rotate_around_origin(this.opticsPiece.points, rad_to_deg(_angle-this.rotation));
 		this.opticsPiece.moveTo(this.bounds.centerX, this.bounds.centerY);
 	}
+
+	if(this.opticsPiece != null && this.opticsPiece.kind == "core") {  // for special case: coure
+		// this internal test avoids the hack from breaking the +/- tweak control buttons for after placing
+		if(LevelEditor.selectedBrush.onMouseMove == LevelEditor.trScripts.mouseRotate) {
+			_angle -= Math.PI / 2.0; // rotates core so it points its outlet toward mouse cursor
+		}
+	}
+
 	//
 	Graphic.prototype.updateRotation.call(this, _angle);
 }
