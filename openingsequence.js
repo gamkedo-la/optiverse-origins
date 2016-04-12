@@ -81,10 +81,10 @@ function portalFleeDraw() {
 
 	drawBitmapCenteredAtLocationWithRotation(imgPortalLeftBG,
 						portalX, canvas.height/2, 0, Cutctx);
-	drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall,
-						animTick * playerShipSpeed, canvas.height/2, Math.PI*0.5, Cutctx, 0);
+	drawBitmapCenteredAtLocationWithRotation(imgShipAnimSmallThrust,
+						animTick * playerShipSpeed, canvas.height/2, 0, Cutctx);
 	drawBitmapCenteredAtLocationWithRotation(imgPortalRightFG,
-						portalX+175, canvas.height/2, 0, Cutctx);
+						portalX+125, canvas.height/2, 0, Cutctx);
 }
 
 function shipZoomDraw() {

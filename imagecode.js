@@ -2,9 +2,9 @@ var levObjPics = [];
 
 var imgShipLarge = document.createElement("img");
 var imgShipAnimSmall = document.createElement("img");
+var imgShipAnimSmallThrust = document.createElement("img");
 
 var imgShipAnimEnemy = document.createElement("img");
-
 
 var imgPortalLeftBG = document.createElement("img");
 var imgPortalRightFG = document.createElement("img");
@@ -40,6 +40,7 @@ function loadImages() {
   // for loading non-level parts
     {varName:imgShipLarge, theFile:"spaceshiphd.png"},
     {varName:imgShipAnimSmall, theFile:"spaceshipspritesheet.png"},
+    {varName:imgShipAnimSmallThrust, theFile:"spaceshipthrust.png"},
     {varName:imgShipAnimEnemy, theFile:"enemy_ship.png"},
     {varName:imgPortalLeftBG, theFile:"portal_left.png"},
     {varName:imgPortalRightFG, theFile:"portal_right.png"},
