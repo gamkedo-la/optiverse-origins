@@ -3,28 +3,45 @@ var animTick = 0;
 const OPENING_SMALL_ANIM_STEPS = 20;
 const OPENING_ZOOM_STEPS = 20;
 const OPENING_SEQUENCE_OFF = -1;
+
 const OPENING_SEQUENCE_START_ANIM = 0;
 const OPENING_SEQUENCE_ZOOM_TO_SIDE = 1;
 const OPENING_SEQUENCE_SHOWING = 2;
+
 var openingSequence = OPENING_SEQUENCE_OFF;
+
+const CUTSCENE_SHIP_ZOOM = 0;
+const CUTSCENE_PORTAL_FLEE = 1;
+var cutscenePlaying = CUTSCENE_PORTAL_FLEE;
+
+function advanceShipZoomStep() {
+	switch(openingSequence) {
+		case OPENING_SEQUENCE_START_ANIM:
+			if(animTick >= OPENING_SMALL_ANIM_STEPS) {
+  				openingSequence++;
+  				animTick = 0;
+  			}
+  			break;
+		case OPENING_SEQUENCE_ZOOM_TO_SIDE:
+			if(animTick >= OPENING_ZOOM_STEPS) {
+  				openingSequence++;
+  			}
+  			break;
+  	}
+}
 
 function setupOpeningAnimTick() {
 	var animFPS = 15;
 	setInterval(function() {
 			animTick++;	
-			switch(openingSequence) {
-				case OPENING_SEQUENCE_START_ANIM:
-					if(animTick >= OPENING_SMALL_ANIM_STEPS) {
-		  				openingSequence++;
-		  				animTick = 0;
-		  			}
-		  			break;
-				case OPENING_SEQUENCE_ZOOM_TO_SIDE:
-					if(animTick >= OPENING_ZOOM_STEPS) {
-		  				openingSequence++;
-		  			}
-		  			break;
-		  	}
+			switch(cutscenePlaying) {
+				case CUTSCENE_SHIP_ZOOM:
+					advanceShipZoomStep();
+					break;
+				case CUTSCENE_PORTAL_FLEE:
+					
+					break;
+			}
 		}, 1000/animFPS);
 }
 
@@ -34,6 +51,43 @@ function startOpening() {
 }
 
 function openingSequenceHandler() {
+	switch(cutscenePlaying) {
+		case CUTSCENE_SHIP_ZOOM:
+			shipZoomDraw();
+			break;
+		case CUTSCENE_PORTAL_FLEE:
+			portalFleeDraw();
+			break;
+	}
+}
+
+function portalFleeDraw() {
+	var formationStaggerX = -90;
+	var formationStaggerY = 90;
+	var animTickCap = 40;
+	var cappedAnimTick = (animTick > animTickCap ? animTickCap : animTick);
+	var gapBehindPlayer = 160;
+	var portalX = canvas.width*0.7;
+
+	var enemyShipSpeed = 10;
+	var playerShipSpeed = 12;
+
+	drawBitmapCenteredAtLocationWithRotation(imgShipAnimEnemy,
+						cappedAnimTick * enemyShipSpeed+formationStaggerX - gapBehindPlayer, canvas.height/2-formationStaggerY, Math.PI*0.5, Cutctx);
+	drawBitmapCenteredAtLocationWithRotation(imgShipAnimEnemy,
+						cappedAnimTick * enemyShipSpeed - gapBehindPlayer, canvas.height/2, Math.PI*0.5, Cutctx);
+	drawBitmapCenteredAtLocationWithRotation(imgShipAnimEnemy,
+						cappedAnimTick * enemyShipSpeed+formationStaggerX - gapBehindPlayer, canvas.height/2+formationStaggerY, Math.PI*0.5, Cutctx);
+
+	drawBitmapCenteredAtLocationWithRotation(imgPortalLeftBG,
+						portalX, canvas.height/2, 0, Cutctx);
+	drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall,
+						animTick * playerShipSpeed, canvas.height/2, Math.PI*0.5, Cutctx, 0);
+	drawBitmapCenteredAtLocationWithRotation(imgPortalRightFG,
+						portalX+175, canvas.height/2, 0, Cutctx);
+}
+
+function shipZoomDraw() {
 	switch(openingSequence) {
 		case OPENING_SEQUENCE_START_ANIM:
 			drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall,

@@ -2,6 +2,13 @@ var levObjPics = [];
 
 var imgShipLarge = document.createElement("img");
 var imgShipAnimSmall = document.createElement("img");
+
+var imgShipAnimEnemy = document.createElement("img");
+
+
+var imgPortalLeftBG = document.createElement("img");
+var imgPortalRightFG = document.createElement("img");
+
 var LevelEditorRotSymbol = document.createElement("img");
 var LevelEditorPlusSign = document.createElement("img");
 var LevelEditorMinusSign = document.createElement("img");
@@ -30,8 +37,13 @@ function loadImageForLevPartCode(levObjCode, fileName) {
 function loadImages() {
 
   var imageList = [
-    {varName:imgShipLarge, theFile:"spaceshiphd.png"}, // for loading non-level parts
-    {varName:imgShipAnimSmall, theFile:"spaceshipspritesheet.png"}, // for loading non-level parts
+  // for loading non-level parts
+    {varName:imgShipLarge, theFile:"spaceshiphd.png"},
+    {varName:imgShipAnimSmall, theFile:"spaceshipspritesheet.png"},
+    {varName:imgShipAnimEnemy, theFile:"enemy_ship.png"},
+    {varName:imgPortalLeftBG, theFile:"portal_left.png"},
+    {varName:imgPortalRightFG, theFile:"portal_right.png"},
+
     {varName:LevelEditorRotSymbol, theFile:"symbolRot.png"},
     {varName:LevelEditorPlusSign, theFile:"btn_plussign.png"},
     {varName:LevelEditorMinusSign, theFile:"btn_minussign.png"},
@@ -84,16 +96,20 @@ function drawBitmapCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, c
   context.restore(); // undo the translation movement and rotation since save()
 }
 
-function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, context) {
+function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, context, frameNum) {
   if(!context)
     context = ctx;
+
+  if(frameNum == undefined) {
+    frameNum = animTick;
+  }
   
   context.save();
   context.translate(atX,atY);
   context.rotate(withAngle);
   var spriteDim = graphic.height; // note: assuming square images in horizontal strip
   var frameMax = graphic.width/spriteDim;
-  var frameNow = animTick % frameMax;
+  var frameNow = frameNum % frameMax;
   context.drawImage(graphic,
     frameNow*spriteDim,0,
     spriteDim,spriteDim,
