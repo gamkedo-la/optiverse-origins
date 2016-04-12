@@ -103,6 +103,10 @@ function shipZoomDraw() {
 }
 
 function isOpeningBlockingGameplay() {
+	if(cutscenePlaying == CUTSCENE_PORTAL_FLEE) {
+		return false;
+	}
+
 	return openingSequence != OPENING_SEQUENCE_OFF && openingSequence != OPENING_SEQUENCE_SHOWING;
 }
 

@@ -101,7 +101,7 @@ function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, con
   if(!context)
     context = ctx;
 
-  if(frameNum == undefined) {
+  if(!frameNum || frameNum == undefined) {
     frameNum = animTick;
   }
   
@@ -124,7 +124,6 @@ function drawBitmapFitIntoLocation(graphic, atX, atY, targetWid, targetHei, cont
   if(!context) 
     context = ctx;
   
-  console.log("graphic", graphic);
   context.drawImage(graphic, // image (source)
                           0,0, // source corner
                           graphic.width,graphic.height, // source dimensions
