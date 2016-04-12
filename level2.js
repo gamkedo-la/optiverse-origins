@@ -327,10 +327,10 @@ OptiLevel.prototype.draw = function()
 		
 		if (this.coresinks[i].isFull()) {
 			// Draw opened mineral at core position
-			drawAnimCenteredAtLocationWithRotation(mineral,pos.x,pos.y,0);
+			drawBitmapCenteredAtLocationWithRotation(mineral,pos.x,pos.y,0);
 		} else {
 			// Draw unopened mineral at core position
-			drawAnimCenteredAtLocationWithRotation(mineral_rock,pos.x,pos.y,0);
+			drawBitmapCenteredAtLocationWithRotation(mineral_rock,pos.x,pos.y,0);
 		}
 	}
 	

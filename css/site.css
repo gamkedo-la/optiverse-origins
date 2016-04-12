@@ -2,7 +2,7 @@ body {
 	width: 800px;
 	margin: 0 auto;
     background-color: darkgray;
-    margin-top: 80px;
+    margin-top: 20px;
     font-size: 20px;
     font-family: sans-serif;
     font-weight: initial;
@@ -98,7 +98,7 @@ ul {
       background: red;
       position: relative;
       display:inline-block;
-      margin: 35px;
+      margin: 35px 10px 10px 10px;
     }
 
 .subtitle{
