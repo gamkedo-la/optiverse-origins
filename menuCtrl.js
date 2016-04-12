@@ -49,6 +49,8 @@ angular.module('optiverse', [])
             }
 
             changeSong(SONG_POP);
+
+            isBattleGraphicsLevel = !isBattleGraphicsLevel;
             
             //getLevel
             LevelEditor.canEdit = false;

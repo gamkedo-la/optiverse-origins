@@ -5,9 +5,14 @@ var imgShipAnimSmall = document.createElement("img");
 var imgShipAnimSmallThrust = document.createElement("img");
 
 var imgShipAnimEnemy = document.createElement("img");
+var imgShipEnemyForGame = document.createElement("img");
 
 var imgPortalLeftBG = document.createElement("img");
 var imgPortalRightFG = document.createElement("img");
+
+var enemyExplosion = document.createElement("img");
+const ENEMY_EXPL_FRAMES = 16;
+isBattleGraphicsLevel = true;
 
 var LevelEditorRotSymbol = document.createElement("img");
 var LevelEditorPlusSign = document.createElement("img");
@@ -50,6 +55,8 @@ function loadImages() {
     {varName:imgShipAnimSmall, theFile:"spaceshipspritesheet.png"},
     {varName:imgShipAnimSmallThrust, theFile:"spaceshipthrust.png"},
     {varName:imgShipAnimEnemy, theFile:"enemy_ship.png"},
+    {varName:imgShipEnemyForGame, theFile:"enemy_ship_ingame.png"},
+
     {varName:imgPortalLeftBG, theFile:"portal_left.png"},
     {varName:imgPortalRightFG, theFile:"portal_right.png"},
 
@@ -63,6 +70,8 @@ function loadImages() {
     {varName:bg2, theFile:"background_2_purple.jpg"},
     {varName:bg3, theFile:"background_3_red.jpg"},
     {varName:bg4, theFile:"background_4_blue.jpg"},
+
+    {varName:enemyExplosion, theFile:"explosion.png"},
 
     {varName:fireButtonWaiting, theFile:"button.png"},
     {varName:fireButtonPressed, theFile:"button_lit.png"},
@@ -117,7 +126,7 @@ function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, con
   if(!context)
     context = ctx;
 
-  if(!frameNum || frameNum == undefined) {
+  if(frameNum == null || frameNum == undefined) {
     frameNum = animTick;
   }
   

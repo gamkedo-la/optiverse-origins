@@ -30,7 +30,8 @@ function OptiLevel()
 	this.cores = []; 
 	this.coresinks = [];   
 	this.sprites = [];
-	
+
+	this.tickCount = 0;
 
 	return this;
 }
@@ -215,6 +216,7 @@ OptiLevel.prototype.resetSinks = function() {
 
 OptiLevel.prototype.tick = function()
 {
+	this.tickCount++;
 	/* Commented out by Erik on 4/10/2016
 	if (this.levelCompleted()) {
 		return;
@@ -324,16 +326,33 @@ OptiLevel.prototype.draw = function()
 		// this.coresinks[i].draw();
 		// Draw mineral over core
 		var pos = this.coresinks[i].getPosition();
-		
+		var fakeAng = pos.x+pos.y; // just so they aren't all boring and upright
+
 		if (this.coresinks[i].isFull()) {
 			// Draw opened mineral at core position
-			drawBitmapCenteredAtLocationWithRotation(mineral,pos.x,pos.y,0);
+			if(isBattleGraphicsLevel == false) {
+			 	drawBitmapCenteredAtLocationWithRotation(mineral,pos.x,pos.y,fakeAng);
+			 } else {
+				if(this.coresinks[i].explFrame == undefined ||
+					this.coresinks[i].explFrame == null) {
+					this.coresinks[i].explFrame = 0;
+				} else if(this.tickCount%5 == 0) { // sloewr animation for explosions, because awesome
+					this.coresinks[i].explFrame++;
+				}
+				if(this.coresinks[i].explFrame < ENEMY_EXPL_FRAMES) {
+					drawAnimCenteredAtLocationWithRotation(enemyExplosion,pos.x,pos.y,fakeAng,ctx,this.coresinks[i].explFrame);
+				}		
+			}	
 		} else {
 			// Draw unopened mineral at core position
-			drawBitmapCenteredAtLocationWithRotation(mineral_rock,pos.x,pos.y,0);
+			if(isBattleGraphicsLevel == false) {
+				drawBitmapCenteredAtLocationWithRotation(mineral_rock,pos.x,pos.y,fakeAng);
+			} else {
+				drawBitmapCenteredAtLocationWithRotation(imgShipEnemyForGame,pos.x,pos.y,fakeAng);
+			}
 		}
 	}
-	
+
 	// Beams
 	for (var i=0; i < this.beams.length; i++) {
 		this.beams[i].draw();
