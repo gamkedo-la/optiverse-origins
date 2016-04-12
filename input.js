@@ -95,11 +95,11 @@ function handleMouseUp(evt) {
 function keyPressed(evt) {
   var anyValidKeyPressed = true;
   switch(evt.keyCode) {
-  	/*case KEYCODE_E: // removed for release -cdeleon
+  	case KEYCODE_E:
   		if(LevelEditor.canEdit)
   			LevelEditor.toggle();
   		break;
-  	case KEYCODE_O:
+  	/*case KEYCODE_O: // removed for release -cdeleon
   		startOpening();
   		break;*/
 	case KEYCODE_ESC:
