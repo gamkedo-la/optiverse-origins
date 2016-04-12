@@ -10,10 +10,10 @@ angular.module('optiverse', [])
         ctrl.LevelEditor = LevelEditor;
         startOpening()
         //ctrl.debug = true;
-        ctrl.currentSeries = 'Total Internal Reflection';
+        ctrl.currentSeries = 'Intro';
         ctrl.index = 0
         ctrl.series = series;
-        ctrl.seriesKeys = ['Total Internal Reflection', 'Mixed Mechanics', 'marc', 'erik', 'dan']
+        ctrl.seriesKeys = ['Intro', 'Total Internal Reflection', 'Mixed Mechanics', 'marc', 'erik', 'dan']
     
 
 
