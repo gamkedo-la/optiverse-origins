@@ -346,6 +346,7 @@ function Block(points, color) {
 // draw()
 Block.prototype.draw = function () {
 	colorPolygon(this.points, this.color);
+	strokePolygon(this.points, "white", 1);
 }
 
 
