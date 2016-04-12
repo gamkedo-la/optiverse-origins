@@ -282,6 +282,9 @@ OptiLevel.prototype.draw = function()
 	// next line blanks out the screen with black
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR, Cutctx);
+	if(background){
+		drawBitmapCenteredAtLocationWithRotation(background, canvas.width/2, canvas.height/2, 0);
+	}
 
 	openingSequenceHandler();
 	if( isOpeningBlockingGameplay() ) {

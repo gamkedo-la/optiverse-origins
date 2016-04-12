@@ -37,6 +37,16 @@ angular.module('optiverse', [])
         }
 
         ctrl.load = function(levelStr) {
+            //set background 
+            if(ctrl.currentSeries == "Intro")
+                background = bg2;
+
+            if(ctrl.currentSeries == "Total Internal Reflection")
+                background = bg4;
+
+            if(ctrl.currentSeries == "Mixed Mechanics")
+                background = bg1;
+            
             //getLevel
             LevelEditor.canEdit = false;
             lvlFinished_sound.currentTime = 0
@@ -108,3 +118,4 @@ angular.module('optiverse', [])
 
     }]);
 var leakMenu = null
+var background = null;

@@ -592,7 +592,9 @@ function editorDeleteNearestToMouse() {
 //
 function SaveToTextfield() {
 	levelText = document.getElementById('levelTextfield');
-	levelText.value = JSON.stringify(LevelEditor.pieces);
+	if(levelText){
+		levelText.value = JSON.stringify(LevelEditor.pieces);
+	}
 
 	
 	var levelData = {}

@@ -14,6 +14,10 @@ var LevelEditorPlusSign = document.createElement("img");
 var LevelEditorMinusSign = document.createElement("img");
 var mineral_rock = document.createElement("img");
 var mineral = document.createElement("img");
+var bg1 = document.createElement("img");
+var bg2 = document.createElement("img");
+var bg3 = document.createElement("img");
+var bg4 = document.createElement("img");
 
 var picsToLoad = 0;
 
@@ -50,6 +54,11 @@ function loadImages() {
     {varName:LevelEditorMinusSign, theFile:"btn_minussign.png"},
     {varName:mineral_rock, theFile:"minerals_rock.png"},
     {varName:mineral, theFile:"minerals.png"},
+
+    {varName:bg1, theFile:"background_1_purple.png"},
+    {varName:bg2, theFile:"background_2_purple.png"},
+    {varName:bg3, theFile:"background_3_red.png"},
+    {varName:bg4, theFile:"background_4_blue.png"},
 
     // this format loads level parts (and editor UI buttons)
     {levPartType:LEVELPART_ASTEROID, theFile:"asteroid.png"},
