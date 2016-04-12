@@ -419,7 +419,8 @@ Core.prototype.getPosition = function () {
 Core.prototype.draw = function () {
 	
 	// Core circle
-	colorCircle(this.centerX, this.centerY, this.radius, this.color);
+	colorCircle(this.centerX, this.centerY, this.radius+1, "black");
+	colorCircle(this.centerX, this.centerY, this.radius-1, this.color);
 	
 	// Core levels
 	for(var i=0; i < this.coreRings.length; i++){
@@ -522,6 +523,9 @@ CoreRing.prototype.draw = function (centerX, centerY, kind) {
 	
 	// Draw Ring
 	if (this.active) {
+		// background
+		strokeCircle(centerX, centerY, this.radius, "black", this.lineWidth+2);
+		// Colored ring
 		strokeCircle(centerX, centerY, this.radius, this.color, this.lineWidth);
 	} else {
 		strokeCircleDashed(centerX, centerY, this.radius, this.color, 1);
