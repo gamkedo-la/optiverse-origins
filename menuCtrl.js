@@ -7,8 +7,9 @@ angular.module('optiverse', [])
         ctrl.showCredits = false;
         ctrl.testText = "this is a test"
         ctrl.levels = level;
+        ctrl.LevelEditor = LevelEditor;
         startOpening()
-        ctrl.debug = true;
+        //ctrl.debug = true;
         ctrl.currentSeries = 'Total Internal Reflection';
         ctrl.index = 0
         ctrl.series = series;

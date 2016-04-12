@@ -31,41 +31,42 @@
             <button ng-click="ctrl.goToMenu()"> Back </button>
         </div>
         <div class="main-menu" ng-if="ctrl.showMenu">
-            <h1>Optiverse</h1>
+            <img src="images/Optiverse_Logo.png">
             <br/>
             <!-- <div>
                 <button ng-repeat="(key, value) in ctrl.levels" ng-click="ctrl.load(value)">{{key}} </button>
             </div> -->
-            <button ng-click="ctrl.showLevels()">Play</button>
+            <div ng-click="ctrl.showLevels()" class="play highlight">Play</div>
             <br/>
-            <button ng-click="ctrl.showEditor()">Level Editor </button>
+            <div ng-click="ctrl.showEditor()" class="highlight">Level Editor </div>
             <br/>
-            <button ng-click="ctrl.goToCredits()">credits </button>
+            <div ng-click="ctrl.goToCredits()" class="highlight">credits </div>
             <!-- <button onclick="reflect_sound.currentTime = 0; reflect_sound.play()">reflect </button> -->
 
             <!-- <pre>{{ctrl | json}}</pre> -->
         </div>
 
         <div class="level-select" ng-if="ctrl.showlevels">
-            <h1>Optiverse</h1>
-            <br/>
-            <a href="#" ng-click="ctrl.decSeries()">
-                <div class="arrow-up" ></div>
-            </a>
-            <br />
-            <h2>{{ctrl.currentSeries}}</h2>
+            <img src="images/Optiverse_Logo.png">
             <div>
+                
+                <h2>{{ctrl.currentSeries}}</h2>
+                <a class="left-wrap" href="#" ng-click="ctrl.decSeries()">
+                    <div class="arrow-up" ></div>
+                </a>
+                <div>
 
-                <div class="circle" ng-repeat="(key, value) in ctrl.series[ctrl.currentSeries]" ng-click="ctrl.load(value)">
-                    <div class="subtitle">{{key}} </div>
+                    <div class="circle" ng-repeat="(key, value) in ctrl.series[ctrl.currentSeries]" ng-click="ctrl.load(value)">
+                        <div class="subtitle">{{key}} </div>
+                    </div>
                 </div>
+                <a class="right-wrap" href="#" ng-click="ctrl.incSeries()">
+                    <div class="arrow-down"></div>
+                </a>
             </div>
-            <a href="#" ng-click="ctrl.incSeries()">
-                <div class="arrow-down"></div>
-            </a>
             <!-- <button onclick="reflect_sound.currentTime = 0; reflect_sound.play()">reflect </button> -->
 
-            <pre>{{series | json}}</pre>
+
         </div>
         <audio controls autoplay loop id="intro">
           <source src="audio/Energy Pop.ogg" type="audio/ogg">
@@ -136,7 +137,7 @@
 
         
         <!-- <div class="placeholderstuff"> stuff stuff stuff stuff stuff stufff </div> -->
-        <textarea rows="3" cols="102" id="levelTextfield">
+        <textarea rows="3" cols="102" id="levelTextfield" ng-if="ctrl.LevelEditor.canEdit">
             Paste level data from saved text file here to load it
         </textarea>
 
