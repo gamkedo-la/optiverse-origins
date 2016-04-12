@@ -3,4 +3,4 @@ level['Level_A_intro_05_mirror4'] = [{"bounds":{"x":540,"y":40,"x2":620,"y2":120
 if(!series['Intro']){
     series['Intro'] = {}
 }
-series['Intro'][5] = level['Level_A_intro_05_mirror4'] 
+series['Intro']["5. Windows"] = level['Level_A_intro_05_mirror4'] 

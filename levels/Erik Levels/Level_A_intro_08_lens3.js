@@ -4,4 +4,4 @@ level['Level_A_intro_08_lens3'] = [{"bounds":{"x":551,"y":102,"x2":631,"y2":182,
 if(!series['Intro']){
     series['Intro'] = {}
 }
-series['Intro'][8] = level['Level_A_intro_08_lens3'] 
+series['Intro']["8. Magic Orb"] = level['Level_A_intro_08_lens3'] 

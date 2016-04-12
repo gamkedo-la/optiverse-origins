@@ -3,4 +3,4 @@ level['Level_A_intro_core'] = [{"bounds":{"x":91,"y":247,"x2":171,"y2":327,"cent
 if(!series['Intro']){
 	series['Intro'] = {}
 }
-series['Intro'][1] = level['Level_A_intro_core']
+series['Intro']['1. Quantum Cores'] = level['Level_A_intro_core']
