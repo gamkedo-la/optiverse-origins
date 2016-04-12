@@ -46,6 +46,13 @@ function setupOpeningAnimTick() {
 }
 
 function startOpening() {
+	cutscenePlaying = CUTSCENE_PORTAL_FLEE;
+	openingSequence = OPENING_SEQUENCE_START_ANIM;
+  	animTick = 0;
+}
+
+function startShipZoom() {
+	cutscenePlaying = CUTSCENE_SHIP_ZOOM;
 	openingSequence = OPENING_SEQUENCE_START_ANIM;
   	animTick = 0;
 }
@@ -88,16 +95,17 @@ function portalFleeDraw() {
 }
 
 function shipZoomDraw() {
+	var displayTo = ctx; // set to Cutctx if for cutscene screens instead of in-game
 	switch(openingSequence) {
 		case OPENING_SEQUENCE_START_ANIM:
 			drawAnimCenteredAtLocationWithRotation(imgShipAnimSmall,
-				canvas.width/2, canvas.height/2, 0, Cutctx);
+				canvas.width/2, canvas.height/2, 0, displayTo);
 			break;
 		case OPENING_SEQUENCE_ZOOM_TO_SIDE:
-			zoomInOnShip(animTick / OPENING_ZOOM_STEPS, Cutctx);
+			zoomInOnShip(animTick / OPENING_ZOOM_STEPS, displayTo);
 			break;
 		case OPENING_SEQUENCE_SHOWING:
-			drawBitmapCenteredAtLocationWithRotation(imgShipLarge, canvas.width, canvas.height/2, 0, Cutctx);
+			drawBitmapCenteredAtLocationWithRotation(imgShipLarge, canvas.width, canvas.height/2, 0, displayTo);
 			break;
 	}
 }
@@ -107,7 +115,8 @@ function isOpeningBlockingGameplay() {
 		return false;
 	}
 
-	return openingSequence != OPENING_SEQUENCE_OFF && openingSequence != OPENING_SEQUENCE_SHOWING;
+	return false; // no longer blocks gameplay at all, harsh hack to avoid any lockouts due to timing errors
+	// return openingSequence != OPENING_SEQUENCE_OFF && openingSequence != OPENING_SEQUENCE_SHOWING;
 }
 
 function zoomInOnShip(lerpVal, onCtx) {

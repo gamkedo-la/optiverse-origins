@@ -38,14 +38,17 @@ angular.module('optiverse', [])
 
         ctrl.load = function(levelStr) {
             //set background 
-            if(ctrl.currentSeries == "Intro")
+            if(ctrl.currentSeries == "Intro") {
                 background = bg2;
-
-            if(ctrl.currentSeries == "Total Internal Reflection")
+            } else if(ctrl.currentSeries == "Total Internal Reflection") {
                 background = bg4;
-
-            if(ctrl.currentSeries == "Mixed Mechanics")
+            } else if(ctrl.currentSeries == "Mixed Mechanics") {
                 background = bg1;
+            } else {
+                background = bg3;
+            }
+
+            changeSong(SONG_POP);
             
             //getLevel
             LevelEditor.canEdit = false;

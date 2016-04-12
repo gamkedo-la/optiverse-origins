@@ -1043,7 +1043,7 @@ LevelEditor.buttonScripts = {
 	},
 	"delete": {
 		"index": 8,
-		"tooltip": "Click to delete nearest part (hold SHIFT to stay in delete mode)",
+		"tooltip": "Click to delete selected object (hold SHIFT to stay in delete mode)",
 		"imagecode": LEVELPART_DELETE,
 		"command": function() {
 			if(LevelEditor.selectedPiece != null) {

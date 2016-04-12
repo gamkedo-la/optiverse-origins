@@ -46,12 +46,11 @@ window.onload = function() {
 	
 	
 	reflect_sound = document.getElementById("reflect"); 
-	refract_sound = document.getElementById("refract"); lvlFinished
+	refract_sound = document.getElementById("refract");
 	lvlFinished_sound = document.getElementById("lvlFinished"); 
 	lvlFailed_sound = document.getElementById("lvlFailed"); 
-	intro_song = document.getElementById("intro");
-	intro_song.volume = .4;
 	
+	prepSongs(); // now in jukebox.js
 
 }
 

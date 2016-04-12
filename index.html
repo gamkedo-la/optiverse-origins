@@ -24,7 +24,7 @@
                 <li>Jeremy Kenyon - Artwork (background)</li>
                 <li>Chris Deleon - Programming (cutscenes, start of editor)</li>
                 <li>Thomas Kresge - Sound Effects and Tracks</li>
-                <li>Jo Leigh - Story</li>
+                <li>JL Evans - Story</li>
                 <li> &mdash; </li>
                 <li>Level Design: Erik Verlage,  Andreas Lathe,  Marcus Silva,  Tim Waskett,  Dan Lazar</li>
             </ul>
@@ -68,14 +68,18 @@
 
 
         </div>
-        <audio controls autoplay loop id="intro">
+        <audio controls autoplay loop id="eerie">
+          <source src="audio/Eerie.ogg" type="audio/ogg">
+          <source src="audio/Eerie.mp3" type="audio/mpeg">
+          Your browser does not support the audio tag.
+        </audio>
+        <audio loop id="intro">
           <source src="audio/Energy Pop.ogg" type="audio/ogg">
           <source src="audio/Energy Pop.mp3" type="audio/mpeg">
           Your browser does not support the audio tag.
         </audio>
 
     </div>
-    <script src="audio.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="menuCtrl.js"></script>
@@ -87,6 +91,7 @@
     <script src="optics_helper.js"></script>
     <script src="optics.js"></script>
     <script src="leveleditor.js"></script>
+    <script src="jukebox.js"></script>
     <script src="main.js"></script>
     <script src="levels/level_A_bigblox_1.js"></script>
     <script src="levels/level_B__series-ItTakes2.js"></script>

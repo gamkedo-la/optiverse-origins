@@ -100,9 +100,10 @@ function keyPressed(evt) {
   			LevelEditor.toggle();
   		break;
   	/*case KEYCODE_O: // removed for release -cdeleon
-  		startOpening();
+  		startShipZoom();
   		break;*/
 	case KEYCODE_ESC:
+		changeSong(SONG_EERIE);
   		leakMenu();
   		break;
   	default: // to allow any non-game key actions to affect browser

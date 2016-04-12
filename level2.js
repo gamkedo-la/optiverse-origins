@@ -359,11 +359,8 @@ OptiLevel.prototype.draw = function()
 		if(lvlFinished_sound.paused && !(intro_song.paused)){
 			lvlFinished_sound.currentTime = 0;
 			lvlFinished_sound.play();
-			intro_song.pause();
+			stopMusic();
 		} else if (lvlFinished_sound.ended) {
-			intro_song.currentTime = 0;
-			intro_song.play();
-			
 			// Reset level pieces
 			this.coresinks = []; // Temp solution
 			
@@ -371,7 +368,10 @@ OptiLevel.prototype.draw = function()
 			
 			// RETURN TO MAIN MENU
 			//angular.element(document.getElementById('ctrl')).scope().goToCredits();
+			leakMenu(); // added by cdeleon, abrupt but gets us back out of the game to pick levels
 			
+			changeSong(SONG_EERIE);
+
 			//!!!!!!!!!!!!!!!!!!!
 		}
 	} 
