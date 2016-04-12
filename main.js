@@ -97,24 +97,6 @@ function loadGameElements() {
 
 var editorLevel = OptiLevel.init([]);
 
-
-function zoomInOnShip(lerpVal) {
-	var shipStartW = imgShipAnimSmall.height; // using height since square anims strip
-	var shipEndW = imgShipLarge.width;
-	var shipStartX = canvas.width/2;
-
-	var shipStartH = imgShipAnimSmall.height;
-	var shipEndH = imgShipLarge.height;
-	var shipEndX = canvas.width;
-
-	var shipDrawW = (1.0-lerpVal) * shipStartW + lerpVal * shipEndW;
-	var shipDrawH = (1.0-lerpVal) * shipStartH + lerpVal * shipEndH;
-	var shipDrawX = (1.0-lerpVal) * shipStartX + lerpVal * shipEndX;
-
-	// drawBitmapFitIntoLocation(imgShipLarge, shipDrawX-shipDrawW/2, canvas.height/2-shipDrawH/2,
-	//	shipDrawW,shipDrawH);
-}
-
 // ##################################
 // DRAW functions
 // ##################################

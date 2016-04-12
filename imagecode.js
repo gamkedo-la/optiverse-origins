@@ -102,8 +102,8 @@ function drawAnimCenteredAtLocationWithRotation(graphic, atX, atY,withAngle, con
   context.restore();
 }
 
-function drawBitmapFitIntoLocation(graphic, atX, atY, targetWid, targetHei) {
-  ctx.drawImage(graphic, // image (source)
+function drawBitmapFitIntoLocation(graphic, atX, atY, targetWid, targetHei, context) {
+  context.drawImage(graphic, // image (source)
                           0,0, // source corner
                           graphic.width,graphic.height, // source dimensions
                           atX,atY, // dest corner

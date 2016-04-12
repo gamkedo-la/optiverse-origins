@@ -20,7 +20,7 @@ angular.module('optiverse', [])
         ctrl.timer = $timeout(function(){
             ctrl.showMenu = true
             ctrl.reflect_sound = reflect_sound
-        }, 5500)
+        }, 3000)
 
         ctrl.incSeries = function(){
             if(ctrl.index < ctrl.seriesKeys.length - 1){
