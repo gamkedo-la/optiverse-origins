@@ -22,7 +22,7 @@ textarea {
 	height:600px;
 }
 
-.main-menu{
+.main-menu, .level-select{
 	position:absolute;
 	top: 0px;
 	color:white;
@@ -31,6 +31,10 @@ textarea {
 	width:800px;
 	height:600px;
 	//background-color: #191616;
+}
+
+.level-select{
+	background-color: #191616;
 }
 
 .main-menu h1 {
@@ -63,3 +67,37 @@ ul {
     padding: 0;
 }
 
+.arrow-up {
+	width: 0; 
+	height: 0; 
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	
+	border-bottom: 20px solid blue;
+}
+
+.arrow-down {
+	width: 0; 
+	height: 0; 
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	
+	border-top: 20px solid blue;
+}
+
+.circle {
+      width: 50px;
+      height: 50px;
+      -webkit-border-radius: 25px;
+      -moz-border-radius: 25px;
+      border-radius: 25px;
+      background: red;
+      position: relative;
+      display:inline-block;
+      margin: 35px;
+    }
+
+.subtitle{
+	position: absolute;
+    top: -20px;
+}

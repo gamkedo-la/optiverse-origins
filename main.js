@@ -4,6 +4,7 @@ var ctx;
 
 var currentLevel = OptiLevel.init();
 var level = {};
+var series = {};
 
 // ##################################
 // Global Variables

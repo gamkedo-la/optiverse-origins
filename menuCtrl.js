@@ -8,16 +8,33 @@ angular.module('optiverse', [])
         ctrl.testText = "this is a test"
         ctrl.levels = level;
         startOpening()
-        //ctrl.debug = true;
+        ctrl.debug = true;
+        ctrl.currentSeries = 'Total Internal Reflection';
+        ctrl.index = 0
+        ctrl.series = series;
+        ctrl.seriesKeys = ['Total Internal Reflection', 'Mixed Mechanics', 'marc', 'erik', 'dan']
+    
 
-        if(ctrl.debug){
-            ctrl.showMenu = true
-        }
-        $timeout(function(){
-            ctrl.showMenu = true
-        ctrl.reflect_sound = reflect_sound
 
+        ctrl.timer = $timeout(function(){
+            ctrl.showMenu = true
+            ctrl.reflect_sound = reflect_sound
         }, 5500)
+
+        ctrl.incSeries = function(){
+            if(ctrl.index < ctrl.seriesKeys.length - 1){
+                ctrl.index += 1;
+                ctrl.currentSeries = ctrl.seriesKeys[ctrl.index]
+            }
+        }
+
+        ctrl.decSeries = function(){
+            if(ctrl.index != 0){
+                ctrl.index -= 1;
+                ctrl.currentSeries = ctrl.seriesKeys[ctrl.index]
+            }
+        }
+
         ctrl.load = function(levelStr) {
             //getLevel
             LevelEditor.canEdit = false;
@@ -26,10 +43,10 @@ angular.module('optiverse', [])
             ctrl.showCanvas = true;
             ctrl.showMenu = false;
             ctrl.showCutScene = false;
+            ctrl.showlevels = false;
             LevelEditor.toggle();
             LevelEditor.toggle();
             //LevelEditor.toggleoff()
-
        }
        ctrl.showEditor = function(){
             lvlFinished_sound.currentTime = 0
@@ -40,7 +57,17 @@ angular.module('optiverse', [])
             LevelEditor.toggle();
        }
 
+      ctrl.showLevels = function(){            
+            lvlFinished_sound.currentTime = 0
+            LevelEditor.canEdit = false;
+            ctrl.showCanvas = false;
+            ctrl.showMenu = false;
+            ctrl.showCutScene = false;
+            ctrl.showlevels = true;
+       }
+
        ctrl.goToCredits = function(){
+            
             LevelEditor.canEdit = false;
             ctrl.showCanvas = false;
             ctrl.showMenu = false;
@@ -50,11 +77,14 @@ angular.module('optiverse', [])
        }
 
         ctrl.goToMenu = function(){
+            console.log("cancel timer")
+            $timeout.cancel(ctrl.timer)
             LevelEditor.canEdit = false;
             ctrl.showMenu = true
             ctrl.showCanvas = false;
             ctrl.showCutScene = true;
             ctrl.showCredits = false;
+            ctrl.showlevels = false;
         }
         leakMenu = function(){
             $timeout(function(){
@@ -68,6 +98,11 @@ angular.module('optiverse', [])
             if(e.keyCode == 27){
                 ctrl.goToMenu();
             }
+        }
+
+        if(ctrl.debug){
+            ctrl.goToMenu();
+            intro.pause();
         }
 
     }]);
