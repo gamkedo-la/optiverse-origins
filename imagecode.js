@@ -55,10 +55,10 @@ function loadImages() {
     {varName:mineral_rock, theFile:"minerals_rock.png"},
     {varName:mineral, theFile:"minerals.png"},
 
-    {varName:bg1, theFile:"background_1_purple.png"},
-    {varName:bg2, theFile:"background_2_purple.png"},
-    {varName:bg3, theFile:"background_3_red.png"},
-    {varName:bg4, theFile:"background_4_blue.png"},
+    {varName:bg1, theFile:"background_1_purple.jpg"},
+    {varName:bg2, theFile:"background_2_purple.jpg"},
+    {varName:bg3, theFile:"background_3_red.jpg"},
+    {varName:bg4, theFile:"background_4_blue.jpg"},
 
     // this format loads level parts (and editor UI buttons)
     {levPartType:LEVELPART_ASTEROID, theFile:"asteroid.png"},
