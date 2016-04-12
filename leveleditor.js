@@ -1193,7 +1193,7 @@ LevelPiece.prototype.updateRotation = function(_angle)
 
 	if(this.opticsPiece != null && this.opticsPiece.kind == "core") {  // for special case: coure
 		// this internal test avoids the hack from breaking the +/- tweak control buttons for after placing
-		if(LevelEditor.selectedBrush.onMouseMove == LevelEditor.trScripts.mouseRotate) {
+		if(LevelEditor.selectedBrush && LevelEditor.selectedBrush.onMouseMove == LevelEditor.trScripts.mouseRotate) {
 			_angle -= Math.PI / 2.0; // rotates core so it points its outlet toward mouse cursor
 		}
 	}
