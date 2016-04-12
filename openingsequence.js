@@ -79,6 +79,8 @@ function portalFleeDraw() {
 	var enemyShipSpeed = 10;
 	var playerShipSpeed = 12;
 
+	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR, Cutctx);
+
 	drawBitmapCenteredAtLocationWithRotation(imgShipAnimEnemy,
 						cappedAnimTick * enemyShipSpeed+formationStaggerX - gapBehindPlayer, canvas.height/2-formationStaggerY, Math.PI*0.5, Cutctx);
 	drawBitmapCenteredAtLocationWithRotation(imgShipAnimEnemy,

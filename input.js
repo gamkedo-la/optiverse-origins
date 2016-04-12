@@ -75,6 +75,10 @@ function handleMouseClick(evt) {
 	}*/
 	if(buttonFired == false && mouseIsInFireButtion()) {
 		buttonFired = true;
+
+		fireLaser.currentTime = 0;
+		fireLaser.play();
+		
 		// Remove all dashed lines in level
 		currentLevel.beams = [];		
 		

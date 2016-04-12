@@ -285,10 +285,10 @@ OptiLevel.prototype.tick = function()
 OptiLevel.prototype.draw = function()
 {
 	// next line blanks out the screen with black
-	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
-	colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR, Cutctx);
 	if(background){
 		drawBitmapCenteredAtLocationWithRotation(background, canvas.width/2, canvas.height/2, 0);
+	} else {
+		colorRect(0,0,canvas.width,canvas.height, BACKGROUND_COLOR);
 	}
 
 	openingSequenceHandler();
@@ -378,6 +378,7 @@ OptiLevel.prototype.draw = function()
 		if(lvlFinished_sound.paused && !(intro_song.paused)){
 			lvlFinished_sound.currentTime = 0;
 			lvlFinished_sound.play();
+
 			stopMusic();
 		} else if (lvlFinished_sound.ended) {
 			// Reset level pieces

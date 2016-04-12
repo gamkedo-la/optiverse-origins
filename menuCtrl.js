@@ -48,6 +48,10 @@ angular.module('optiverse', [])
                 background = bg3;
             }
 
+            LevelEditor.selectedBrush = null;
+            if(LevelEditor.active)
+                LevelEditor.toggle();
+
             changeSong(SONG_POP);
 
             isBattleGraphicsLevel = !isBattleGraphicsLevel;
@@ -70,7 +74,8 @@ angular.module('optiverse', [])
             ctrl.showCanvas = true;
             ctrl.showMenu = false;
             ctrl.showCutScene = false;
-            LevelEditor.toggle();
+            if(LevelEditor.active == false)
+                LevelEditor.toggle();
        }
 
       ctrl.showLevels = function(){            
