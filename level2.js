@@ -10,6 +10,8 @@
 */
 
 
+var levelCompletedBOOL = false;
+
 /**
  * CONSTRUCTOR
  *
@@ -374,23 +376,26 @@ OptiLevel.prototype.draw = function()
 	// Sound Effects and Messages
 	// --------------------------
 	
+	// Loop between different songs
+	loopSong();	
+	
 	if (this.levelCompleted()) {
-		if(lvlFinished_sound.paused && !(intro_song.paused)){
+		if(lvlFinished_sound.paused && !levelCompletedBOOL){
+			levelCompletedBOOL = true;
+			set_volume_to_low();
 			lvlFinished_sound.currentTime = 0;
 			lvlFinished_sound.play();
-
-			stopMusic();
 		} else if (lvlFinished_sound.ended) {
 			// Reset level pieces
 			this.coresinks = []; // Temp solution
+			levelCompletedBOOL = false;
 			
-			// HERE MARCUS!!!!!!			
+			// Return song to normal volume
+			set_volume_to_normal();
 			
 			// RETURN TO MAIN MENU
 			//angular.element(document.getElementById('ctrl')).scope().goToCredits();
 			leakMenu(); // added by cdeleon, abrupt but gets us back out of the game to pick levels
-			
-			changeSong(SONG_EERIE);
 
 			//!!!!!!!!!!!!!!!!!!!
 		}

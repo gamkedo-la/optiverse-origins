@@ -37,6 +37,9 @@ angular.module('optiverse', [])
         }
 
         ctrl.load = function(levelStr) {
+            
+            isBattleGraphicsLevel = false;        
+        
             //set background 
             if(ctrl.currentSeries == "Intro") {
                 background = bg2;
@@ -46,15 +49,16 @@ angular.module('optiverse', [])
                 background = bg1;
             } else {
                 background = bg3;
+                isBattleGraphicsLevel = true; 
             }
 
             LevelEditor.selectedBrush = null;
             if(LevelEditor.active)
                 LevelEditor.toggle();
 
-            changeSong(SONG_POP);
+            // changeSong(SONG_EERIE);
 
-            isBattleGraphicsLevel = !isBattleGraphicsLevel;
+            
             
             //getLevel
             LevelEditor.canEdit = false;
@@ -79,7 +83,7 @@ angular.module('optiverse', [])
        }
 
       ctrl.showLevels = function(){            
-            lvlFinished_sound.currentTime = 0
+            // lvlFinished_sound.currentTime = 0
             LevelEditor.canEdit = false;
             ctrl.showCanvas = false;
             ctrl.showMenu = false;
@@ -110,7 +114,7 @@ angular.module('optiverse', [])
         leakMenu = function(){
             $timeout(function(){
                 openingSequence = OPENING_SEQUENCE_SHOWING
-                ctrl.goToMenu()
+                ctrl.showLevels()
             })
             
         }

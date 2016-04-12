@@ -29,6 +29,11 @@ function mouseIsInFireButtion() {
 function drawFireButton() {
 	drawBitmapCenteredAtLocationWithRotation( (buttonFired ? fireButtonPressed : fireButtonWaiting),
 		fireButtonX,fireButtonY,0);
+		
+	// Temp fix for mouse hovering
+	if(mouseIsInFireButtion()){
+		drawBitmapCenteredAtLocationWithRotation(fireButtonPressed, fireButtonX,fireButtonY,0);
+	}
 }
 
 function updateMousePos(evt) {
@@ -107,7 +112,7 @@ function keyPressed(evt) {
   		startShipZoom();
   		break;*/
 	case KEYCODE_ESC:
-		changeSong(SONG_EERIE);
+		// changeSong(SONG_POP);
   		leakMenu();
   		break;
   	default: // to allow any non-game key actions to affect browser

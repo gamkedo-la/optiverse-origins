@@ -1,15 +1,17 @@
 const NO_SONG = -1;
 const SONG_EERIE = 0;
 const SONG_POP = 1;
+const POP_VOLUME = .25
+const EERIE_VOLUME = .4
 var lastSongPlaying = NO_SONG;
 
 function prepSongs() {
 	intro_song = document.getElementById("intro");
-	intro_song.volume = .25;
+	intro_song.volume = POP_VOLUME;
 	eerie_song = document.getElementById("eerie");
-	eerie_song.volume = .4;
+	eerie_song.volume = EERIE_VOLUME;
 
-	changeSong(SONG_EERIE);
+	changeSong(SONG_POP);
 }
 
 function stopMusic() {
@@ -40,3 +42,26 @@ function changeSong(toSong) {
     songTo.play();
     songTo.controls = true;
 }
+
+function loopSong() {
+	if(lastSongPlaying == SONG_POP) {
+		if (intro_song.ended) {
+			changeSong(SONG_EERIE);
+		}
+	} else if (lastSongPlaying == SONG_EERIE) {
+		if (eerie_song.ended) {
+			changeSong(SONG_POP);
+		}
+	}
+}
+
+function set_volume_to_low() {
+	eerie_song.volume = EERIE_VOLUME/2;
+	intro_song.volume = POP_VOLUME/2;
+}
+
+function set_volume_to_normal() {
+	eerie_song.volume = EERIE_VOLUME;
+	intro_song.volume = POP_VOLUME;
+}
+	

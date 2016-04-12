@@ -427,10 +427,12 @@ Core.prototype.draw = function () {
 		var ring = this.coreRings[i];
 		ring.draw(this.centerX, this.centerY, this.kind);
 		
+		/* DON'T NEED THIS ANYMORE
 		// TEMP FIX for mouse-over
 		if(ring.active && this.encloses(mouseX, mouseY)) {
 			strokeCircle(this.centerX, this.centerY, ring.radius, ring.color, 7);
 		}
+		*/
 	}
 }
 
@@ -522,13 +524,15 @@ CoreRing.prototype.emitLasers = function (centerX, centerY) {
 // draw()
 CoreRing.prototype.draw = function (centerX, centerY, kind) {
 	
+	// background ring
+	strokeCircle(centerX, centerY, this.radius, "black", this.lineWidth+2);	
+	
 	// Draw Ring
 	if (this.active) {
-		// background
-		strokeCircle(centerX, centerY, this.radius, "black", this.lineWidth+2);
-		// Colored ring
+		// Filled ring
 		strokeCircle(centerX, centerY, this.radius, this.color, this.lineWidth);
 	} else {
+		// Dasheded ring
 		strokeCircleDashed(centerX, centerY, this.radius, this.color, 1);
 	}
 	
