@@ -8,6 +8,28 @@ const KEYCODE_E = 69;
 const KEYCODE_O = 79;
 const KEYCODE_ESC = 27;
 
+var fireButtonX=40;
+var fireButtonY=30;
+var buttonFired = false;
+
+function resetFireButton() {
+	buttonFired = false;
+}
+
+function mouseIsInFireButtion() {
+	var left = fireButtonX - fireButtonWaiting.width/2;
+	var right = fireButtonX + fireButtonWaiting.width/2;
+	var top = fireButtonY - fireButtonWaiting.height/2;
+	var bot = fireButtonY + fireButtonWaiting.height/2;
+
+	return (mouseX < right && mouseY < bot &&
+			mouseX > left && mouseY > top);
+}
+
+function drawFireButtion() {
+	drawBitmapCenteredAtLocationWithRotation( (buttonFired ? fireButtonPressed : fireButtonWaiting),
+		fireButtonX,fireButtonY,0);
+}
 
 function updateMousePos(evt) {
 	var rect = canvas.getBoundingClientRect();
@@ -41,7 +63,7 @@ function handleMouseClick(evt) {
 	}
 	
 	// Check for click on cores
-	for (var i=0; i < currentLevel.cores.length; i++) {
+	/*for (var i=0; i < currentLevel.cores.length; i++) {
 		core = currentLevel.cores[i];
 		if (core.encloses(mouseX, mouseY)){
 			// Remove all dashed lines in level
@@ -50,6 +72,14 @@ function handleMouseClick(evt) {
 			// Emit laser from all cores
 			currentLevel.emitLasers();
 		}
+	}*/
+	if(buttonFired == false && mouseIsInFireButtion()) {
+		buttonFired = true;
+		// Remove all dashed lines in level
+		currentLevel.beams = [];		
+		
+		// Emit laser from all cores
+		currentLevel.emitLasers();
 	}
 }
 function handleMouseUp(evt) {
@@ -65,13 +95,13 @@ function handleMouseUp(evt) {
 function keyPressed(evt) {
   var anyValidKeyPressed = true;
   switch(evt.keyCode) {
-  	case KEYCODE_E:
+  	/*case KEYCODE_E: // removed for release -cdeleon
   		if(LevelEditor.canEdit)
   			LevelEditor.toggle();
   		break;
   	case KEYCODE_O:
   		startOpening();
-  		break;
+  		break;*/
 	case KEYCODE_ESC:
   		leakMenu();
   		break;

@@ -19,6 +19,10 @@ var bg2 = document.createElement("img");
 var bg3 = document.createElement("img");
 var bg4 = document.createElement("img");
 
+
+var fireButtonWaiting = document.createElement("img");
+var fireButtonPressed = document.createElement("img");
+
 var picsToLoad = 0;
 
 function countLoadedImageAndLaunchIfReady() {
@@ -59,6 +63,9 @@ function loadImages() {
     {varName:bg2, theFile:"background_2_purple.jpg"},
     {varName:bg3, theFile:"background_3_red.jpg"},
     {varName:bg4, theFile:"background_4_blue.jpg"},
+
+    {varName:fireButtonWaiting, theFile:"button.png"},
+    {varName:fireButtonPressed, theFile:"button_lit.png"},
 
     // this format loads level parts (and editor UI buttons)
     {levPartType:LEVELPART_ASTEROID, theFile:"asteroid.png"},

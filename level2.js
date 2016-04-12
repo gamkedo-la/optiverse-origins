@@ -47,6 +47,8 @@ OptiLevel.init = function(_pieces)
 	//
 	var instance = new OptiLevel();
 	
+	resetFireButton(); // defined in input.js
+
 	instance.pieces = _pieces;
 	return instance;
 }
@@ -221,6 +223,7 @@ OptiLevel.prototype.tick = function()
 	
 	if (this.levelFailed()) {
 		// Reset everything
+		resetFireButton();
 		this.resetCores();
 		this.resetSinks();
 		
@@ -373,7 +376,11 @@ OptiLevel.prototype.draw = function()
 		}
 	} 
 	
+	// --------------------------
+	// Fire Button (defined in input.js)
+	// --------------------------
 	
+	drawFireButtion();
 	
 	// --------------------------
 	// Level Editor
