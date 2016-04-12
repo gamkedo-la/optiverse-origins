@@ -427,7 +427,7 @@ Core.prototype.draw = function () {
 		
 		// TEMP FIX for mouse-over
 		if(ring.active && this.encloses(mouseX, mouseY)) {
-			strokeCircle(this.centerX, this.centerY, ring.radius, ring.color, 10);
+			strokeCircle(this.centerX, this.centerY, ring.radius, ring.color, 7);
 		}
 	}
 	
