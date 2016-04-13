@@ -102,7 +102,6 @@ angular.module('optiverse', [])
        }
 
         ctrl.goToMenu = function(){
-            console.log("cancel timer")
             $timeout.cancel(ctrl.timer)
             LevelEditor.canEdit = false;
             ctrl.showMenu = true

@@ -98,12 +98,13 @@ ul {
       background: red;
       position: relative;
       display:inline-block;
-      margin: 35px 10px 10px 10px;
+      margin: 35px 104px 10px 10px;
     }
 
 .subtitle{
 	position: absolute;
     top: -20px;
+    width:115px;
 }
 
 .left-wrap {
@@ -127,5 +128,10 @@ body .highlight.play:hover {
 
 body .highlight:hover {
 	font-size:30px;
+}
+.game-back{
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
 }
 

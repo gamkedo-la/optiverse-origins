@@ -13,6 +13,7 @@
         </canvas>
         <canvas id="cutSceneCanvas" width="800" height="600" ng-show="ctrl.showCutScene">
         </canvas>
+        <button ng-click="ctrl.goToMenu()" ng-show="ctrl.showCanvas" class="game-back"> back </button>
         <div ng-if="ctrl.showCredits" class="credits">
             <h1>Credits</h1>
             <br/>
@@ -64,6 +65,7 @@
                 <a class="right-wrap" href="#" ng-click="ctrl.incSeries()">
                     <div class="arrow-down"></div>
                 </a>
+                <button ng-click="ctrl.goToMenu()"> back </button>
             </div>
             <!-- <button onclick="reflect_sound.currentTime = 0; reflect_sound.play()">reflect </button> -->
 
