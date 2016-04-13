@@ -13,7 +13,7 @@ angular.module('optiverse', [])
         ctrl.currentSeries = 'Intro';
         ctrl.index = 0
         ctrl.series = series;
-        ctrl.seriesKeys = ['Intro', 'Total Internal Reflection', 'Mixed Mechanics', 'marc', 'erik', 'dan']
+        ctrl.seriesKeys = ['Intro', 'Total Internal Reflection', 'Mixed Mechanics', 'Escape From Optiverse']
     
 
 

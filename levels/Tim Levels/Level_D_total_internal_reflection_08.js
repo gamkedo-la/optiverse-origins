@@ -2,4 +2,4 @@ level['Level_D_total_internal_reflection_08'] = [{"bounds":{"x":276,"y":474,"x2"
 if(!series['Total Internal Reflection']){
 	series['Total Internal Reflection'] = {}
 }
-series['Total Internal Reflection'][7] = level['Level_D_total_internal_reflection_08']
+series['Total Internal Reflection']["8. Butterfly"] = level['Level_D_total_internal_reflection_08']

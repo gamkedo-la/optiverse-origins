@@ -2,4 +2,4 @@ level['Level_E_mixed_mechanics_04'] = [{"bounds":{"x":556,"y":234,"x2":612,"y2":
 if(!series['Mixed Mechanics']){
 	series['Mixed Mechanics'] = {}
 }
-series['Mixed Mechanics'][4] = level['Level_E_mixed_mechanics_04']
+series['Mixed Mechanics']["4. Split"] = level['Level_E_mixed_mechanics_04']
