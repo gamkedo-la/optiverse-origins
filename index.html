@@ -52,20 +52,20 @@
             <img src="images/Optiverse_Logo.png">
             <div>
                 
-                <h2>{{ctrl.currentSeries}}</h2>
+                <h2 class="levelSelectTitle">{{ctrl.currentSeries}}</h2>
                 <a class="left-wrap" href="#" ng-click="ctrl.decSeries()">
                     <div class="arrow-up" ></div>
                 </a>
                 <div>
-
-                    <div class="circle" ng-repeat="(key, value) in ctrl.series[ctrl.currentSeries]" ng-click="ctrl.load(value)">
+                    <div class="levelSelectThumb" ng-repeat="(key, value) in ctrl.series[ctrl.currentSeries]" ng-click="ctrl.load(value)">
+                        <img src="images/lvl_thumbs/{{key}}.png" />
                         <div class="subtitle">{{key}} </div>
                     </div>
                 </div>
                 <a class="right-wrap" href="#" ng-click="ctrl.incSeries()">
                     <div class="arrow-down"></div>
                 </a>
-                <button ng-click="ctrl.goToMenu()"> back </button>
+                <button ng-click="ctrl.goToMenu()" class="game-back"> back </button>
             </div>
             <!-- <button onclick="reflect_sound.currentTime = 0; reflect_sound.play()">reflect </button> -->
 
@@ -131,6 +131,8 @@
     <script src="levels/Tim Levels/Level_E_mixed_mechanics_08.js"></script>
 
     <script src="levels/Erik Levels/Level_A_intro_01_core.js"></script>
+
+    <script src="makeLvlThb.js"></script>
 
     <audio id="reflect">
       <source src="audio/laserbounceoffmirror.ogg" type="audio/ogg">

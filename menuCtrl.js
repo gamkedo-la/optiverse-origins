@@ -1,6 +1,9 @@
+var menuController;
+
 angular.module('optiverse', [])
     .controller('menuCtrl', ['$http', "$timeout", function($http, $timeout) {
         var ctrl = this;
+        menuController = ctrl;
         ctrl.showMenu = false
         ctrl.showCanvas = false;
         ctrl.showCutScene = true;
